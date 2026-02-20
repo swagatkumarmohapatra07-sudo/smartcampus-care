@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Student Profile</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container slide-in">
+        <h2 style="margin-bottom: 5px; display: flex; align-items: center;">
+            <img id="headerAvatar" class="profile-avatar-small" src="https://cdn-icons-png.flaticon.com/512/149/149071.png" alt="Avatar">
+            <span id="welcomeText" style="margin-left: 8px;">Welcome, Student!</span>
+        </h2>
+        <p id="academicInfo" style="color: #94a3b8; font-weight: 500; margin-bottom: 20px;">Loading academic info...</p>
+        
+        <div class="nav-tabs">
+            <a href="student-home.html" class="tab-btn">Home</a>
+            <a href="student.html" class="tab-btn">Maintenance Queries</a>
+            <a href="student-fees.html" class="tab-btn">Fee Portal</a>
+            <a href="student-profile.html" class="tab-btn active">My Profile</a>
+        </div>
+        
+        <div class="profile-header">
+            <div>
+                <img id="profileAvatarLarge" class="profile-avatar-large" src="https://cdn-icons-png.flaticon.com/512/149/149071.png" alt="Profile Picture">
+            </div>
+            <div>
+                <h3 style="margin-bottom: 5px; color: #f8fafc;" id="profileNameDisplay">Student Name</h3>
+                <p style="color: #94a3b8; font-size: 0.9em; margin-bottom: 10px;" id="profileRegDisplay">Reg: 000000</p>
+                
+                <label class="file-upload-label">
+                    <input type="file" id="profileImageInput" accept="image/*" style="display: none;">
+                    Upload New Avatar
+                </label>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3 style="color: #818cf8; margin-bottom: 15px;">Academic Progression</h3>
+            <p style="color: #94a3b8; font-size: 0.85em; margin-bottom: 15px;">If you have progressed to the next year, update your details here to recalculate fees and set your core branch.</p>
+            
+            <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                <div style="flex: 1;">
+                    <label style="color: #cbd5e1; font-size: 0.9em;">Current Year</label>
+                    <select id="profileYear" required>
+                        <option value="1st Year">1st Year</option>
+                        <option value="2nd Year">2nd Year</option>
+                        <option value="3rd Year">3rd Year</option>
+                        <option value="4th Year">4th Year</option>
+                    </select>
+                </div>
+                <div style="flex: 1;">
+                    <label style="color: #cbd5e1; font-size: 0.9em;">Current Semester</label>
+                    <select id="profileSemester" required>
+                        <option value="Semester 1">Semester 1</option>
+                        <option value="Semester 2">Semester 2</option>
+                        <option value="Semester 3">Semester 3</option>
+                        <option value="Semester 4">Semester 4</option>
+                        <option value="Semester 5">Semester 5</option>
+                        <option value="Semester 6">Semester 6</option>
+                        <option value="Semester 7">Semester 7</option>
+                        <option value="Semester 8">Semester 8</option>
+                    </select>
+                </div>
+            </div>
+
+            <label style="color: #cbd5e1; font-size: 0.9em;">Current Branch</label>
+            <select id="profileBranch" required style="margin-bottom: 15px;"></select>
+
+            <button id="updateProfileBtn" style="background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); width: 100%;">
+                Save & Update Profile
+            </button>
+        </div>
+        
+        <button class="logout-btn" onclick="window.logout()">Secure Logout</button>
+    </div>
+    
+    <script type="module" src="app.js"></script>
+</body>
+</html>

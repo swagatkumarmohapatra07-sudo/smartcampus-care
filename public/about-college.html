@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>About EATM</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container slide-in">
+        
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
+            
+            <button class="back-circle-btn" onclick="window.history.back()" title="Back to Dashboard">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+            </button>
+            
+            <div class="accreditation-logos" style="background: transparent; border: none; padding: 0; margin: 0;">
+                <img src="aicte.png" alt="AICTE" title="AICTE Approved" style="height: 40px;">
+                <img src="bput.png" alt="BPUT" title="BPUT Affiliated" style="height: 40px;">
+                <img src="nba.png" alt="NBA" title="NBA Accredited" style="height: 40px;">
+                <img src="naac.png" alt="NAAC" title="NAAC Accredited" style="height: 40px;">
+            </div>
+
+        </div>
+        
+        <div style="text-align: center; margin-top: 10px;">
+            <img src="eatm-campus.jpg" alt="EATM Campus" style="width: 100%; height: 250px; object-fit: cover; border-radius: 15px; border: 2px solid rgba(255,255,255,0.05); margin-bottom: 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.3);">
+            
+            <h1 style="color: #6366f1; margin-bottom: 5px;">Einstein Academy of Technology and Management</h1>
+            <p style="color: #94a3b8; font-weight: 500; margin-bottom: 30px;">Bhubaneswar, Odisha, India</p>
+        </div>
+
+        <div class="card">
+            <h3 style="color: #818cf8; margin-bottom: 10px;">Overview</h3>
+            <p style="color: #cbd5e1; line-height: 1.6; margin-bottom: 20px; font-size: 0.95em;">
+                Established in 2006, the Einstein Academy of Technology and Management (EATM) is a premier engineering institution located in Baniatangi, Bhubaneswar. The college is affiliated with the Biju Patnaik University of Technology (BPUT) and approved by the All India Council for Technical Education (AICTE), New Delhi.
+            </p>
+
+            <h3 style="color: #818cf8; margin-bottom: 10px;">Academic Excellence</h3>
+            <p style="color: #cbd5e1; line-height: 1.6; margin-bottom: 20px; font-size: 0.95em;">
+                EATM is dedicated to shaping the future of engineering professionals by providing high-quality technical education. After a common foundation year, students specialize in core branches including Computer Science, Data Science, Electrical & Electronics, Civil, and Mechanical Engineering. The campus is equipped with state-of-the-art laboratories, a vast library, and modern infrastructure to support innovation and research.
+            </p>
+
+            <div style="display: flex; gap: 15px; margin-top: 25px; margin-bottom: 10px;">
+                <div style="flex: 1; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 10px; text-align: center; border: 1px solid rgba(255,255,255,0.05);">
+                    <span style="display: block; font-size: 1.5em; color: #10b981; font-weight: bold;">2006</span>
+                    <span style="font-size: 0.85em; color: #94a3b8;">Year Established</span>
+                </div>
+                <div style="flex: 1; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 10px; text-align: center; border: 1px solid rgba(255,255,255,0.05);">
+                    <span style="display: block; font-size: 1.5em; color: #10b981; font-weight: bold;">BPUT</span>
+                    <span style="font-size: 0.85em; color: #94a3b8;">Affiliation</span>
+                </div>
+                <div style="flex: 1; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 10px; text-align: center; border: 1px solid rgba(255,255,255,0.05);">
+                    <span style="display: block; font-size: 1.5em; color: #10b981; font-weight: bold;">AICTE</span>
+                    <span style="font-size: 0.85em; color: #94a3b8;">Approved</span>
+                </div>
+            </div>
+        </div>
+
+        <button class="logout-btn" onclick="window.logout()">Secure Logout</button>
+    </div>
+    
+    <script type="module" src="app.js"></script>
+</body>
+</html>

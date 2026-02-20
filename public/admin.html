@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container slide-in">
+        <button class="logout-btn" onclick="window.logout()">Logout</button>
+        <h2>Admin Control Panel</h2>
+        
+        <div class="stats">
+            <div class="stat-box">Total Queries: <span id="totalCount">0</span></div>
+            <div class="stat-box">Resolved: <span id="resolvedCount">0</span></div>
+        </div>
+
+        <h3>Active Student Queries</h3>
+        <div id="adminComplaintsList"></div>
+    </div>
+    
+    <script type="module" src="app.js"></script>
+</body>
+</html>

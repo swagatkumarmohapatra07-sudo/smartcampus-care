@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Register Student</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container slide-in">
+        <a href="index.html" style="color: #6366f1; text-decoration: none;">&larr; Back to Home</a>
+        <h2 style="margin-top: 20px;">Create Student Account</h2>
+        
+        <form id="registerForm">
+            <input type="text" id="fullName" placeholder="Full Name" required>
+            <input type="text" id="course" placeholder="Course (e.g., B.Tech)" value="B.Tech" required>
+            
+            <div style="display: flex; gap: 10px; margin-top: 10px;">
+                <select id="year" required style="flex: 1;">
+                    <option value="">Select Year</option>
+                    <option value="1st Year">1st Year</option>
+                    <option value="2nd Year">2nd Year</option>
+                    <option value="3rd Year">3rd Year</option>
+                    <option value="4th Year">4th Year</option>
+                </select>
+                <select id="semester" required style="flex: 1;">
+                    <option value="">Select Semester</option>
+                    <option value="Semester 1">Semester 1</option>
+                    <option value="Semester 2">Semester 2</option>
+                    <option value="Semester 3">Semester 3</option>
+                    <option value="Semester 4">Semester 4</option>
+                    <option value="Semester 5">Semester 5</option>
+                    <option value="Semester 6">Semester 6</option>
+                    <option value="Semester 7">Semester 7</option>
+                    <option value="Semester 8">Semester 8</option>
+                </select>
+            </div>
+
+            <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                <select id="branch" required style="flex: 2;">
+                    <option value="">Select Year First</option>
+                </select>
+                <input type="text" id="section" placeholder="Section (e.g., A)" required style="flex: 1; margin: 0;">
+            </div>
+
+            <input type="text" id="regNumber" placeholder="Registration Number" required>
+            <input type="password" id="password" placeholder="Create Password" required>
+            
+            <button type="submit" style="width: 100%; margin-top: 10px;">Register Account</button>
+        </form>
+    </div>
+    
+    <script type="module" src="app.js"></script>
+</body>
+</html>
