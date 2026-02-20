@@ -2,106 +2,70 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Student Fee Portal</title>
+    <title>Fee Portal</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
-<body>
-    <div class="container slide-in">
+<body style="position: relative;">
+    <button class="back-circle-btn" onclick="window.location.href='student-home.html'" title="Back to Dashboard" style="position: absolute; top: 20px; left: 20px; z-index: 100;">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="19" y1="12" x2="5" y2="12"></line>
+            <polyline points="12 19 5 12 12 5"></polyline>
+        </svg>
+    </button>
+
+    <div class="container slide-in" style="margin-top: 60px;">
         <h2 style="margin-bottom: 5px; display: flex; align-items: center;">
             <img id="headerAvatar" class="profile-avatar-small" src="https://cdn-icons-png.flaticon.com/512/149/149071.png" alt="Avatar">
-            <span id="welcomeText" style="margin-left: 8px;">Welcome, Student!</span>
+            <span id="welcomeText" style="margin-left: 8px;">Fees & Ledger</span>
         </h2>
-        <p id="academicInfo" style="color: #94a3b8; font-weight: 500; margin-bottom: 20px;">Loading academic info...</p>
-        
-        <div class="nav-tabs">
-            <a href="student-home.html" class="tab-btn">Home</a>
-            <a href="student.html" class="tab-btn">Maintenance Queries</a>
-            <a href="student-fees.html" class="tab-btn active">Fee Portal</a>
-            <a href="student-profile.html" class="tab-btn">My Profile</a>
-        </div>
+        <p id="academicInfo" style="color: #94a3b8; font-weight: 500; margin-bottom: 30px;">Loading records...</p>
         
         <div class="stats" style="margin-bottom: 20px;">
-            <div class="stat-box" style="padding: 15px; border-color: rgba(99, 102, 241, 0.3);">
-                Total Fee (Up to Current Year): <br>
+            <div class="stat-box" style="border-color: rgba(99, 102, 241, 0.3);">
+                Total Owed: <br>
                 <span id="totalOwedDisplay" style="font-size: 1.5em; color: #f8fafc;">₹0</span>
             </div>
-            <div class="stat-box" style="padding: 15px; border-color: rgba(16, 185, 129, 0.3);">
-                Total Amount Paid: <br>
+            <div class="stat-box" style="border-color: rgba(16, 185, 129, 0.3);">
+                Total Paid: <br>
                 <span id="totalPaidDisplay" style="font-size: 1.5em; color: #10b981;">₹0</span>
             </div>
-            <div class="stat-box" style="padding: 15px; border-color: rgba(245, 158, 11, 0.3);">
-                Remaining Balance: <br>
+            <div class="stat-box" style="border-color: rgba(245, 158, 11, 0.3);">
+                Balance: <br>
                 <span id="remainingBalanceDisplay" style="font-size: 1.5em; color: #f59e0b;">₹0</span>
             </div>
         </div>
         
-        <div class="card" style="border: 1px solid rgba(99, 102, 241, 0.4); background: rgba(15, 23, 42, 0.8);">
-            <h3 style="color: #818cf8; margin-bottom: 15px;">Make a Secure Payment</h3>
+        <div class="card" style="background: rgba(15, 23, 42, 0.8);">
+            <h3>Make a Secure Payment</h3>
             <form id="paymentForm">
-                <label style="color: #cbd5e1; font-size: 0.9em;">Amount to Pay (INR):</label>
-                <input type="number" id="payAmount" placeholder="Loading balance..." required min="1">
+                <label>Amount (INR)</label>
+                <input type="number" id="payAmount" required min="1">
                 
-                <div style="display: flex; gap: 10px; margin-bottom: 10px;">
-                    <div style="flex: 1;">
-                        <label style="color: #cbd5e1; font-size: 0.9em;">Payment Gateway:</label>
-                        <select id="payGateway" required>
-                            <option value="">Select Gateway</option>
-                            <option value="Razorpay">Razorpay</option>
-                            <option value="Stripe">Stripe</option>
-                        </select>
-                    </div>
-                    <div style="flex: 1;">
-                        <label style="color: #cbd5e1; font-size: 0.9em;">Payment Method:</label>
-                        <select id="payMethod" required>
-                            <option value="">Select Method</option>
-                            <option value="UPI / QR">UPI / QR</option>
-                            <option value="Credit/Debit Card">Credit/Debit Card</option>
-                            <option value="Net Banking">Net Banking</option>
-                        </select>
-                    </div>
+                <div style="display: flex; gap: 10px;">
+                    <select id="payGateway" style="flex: 1;" required>
+                        <option value="">Gateway</option>
+                        <option value="Razorpay">Razorpay</option>
+                        <option value="Stripe">Stripe</option>
+                    </select>
+                    <select id="payMethod" style="flex: 1;" required>
+                        <option value="">Method</option>
+                        <option value="UPI / QR">UPI / QR</option>
+                        <option value="Credit/Debit Card">Credit/Debit Card</option>
+                        <option value="Net Banking">Net Banking</option>
+                    </select>
                 </div>
 
-                <div id="upiUI" class="upi-container">
-                    <p style="color: #cbd5e1; margin-bottom: 10px; font-weight: 600;">Scan to Pay via any UPI App</p>
-                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=upi://pay?pa=smartcampus@ybl&pn=SmartCampusHub" alt="QR Code">
-                    <p style="color: #cbd5e1; font-size: 0.9em; margin-bottom: 5px;">Or enter your UPI ID manually:</p>
-                    <input type="text" id="upiId" placeholder="e.g., student@okicici" style="text-align: center;">
+                <div id="upiUI" class="upi-container" style="display:none; text-align: center; margin: 15px 0;">
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=upi://pay?pa=smartcampus@ybl" alt="QR">
                 </div>
 
-                <div id="cardUI" class="virtual-card">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                        <span style="font-weight: bold; letter-spacing: 2px;">SECURE CARD</span>
-                        <span style="font-size: 1.8em;">💳</span>
-                    </div>
-                    <label>Card Number</label>
-                    <input type="text" id="cardNumber" placeholder="0000 0000 0000 0000" maxlength="19">
-                    <div style="display: flex; gap: 15px;">
-                        <div style="flex: 2;">
-                            <label>Card Holder</label>
-                            <input type="text" id="cardHolder" placeholder="Name on Card">
-                        </div>
-                        <div style="flex: 1;">
-                            <label>Expiry</label>
-                            <input type="text" id="cardExpiry" placeholder="MM/YY" maxlength="5">
-                        </div>
-                        <div style="flex: 1;">
-                            <label>CVV</label>
-                            <input type="password" id="cardCvv" placeholder="***" maxlength="3">
-                        </div>
-                    </div>
-                </div>
-                
-                <button type="submit" id="payFeeBtn" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); width: 100%; margin-top: 15px;">
-                    Process Secure Payment
-                </button>
+                <button type="submit" id="payFeeBtn" style="background: #f59e0b; width: 100%; margin-top: 15px;">Process Payment</button>
             </form>
         </div>
 
-        <h3 style="margin-top: 30px; color: #10b981;">Payment History & Receipts</h3>
+        <h3 style="margin-top: 30px;">Transaction History</h3>
         <div id="paymentHistoryList"></div>
-        
-        <button class="logout-btn" onclick="window.logout()">Secure Logout</button>
     </div>
     
     <script type="module" src="app.js"></script>

@@ -202,6 +202,7 @@ if (user?.role === 'Student') {
 
     if (welcomeText) welcomeText.innerText = `Welcome, ${user.full_name}!`;
 
+    // Time-based Greeting
     const timeGreeting = document.getElementById('timeGreeting');
     const welcomeName = document.getElementById('welcomeName');
     if (timeGreeting && welcomeName) {
@@ -213,6 +214,12 @@ if (user?.role === 'Student') {
         timeGreeting.innerText = greeting;
         welcomeName.innerText = user.full_name;
     }
+
+    // Eye-Catchy Dashboard Stats Update
+    const statYear = document.getElementById('statYear');
+    const statSem = document.getElementById('statSem');
+    if (statYear) statYear.innerText = user.year || '1st Year';
+    if (statSem) statSem.innerText = user.semester || 'Sem 1';
 
     if (document.getElementById('complaintForm')) initQueriesSystem();
     if (document.getElementById('paymentForm')) initFeeSystem();
@@ -312,7 +319,6 @@ function initQueriesSystem() {
     const activeList = document.getElementById('activeComplaintsList');
     const resolvedList = document.getElementById('resolvedComplaintsList');
 
-    // 1. Submit form
     complaintForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const descInput = document.getElementById('description');
@@ -336,7 +342,6 @@ function initQueriesSystem() {
         submitBtn.innerText = "Submit Query";
     });
 
-    // 2. NEW: Delete Query Function
     window.deleteQuery = async (queryId) => {
         if(confirm("Are you sure you want to delete this query?")) {
             try {
@@ -349,7 +354,6 @@ function initQueriesSystem() {
         }
     };
 
-    // 3. Listener
     const q = query(collection(db, "complaints"), where("student_id", "==", user.id));
     onSnapshot(q, (querySnapshot) => {
         let complaints = [];
@@ -363,13 +367,10 @@ function initQueriesSystem() {
             ? '<p style="color: #64748b; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px;">No active queries at the moment.</p>' 
             : activeComplaints.map((c, index) => `
                 <div class="card" style="animation-delay: ${index * 0.1}s; position: relative;">
-                    
                     ${c.status === 'Pending' ? `
-                    <button onclick="window.deleteQuery('${c.id}')" style="position: absolute; top: 15px; right: 15px; background: rgba(225, 29, 72, 0.1); color: #fda4af; border: 1px solid rgba(225, 29, 72, 0.3); padding: 5px 10px; border-radius: 6px; cursor: pointer; font-size: 0.8em; transition: 0.3s; width: auto; margin: 0;" onmouseover="this.style.background='rgba(225, 29, 72, 0.3)'" onmouseout="this.style.background='rgba(225, 29, 72, 0.1)'">
+                    <button onclick="window.deleteQuery('${c.id}')" style="position: absolute; top: 15px; right: 15px; background: rgba(225, 29, 72, 0.1); color: #fda4af; border: 1px solid rgba(225, 29, 72, 0.3); padding: 5px 10px; border-radius: 6px; cursor: pointer; font-size: 0.8em; transition: 0.3s; width: auto; margin: 0;">
                         🗑️ Delete
-                    </button>
-                    ` : ''}
-
+                    </button>` : ''}
                     <p style="padding-right: 80px;"><strong>Query:</strong> ${c.description}</p>
                     <div style="margin-top: 15px;">
                         <small>Status: <span class="badge ${c.status.replace(' ', '-')}">${c.status}</span></small>
@@ -419,7 +420,6 @@ function initFeeSystem() {
 
     paymentForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        
         const amount = Number(document.getElementById('payAmount').value);
         const gateway = document.getElementById('payGateway').value;
         const method = document.getElementById('payMethod').value;
@@ -439,49 +439,38 @@ function initFeeSystem() {
         const btn = document.getElementById('payFeeBtn');
         btn.innerText = `Authorizing details via ${gateway}...`;
         btn.disabled = true;
-        btn.style.opacity = "0.7";
 
-        setTimeout(() => {
-            btn.innerText = `Processing ${method} Payment...`;
-            
-            setTimeout(async () => {
-                try {
-                    const txnId = 'TXN-' + Math.floor(10000000 + Math.random() * 90000000);
-                    
-                    await addDoc(collection(db, "payments"), {
-                        student_id: user.id,
-                        full_name: user.full_name,
-                        registration_number: user.registration_number,
-                        course: user.course,
-                        branch: user.branch,
-                        section: user.section,
-                        year: user.year || "N/A",           
-                        semester: user.semester || "N/A",   
-                        amount: amount,
-                        gateway: gateway,
-                        method: method,
-                        transaction_id: txnId,
-                        date: Date.now()
-                    });
+        setTimeout(async () => {
+            try {
+                const txnId = 'TXN-' + Math.floor(10000000 + Math.random() * 90000000);
+                await addDoc(collection(db, "payments"), {
+                    student_id: user.id,
+                    full_name: user.full_name,
+                    registration_number: user.registration_number,
+                    course: user.course,
+                    branch: user.branch,
+                    section: user.section,
+                    year: user.year || "N/A",           
+                    semester: user.semester || "N/A",   
+                    amount: amount,
+                    gateway: gateway,
+                    method: method,
+                    transaction_id: txnId,
+                    date: Date.now()
+                });
 
-                    showToast(`Successfully paid ₹${amount.toLocaleString()} via ${gateway}!`, 'success');
-                    paymentForm.reset();
-                    upiUI.style.display = 'none';
-                    cardUI.style.display = 'none';
-                } catch (error) {
-                    console.error("Payment failed:", error);
-                    showToast("Payment failed. Please try again.", "error");
-                } finally {
-                    btn.innerText = "Process Secure Payment";
-                    btn.disabled = false;
-                    btn.style.opacity = "1";
-                }
-            }, 1500); 
-        }, 1000); 
+                showToast(`Successfully paid ₹${amount.toLocaleString()}!`, 'success');
+                paymentForm.reset();
+            } catch (error) {
+                showToast("Payment failed.", "error");
+            } finally {
+                btn.innerText = "Process Secure Payment";
+                btn.disabled = false;
+            }
+        }, 2000);
     });
 
     const q = query(collection(db, "payments"), where("student_id", "==", user.id));
-    
     onSnapshot(q, (querySnapshot) => {
         let payments = [];
         let totalPaid = 0;
@@ -495,47 +484,35 @@ function initFeeSystem() {
         remainingBalance = totalFeeAmount - totalPaid;
         window.userPaymentHistory = payments.sort((a, b) => b.date - a.date); 
 
-        const totalOwedDisplay = document.getElementById('totalOwedDisplay');
-        if(totalOwedDisplay) totalOwedDisplay.innerText = `₹${totalFeeAmount.toLocaleString()}`;
-        
+        document.getElementById('totalOwedDisplay').innerText = `₹${totalFeeAmount.toLocaleString()}`;
         document.getElementById('totalPaidDisplay').innerText = `₹${totalPaid.toLocaleString()}`;
-        const remDisplay = document.getElementById('remainingBalanceDisplay');
-        remDisplay.innerText = `₹${remainingBalance.toLocaleString()}`;
+        document.getElementById('remainingBalanceDisplay').innerText = `₹${remainingBalance.toLocaleString()}`;
         
         const payAmountInput = document.getElementById('payAmount');
         const payFeeBtn = document.getElementById('payFeeBtn');
         
         if (remainingBalance <= 0) {
-            remDisplay.style.color = "#10b981"; 
             payAmountInput.disabled = true;
-            payAmountInput.placeholder = "All fees cleared!";
             payFeeBtn.disabled = true;
             payFeeBtn.innerText = "Course Paid in Full";
-            payFeeBtn.style.background = "#10b981";
         } else {
             payAmountInput.max = remainingBalance;
-            payAmountInput.placeholder = `Enter amount (Max: ₹${remainingBalance})`;
+            payAmountInput.placeholder = `Max: ₹${remainingBalance}`;
         }
 
         if (payments.length === 0) {
-            historyList.innerHTML = '<p style="color: #64748b; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px;">No payment history found.</p>';
+            historyList.innerHTML = '<p>No history found.</p>';
         } else {
-            historyList.innerHTML = payments.map((p, index) => `
-                <div class="card" style="animation-delay: ${index * 0.1}s; border-left: 4px solid #10b981; margin-bottom: 15px;">
-                    <div style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; margin-bottom: 10px;">
-                        <span style="color: #10b981; font-weight: 700; font-size: 1.2em;">₹${p.amount.toLocaleString()}</span>
+            historyList.innerHTML = payments.map((p) => `
+                <div class="card" style="border-left: 4px solid #10b981; margin-bottom: 15px;">
+                    <div style="display: flex; justify-content: space-between;">
+                        <span style="color: #10b981; font-weight: 700;">₹${p.amount.toLocaleString()}</span>
                         <span class="badge Resolved">Success</span>
                     </div>
-                    <p style="color: #cbd5e1; font-size: 0.9em;"><strong>TXN ID:</strong> ${p.transaction_id} | <strong>Date:</strong> ${new Date(p.date).toLocaleString()}</p>
-                    <p style="color: #cbd5e1; font-size: 0.9em;"><strong>Paid via:</strong> ${p.method} (${p.gateway})</p>
-                    
+                    <p><small>TXN ID: ${p.transaction_id}</small></p>
                     <div style="display: flex; gap: 10px; margin-top: 15px;">
-                        <button onclick="window.viewReceipt('${p.id}')" style="flex: 1; background: transparent; color: #6366f1; border: 1px solid #6366f1; transition: 0.3s; margin: 0; padding: 10px;" onmouseover="this.style.background='rgba(99, 102, 241, 0.1)'" onmouseout="this.style.background='transparent'">
-                            👁️ View
-                        </button>
-                        <button onclick="window.downloadReceipt('${p.id}')" style="flex: 1; background: transparent; color: #10b981; border: 1px solid #10b981; transition: 0.3s; margin: 0; padding: 10px;" onmouseover="this.style.background='rgba(16, 185, 129, 0.1)'" onmouseout="this.style.background='transparent'">
-                            ↓ Download
-                        </button>
+                        <button onclick="window.viewReceipt('${p.id}')" style="flex: 1; background: transparent; color: #6366f1; border: 1px solid #6366f1; padding: 10px;">👁️ View</button>
+                        <button onclick="window.downloadReceipt('${p.id}')" style="flex: 1; background: transparent; color: #10b981; border: 1px solid #10b981; padding: 10px;">↓ Download</button>
                     </div>
                 </div>
             `).join('');
@@ -547,59 +524,47 @@ function initFeeSystem() {
 function buildReceiptPDF(txn) {
     const { jsPDF } = window.jspdf;
     const pdf = new jsPDF();
-
     pdf.setFontSize(24);
     pdf.setTextColor(99, 102, 241); 
     pdf.text("SmartCampus Hub", 105, 20, null, null, "center");
-
     pdf.setFontSize(14);
     pdf.setTextColor(100, 100, 100);
     pdf.text("Official Payment Receipt", 105, 30, null, null, "center");
-
     pdf.setFontSize(11);
     pdf.setTextColor(0, 0, 0);
     pdf.text(`Transaction ID: ${txn.transaction_id}`, 20, 50);
     pdf.text(`Date & Time: ${new Date(txn.date).toLocaleString()}`, 20, 58);
     pdf.text(`Payment Gateway: ${txn.gateway}`, 20, 66);
     pdf.text(`Payment Method: ${txn.method}`, 20, 74);
-
     pdf.text("--------------------------------------------------------------------------------------", 20, 85);
     pdf.setFontSize(12);
     pdf.text(`Received From: ${txn.full_name}`, 20, 95);
     pdf.text(`Registration No: ${txn.registration_number}`, 20, 103);
-    pdf.text(`Course Details: ${txn.course} (${txn.branch} - Sec ${txn.section}) | ${txn.year} (${txn.semester})`, 20, 111);
+    pdf.text(`Course Details: ${txn.course} (${txn.branch}) | ${txn.year} (${txn.semester})`, 20, 111);
     pdf.text("--------------------------------------------------------------------------------------", 20, 120);
-    
     pdf.setFontSize(16);
     pdf.setTextColor(16, 185, 129); 
     pdf.text(`Amount Paid: INR ${txn.amount.toLocaleString()}`, 20, 135);
-    
     pdf.setFontSize(12);
     pdf.setTextColor(0, 0, 0);
     pdf.text("Status: SUCCESSFUL", 20, 145);
-
     return pdf;
 }
 
-// Button 1: Download to Computer
 window.downloadReceipt = (paymentId) => {
     const txn = window.userPaymentHistory.find(p => p.id === paymentId);
-    if (!txn) return showToast("Receipt data not found!", "error");
-
+    if (!txn) return;
     const pdf = buildReceiptPDF(txn);
     pdf.save(`Receipt_${txn.transaction_id}.pdf`);
-    showToast("Receipt downloaded successfully!", "success");
-}
+};
 
-// Button 2: View in New Tab
 window.viewReceipt = (paymentId) => {
     const txn = window.userPaymentHistory.find(p => p.id === paymentId);
-    if (!txn) return showToast("Receipt data not found!", "error");
-
+    if (!txn) return;
     const pdf = buildReceiptPDF(txn);
     const blobUrl = pdf.output("bloburl");
     window.open(blobUrl, "_blank");
-}
+};
 
 // --- 7. ADMIN DASHBOARD LOGIC ---
 const adminComplaintsList = document.getElementById('adminComplaintsList');
@@ -616,34 +581,25 @@ function loadAdminData() {
     onSnapshot(collection(db, "complaints"), (querySnapshot) => {
         let complaints = [];
         let resolvedCount = 0;
-
         querySnapshot.forEach((doc) => {
             const data = doc.data();
             complaints.push({ id: doc.id, ...data });
             if (data.status === 'Resolved') resolvedCount++;
         });
-
         complaints.sort((a, b) => b.created_at - a.created_at);
+        if(document.getElementById('totalCount')) document.getElementById('totalCount').innerText = complaints.length;
+        if(document.getElementById('resolvedCount')) document.getElementById('resolvedCount').innerText = resolvedCount;
 
-        document.getElementById('totalCount').innerText = complaints.length;
-        document.getElementById('resolvedCount').innerText = resolvedCount;
-
-        adminComplaintsList.innerHTML = complaints.map((c, index) => `
-            <div class="card" style="animation-delay: ${index * 0.1}s">
-                <div style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; margin-bottom: 10px;">
+        adminComplaintsList.innerHTML = complaints.map((c) => `
+            <div class="card">
+                <div style="display: flex; justify-content: space-between;">
                     <span style="color: #6366f1; font-weight: 600;">Reg: ${c.reg_number}</span>
                     <span class="badge ${c.status.replace(' ', '-')}">${c.status}</span>
                 </div>
-                <p><strong>Student Info:</strong> ${c.student_details}</p>
-                <p style="margin-top: 10px; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px;"><strong>Issue:</strong> ${c.description}</p>
-                
-                ${c.status === 'Pending' ? `
-                <button onclick="updateStatus('${c.id}', 'In Progress')" style="margin-top: 15px; width: 100%;">Mark 'In Progress'</button>
-                ` : ''}
-
-                ${c.status === 'In Progress' ? `
-                <button onclick="updateStatus('${c.id}', 'Resolved')" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); margin-top: 15px; width: 100%;">Mark 'Resolved'</button>
-                ` : ''}
+                <p><strong>Info:</strong> ${c.student_details}</p>
+                <p><strong>Issue:</strong> ${c.description}</p>
+                ${c.status === 'Pending' ? `<button onclick="updateStatus('${c.id}', 'In Progress')" style="margin-top: 15px; width: 100%;">Mark 'In Progress'</button>` : ''}
+                ${c.status === 'In Progress' ? `<button onclick="updateStatus('${c.id}', 'Resolved')" style="background: #10b981; margin-top: 15px; width: 100%;">Mark 'Resolved'</button>` : ''}
             </div>
         `).join('');
     });
@@ -652,44 +608,28 @@ function loadAdminData() {
 // --- 8. NET BANKING REDIRECT LOGIC ---
 if (window.location.pathname.includes('net-banking.html')) {
     const pendingTxn = JSON.parse(localStorage.getItem('pendingTxn'));
-    
-    if (!pendingTxn || !user) {
-        window.location.href = 'student-fees.html';
-    } else {
+    if (pendingTxn && user) {
         document.getElementById('sbiAmount').innerText = pendingTxn.amount;
-        
         document.getElementById('sbiLoginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = document.getElementById('sbiPayBtn');
-            btn.innerText = "Authorizing Transaction with SBI...";
+            btn.innerText = "Processing...";
             btn.disabled = true;
-
             setTimeout(async () => {
                 const txnId = 'TXN-' + Math.floor(10000000 + Math.random() * 90000000);
-                
                 await addDoc(collection(db, "payments"), {
                     student_id: user.id,
                     full_name: user.full_name,
                     registration_number: user.registration_number,
-                    course: user.course,
-                    branch: user.branch,
-                    section: user.section,
-                    year: user.year || "N/A",
-                    semester: user.semester || "N/A",
                     amount: Number(pendingTxn.amount),
                     gateway: pendingTxn.gateway,
                     method: pendingTxn.method,
                     transaction_id: txnId,
                     date: Date.now()
                 });
-                
                 localStorage.removeItem('pendingTxn');
-                
-                showToast("SBI Payment Successful! Returning to Portal...", "success");
-                setTimeout(() => {
-                    window.location.href = 'student-fees.html';
-                }, 2500);
-
+                showToast("Payment Successful!", "success");
+                setTimeout(() => { window.location.href = 'student-fees.html'; }, 2000);
             }, 2000);
         });
     }
@@ -697,20 +637,15 @@ if (window.location.pathname.includes('net-banking.html')) {
 
 // --- 9. GLOBAL PASSWORD TOGGLE (AUTO-INJECTOR) ---
 document.addEventListener('DOMContentLoaded', () => {
-    // Premium SVG Icons (Matches your SaaS design)
     const eyeOpenSVG = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>`;
     const eyeClosedSVG = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>`;
 
-    // Find every single password input on the current page
     const passwordInputs = document.querySelectorAll('input[type="password"]');
-    
     passwordInputs.forEach(input => {
-        // Capture original margins so we don't break your layout
         const computedStyle = window.getComputedStyle(input);
         const marginB = computedStyle.marginBottom;
         const marginT = computedStyle.marginTop;
 
-        // Create a wrapper div
         const wrapper = document.createElement('div');
         wrapper.style.position = 'relative';
         wrapper.style.width = '100%';
@@ -718,18 +653,14 @@ document.addEventListener('DOMContentLoaded', () => {
         wrapper.style.marginBottom = marginB;
         wrapper.style.marginTop = marginT;
 
-        // Wrap the input seamlessly
         input.parentNode.insertBefore(wrapper, input);
         wrapper.appendChild(input);
         
-        // Adjust input styles inside the wrapper so text doesn't hide behind the icon
         input.style.paddingRight = '45px';
-        input.style.boxSizing = 'border-box';
         input.style.width = '100%';
         input.style.marginBottom = '0'; 
         input.style.marginTop = '0'; 
         
-        // Create the eye toggle button
         const toggleBtn = document.createElement('span');
         toggleBtn.innerHTML = eyeOpenSVG;
         toggleBtn.style.position = 'absolute';
@@ -738,30 +669,17 @@ document.addEventListener('DOMContentLoaded', () => {
         toggleBtn.style.transform = 'translateY(-50%)';
         toggleBtn.style.cursor = 'pointer';
         toggleBtn.style.display = 'flex';
-        toggleBtn.style.alignItems = 'center';
-        toggleBtn.style.justifyContent = 'center';
         toggleBtn.style.zIndex = '5';
-        toggleBtn.style.transition = 'all 0.3s ease';
-        toggleBtn.title = "Show Password";
         
-        // Hover Effect (Turns Indigo)
-        toggleBtn.addEventListener('mouseenter', () => toggleBtn.querySelector('svg').style.stroke = '#6366f1');
-        toggleBtn.addEventListener('mouseleave', () => toggleBtn.querySelector('svg').style.stroke = '#94a3b8');
-
-        // Click Logic (Switches Type & Icon)
         toggleBtn.addEventListener('click', () => {
             if (input.type === 'password') {
                 input.type = 'text';
                 toggleBtn.innerHTML = eyeClosedSVG;
-                toggleBtn.title = "Hide Password";
             } else {
                 input.type = 'password';
                 toggleBtn.innerHTML = eyeOpenSVG;
-                toggleBtn.title = "Show Password";
             }
-            toggleBtn.querySelector('svg').style.stroke = '#6366f1'; // Keeps it highlighted after clicking
         });
-        
         wrapper.appendChild(toggleBtn);
     });
 });

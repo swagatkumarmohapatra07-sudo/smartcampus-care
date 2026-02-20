@@ -2,44 +2,72 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Student Portal Hub</title>
+    <title>Student Dashboard - SmartCampus</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="container slide-in">
-        <h2 style="margin-bottom: 5px; display: flex; align-items: center;">
-            <img id="headerAvatar" class="profile-avatar-small" src="https://cdn-icons-png.flaticon.com/512/149/149071.png" alt="Avatar">
-            <span id="timeGreeting">Good Morning</span>, <span id="welcomeName" style="margin-left: 8px;">Student!</span>
-        </h2>
-        <p id="academicInfo" style="color: #94a3b8; font-weight: 500; margin-bottom: 20px;">Loading academic info...</p>
+    <div class="container slide-in" style="max-width: 1000px;">
         
-        <div class="dashboard-grid">
-            <a href="student.html" class="dash-card">
-                <div class="dash-icon">🛠️</div>
-                <h3>Maintenance</h3>
-                <p>Raise and track campus facility queries</p>
-            </a>
+        <header class="welcome-section stagger-1">
+            <div style="display: flex; align-items: center; gap: 20px;">
+                <img id="headerAvatar" class="profile-avatar-large" src="https://cdn-icons-png.flaticon.com/512/149/149071.png" alt="Avatar" style="width: 80px; height: 80px; border: 3px solid #6366f1;">
+                <div>
+                    <h1 style="margin: 0; font-size: 2em; color: #f8fafc;">
+                        <span id="timeGreeting">Hello</span>, <span id="welcomeName" style="color: #818cf8;">Student</span>!
+                    </h1>
+                    <p id="academicInfo" style="margin: 5px 0 0; color: #94a3b8; font-weight: 500;">Retrieving academic records...</p>
+                </div>
+            </div>
+
+            <div class="quick-stats-row">
+                <div class="mini-stat-card">
+                    <span>Current Year</span>
+                    <strong id="statYear">N/A</strong>
+                </div>
+                <div class="mini-stat-card">
+                    <span>Semester</span>
+                    <strong id="statSem">N/A</strong>
+                </div>
+                <div class="mini-stat-card">
+                    <span>Status</span>
+                    <strong style="color: #10b981;">Active</strong>
+                </div>
+            </div>
+        </header>
+
+        <div class="action-grid">
             
-            <a href="student-fees.html" class="dash-card">
-                <div class="dash-icon">💳</div>
-                <h3>Fee Portal</h3>
-                <p>Pay semester fees and download receipts</p>
+            <a href="student.html" class="action-card stagger-2">
+                <span class="card-icon">🛠️</span>
+                <h3 style="color: #f8fafc; margin: 10px 0;">Maintenance Queries</h3>
+                <p style="color: #94a3b8; font-size: 0.9em; line-height: 1.5;">Report issues and track facility status in real-time.</p>
+                <div style="margin-top: 15px; color: #6366f1; font-weight: bold; font-size: 0.85em;">Open Portal &rarr;</div>
             </a>
 
-            <a href="student-profile.html" class="dash-card">
-                <div class="dash-icon">👤</div>
-                <h3>My Profile</h3>
-                <p>Update your academic details & avatar</p>
+            <a href="student-fees.html" class="action-card stagger-3">
+                <span class="card-icon">💳</span>
+                <h3 style="color: #f8fafc; margin: 10px 0;">Fee Management</h3>
+                <p style="color: #94a3b8; font-size: 0.9em; line-height: 1.5;">Check pending balances and process secure payments.</p>
+                <div style="margin-top: 15px; color: #6366f1; font-weight: bold; font-size: 0.85em;">Pay Fees &rarr;</div>
             </a>
 
-            <a href="about-college.html" class="dash-card" style="grid-column: 1 / -1; border-color: rgba(16, 185, 129, 0.4);">
-                <div class="dash-icon">🏛️</div>
-                <h3 style="color: #10b981;">About EATM</h3>
-                <p>Learn more about Einstein Academy of Technology and Management</p>
+            <a href="student-profile.html" class="action-card stagger-4">
+                <span class="card-icon">👤</span>
+                <h3 style="color: #f8fafc; margin: 10px 0;">My Profile</h3>
+                <p style="color: #94a3b8; font-size: 0.9em; line-height: 1.5;">Manage your academic details and account settings.</p>
+                <div style="margin-top: 15px; color: #6366f1; font-weight: bold; font-size: 0.85em;">Edit Profile &rarr;</div>
             </a>
+
+            <a href="about-college.html" class="action-card stagger-1" style="border-color: rgba(16, 185, 129, 0.2);">
+                <span class="card-icon">🏛️</span>
+                <h3 style="color: #10b981; margin: 10px 0;">College Info</h3>
+                <p style="color: #94a3b8; font-size: 0.9em; line-height: 1.5;">Explore campus history and academic affiliations.</p>
+                <div style="margin-top: 15px; color: #10b981; font-weight: bold; font-size: 0.85em;">Learn More &rarr;</div>
+            </a>
+
         </div>
-        
-        <button class="logout-btn" onclick="window.logout()">Secure Logout</button>
+
+        <button class="logout-btn" onclick="window.logout()" style="max-width: 200px; margin: 40px auto 0;">Secure Logout</button>
     </div>
     
     <script type="module" src="app.js"></script>
