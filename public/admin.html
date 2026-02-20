@@ -14,32 +14,46 @@
     <div class="container slide-in" style="margin-top: 80px; max-width: 1000px;">
         <div style="text-align: center; margin-bottom: 30px;">
             <h1 style="color: #fb7185; margin-bottom: 5px;">Admin Control Center</h1>
-            <p style="color: #94a3b8;">Manage students, promotions, and campus operations</p>
+            <p style="color: #94a3b8;">Manage students, operations, and live broadcasts</p>
         </div>
 
-        <div style="display: flex; gap: 15px; margin-bottom: 30px; justify-content: center;">
+        <div style="display: flex; gap: 15px; margin-bottom: 30px; justify-content: center; flex-wrap: wrap;">
             <button onclick="switchAdminTab('students')" id="tab-students" style="padding: 12px 25px; border-radius: 8px; border: none; background: #e11d48; color: white; cursor: pointer; font-weight: bold; transition: 0.3s;">
                 Student Database
             </button>
             <button onclick="switchAdminTab('queries')" id="tab-queries" style="padding: 12px 25px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(30,41,59,0.6); color: #cbd5e1; cursor: pointer; font-weight: bold; transition: 0.3s;">
-                Maintenance Queries
+                Maintenance
+            </button>
+            <button onclick="switchAdminTab('notices')" id="tab-notices" style="padding: 12px 25px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(30,41,59,0.6); color: #cbd5e1; cursor: pointer; font-weight: bold; transition: 0.3s;">
+                Noticeboard
             </button>
         </div>
 
         <div id="admin-students-section">
             <div class="card" style="margin-bottom: 20px; background: rgba(15, 23, 42, 0.8); display: flex; gap: 15px; flex-wrap: wrap;">
                 <input type="text" id="adminSearchStudent" placeholder="🔍 Search by Name or Reg No..." style="flex: 2; min-width: 200px; padding: 14px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); color: white; border-radius: 8px;">
-                
                 <select id="adminBranchFilter" style="flex: 1; min-width: 200px; padding: 14px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); color: white; border-radius: 8px;">
-                    <option value="All">All Branches</option>
-                    <option value="Computer Science and Engineering">Computer Science and Engineering</option>
-                    <option value="Data Science">Data Science</option>
-                    <option value="Electrical Communication Engineering">Electrical Communication Engineering</option>
-                    <option value="EE">EE</option>
-                    <option value="EEE">EEE</option>
-                    <option value="Civil">Civil</option>
-                    <option value="Mechanical">Mechanical</option>
-                    <option value="Common 1st Year">Common 1st Year</option>
+                    <option value="All">All Branches & Courses</option>
+                    <optgroup label="B.Tech Branches">
+                        <option value="Computer Science and Engineering">Computer Science and Engineering</option>
+                        <option value="Data Science">Data Science</option>
+                        <option value="Electrical Communication Engineering">Electrical Communication Engineering</option>
+                        <option value="EE">EE</option>
+                        <option value="EEE">EEE</option>
+                        <option value="Civil">Civil</option>
+                        <option value="Mechanical">Mechanical</option>
+                        <option value="Common 1st Year">Common 1st Year (B.Tech)</option>
+                    </optgroup>
+                    <optgroup label="MBA Specializations">
+                        <option value="Human Resources (HR)">Human Resources (HR)</option>
+                        <option value="Finance">Finance</option>
+                        <option value="Marketing">Marketing</option>
+                        <option value="IT & Systems">IT & Systems</option>
+                        <option value="Operations">Operations</option>
+                    </optgroup>
+                    <optgroup label="MCA">
+                        <option value="Master of Computer Applications">Master of Computer Applications</option>
+                    </optgroup>
                 </select>
             </div>
             <div id="adminStudentDatabaseList"></div>
@@ -53,20 +67,62 @@
             <div id="adminComplaintsList"></div>
         </div>
 
+        <div id="admin-notices-section" style="display: none;">
+            <div class="card" style="background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(225, 29, 72, 0.3);">
+                <h3 style="color: #fb7185; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+                    <span>📢</span> Publish Targeted Broadcast
+                </h3>
+                <form id="noticeForm">
+                    <div style="display: flex; gap: 15px; margin-bottom: 15px; flex-wrap: wrap;">
+                        <div style="flex: 1; min-width: 200px;">
+                            <label style="color: #cbd5e1; font-size: 0.85em;">Target Course</label>
+                            <select id="noticeCourse" style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(0,0,0,0.3); color: white; border: 1px solid rgba(255,255,255,0.1);">
+                                <option value="All">Everyone (All Courses)</option>
+                                <option value="B.Tech">B.Tech Only</option>
+                                <option value="MBA">MBA Only</option>
+                                <option value="MCA">MCA Only</option>
+                            </select>
+                        </div>
+                        <div style="flex: 1; min-width: 200px;">
+                            <label style="color: #cbd5e1; font-size: 0.85em;">Target Year</label>
+                            <select id="noticeYear" style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(0,0,0,0.3); color: white; border: 1px solid rgba(255,255,255,0.1);"></select>
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 15px; margin-bottom: 15px; flex-wrap: wrap;">
+                        <div style="flex: 1; min-width: 200px;">
+                            <label style="color: #cbd5e1; font-size: 0.85em;">Target Semester</label>
+                            <select id="noticeSemester" style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(0,0,0,0.3); color: white; border: 1px solid rgba(255,255,255,0.1);"></select>
+                        </div>
+                        <div style="flex: 1; min-width: 200px;">
+                            <label style="color: #cbd5e1; font-size: 0.85em;">Target Branch</label>
+                            <select id="noticeBranch" style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(0,0,0,0.3); color: white; border: 1px solid rgba(255,255,255,0.1);"></select>
+                        </div>
+                    </div>
+                    
+                    <label style="color: #cbd5e1; font-size: 0.85em;">Broadcast Message</label>
+                    <textarea id="noticeMessage" rows="3" placeholder="Type your important announcement here..." required style="width: 100%; padding: 15px; border-radius: 8px; background: rgba(0,0,0,0.3); color: white; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 15px; resize: vertical;"></textarea>
+                    
+                    <button type="submit" style="width: 100%; padding: 15px; background: #e11d48; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1.1em; transition: 0.3s;" onmouseover="this.style.background='#be123c'" onmouseout="this.style.background='#e11d48'">
+                        Push to Student Dashboards
+                    </button>
+                </form>
+            </div>
+        </div>
+
     </div>
 
     <script>
         function switchAdminTab(tab) {
             document.getElementById('admin-students-section').style.display = tab === 'students' ? 'block' : 'none';
             document.getElementById('admin-queries-section').style.display = tab === 'queries' ? 'block' : 'none';
+            document.getElementById('admin-notices-section').style.display = tab === 'notices' ? 'block' : 'none';
             
-            document.getElementById('tab-students').style.background = tab === 'students' ? '#e11d48' : 'rgba(30,41,59,0.6)';
-            document.getElementById('tab-students').style.color = tab === 'students' ? 'white' : '#cbd5e1';
-            document.getElementById('tab-students').style.border = tab === 'students' ? 'none' : '1px solid rgba(255,255,255,0.1)';
-
-            document.getElementById('tab-queries').style.background = tab === 'queries' ? '#e11d48' : 'rgba(30,41,59,0.6)';
-            document.getElementById('tab-queries').style.color = tab === 'queries' ? 'white' : '#cbd5e1';
-            document.getElementById('tab-queries').style.border = tab === 'queries' ? 'none' : '1px solid rgba(255,255,255,0.1)';
+            const tabs = ['students', 'queries', 'notices'];
+            tabs.forEach(t => {
+                document.getElementById('tab-' + t).style.background = tab === t ? '#e11d48' : 'rgba(30,41,59,0.6)';
+                document.getElementById('tab-' + t).style.color = tab === t ? 'white' : '#cbd5e1';
+                document.getElementById('tab-' + t).style.border = tab === t ? 'none' : '1px solid rgba(255,255,255,0.1)';
+            });
         }
     </script>
     <script type="module" src="app.js"></script>

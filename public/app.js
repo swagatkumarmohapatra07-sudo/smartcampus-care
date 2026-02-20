@@ -23,12 +23,10 @@ window.logout = () => {
     window.location.href = 'index.html';
 };
 
-// Route Protection 
 if (!user && (window.location.pathname.includes('admin.html') || window.location.pathname.includes('student.html') || window.location.pathname.includes('student-fees.html') || window.location.pathname.includes('student-profile.html') || window.location.pathname.includes('net-banking.html') || window.location.pathname.includes('student-home.html') || window.location.pathname.includes('about-college.html'))) {
     window.location.href = 'index.html';
 }
 
-// THE CUSTOM TOAST FUNCTION
 window.showToast = (message, type = 'success') => {
     let container = document.getElementById('toastContainer');
     if (!container) {
@@ -37,60 +35,160 @@ window.showToast = (message, type = 'success') => {
         container.className = 'toast-container';
         document.body.appendChild(container);
     }
-
     const toast = document.createElement('div');
     toast.className = `toast ${type}`;
-    
-    let icon = '✅';
-    if(type === 'error') icon = '❌';
-    if(type === 'warning') icon = '⚠️';
-
+    let icon = type === 'error' ? '❌' : (type === 'warning' ? '⚠️' : '✅');
     toast.innerHTML = `<span style="font-size: 1.2em;">${icon}</span> <span>${message}</span>`;
     container.appendChild(toast);
-
     setTimeout(() => {
         toast.style.animation = 'fadeOutRight 0.5s ease forwards';
         setTimeout(() => toast.remove(), 500);
     }, 3500);
 };
 
-// --- HELPER: DYNAMIC BRANCH SELECTION ---
-function updateBranchOptions(yearElementId, branchElementId, currentBranch = null) {
-    const yearSelect = document.getElementById(yearElementId);
-    const branchSelect = document.getElementById(branchElementId);
-    
-    if (!yearSelect || !branchSelect) return;
+// 💥 DYNAMIC DROPDOWNS ENGINE 💥
+function initDynamicDropdowns(courseRef, yearId, semId, branchId, currentData = {}) {
+    const yearSelect = document.getElementById(yearId);
+    const semSelect = document.getElementById(semId);
+    const branchSelect = document.getElementById(branchId);
+    const courseSelect = document.getElementById(courseRef); 
 
-    const renderOptions = () => {
-        if (yearSelect.value === '1st Year') {
-            branchSelect.innerHTML = '<option value="Common 1st Year">Common 1st Year</option>';
-        } else {
-            branchSelect.innerHTML = `
-                <option value="">Select Core Branch</option>
-                <option value="Computer Science and Engineering">Computer Science and Engineering</option>
-                <option value="Data Science">Data Science</option>
-                <option value="Electrical Communication Engineering">Electrical Communication Engineering</option>
-                <option value="EE">EE</option>
-                <option value="EEE">EEE</option>
-                <option value="Civil">Civil</option>
-                <option value="Mechanical">Mechanical</option>
-            `;
+    if (!yearSelect) return;
+
+    const render = () => {
+        const course = courseSelect ? courseSelect.value : courseRef;
+        
+        const savedYear = yearSelect.value;
+        let years = ['1st Year', '2nd Year'];
+        if (course === 'B.Tech') years.push('3rd Year', '4th Year');
+        
+        yearSelect.innerHTML = years.map(y => `<option value="${y}">${y}</option>`).join('');
+        if (years.includes(savedYear)) yearSelect.value = savedYear;
+        
+        const year = yearSelect.value;
+
+        if (semSelect) {
+            const savedSem = semSelect.value;
+            let sems = [];
+            if (year === '1st Year') sems = ['Semester 1', 'Semester 2'];
+            else if (year === '2nd Year') sems = ['Semester 3', 'Semester 4'];
+            else if (year === '3rd Year') sems = ['Semester 5', 'Semester 6'];
+            else if (year === '4th Year') sems = ['Semester 7', 'Semester 8'];
+            
+            semSelect.innerHTML = sems.map(s => `<option value="${s}">${s}</option>`).join('');
+            if (sems.includes(savedSem)) semSelect.value = savedSem;
         }
-        if (currentBranch) branchSelect.value = currentBranch;
+
+        if (branchSelect) {
+            let options = '';
+            if (course === 'B.Tech') {
+                if (year === '1st Year') {
+                    options = '<option value="Common 1st Year">Common 1st Year</option>';
+                } else {
+                    options = `
+                        <option value="">Select Core Branch</option>
+                        <option value="Computer Science and Engineering">Computer Science and Engineering</option>
+                        <option value="Data Science">Data Science</option>
+                        <option value="Electrical Communication Engineering">Electrical Communication Engineering</option>
+                        <option value="EE">EE</option>
+                        <option value="EEE">EEE</option>
+                        <option value="Civil">Civil</option>
+                        <option value="Mechanical">Mechanical</option>
+                    `;
+                }
+            } else if (course === 'MBA') {
+                options = `
+                    <option value="">Select Specialization</option>
+                    <option value="Human Resources (HR)">Human Resources (HR)</option>
+                    <option value="Finance">Finance</option>
+                    <option value="Marketing">Marketing</option>
+                    <option value="IT & Systems">IT & Systems</option>
+                    <option value="Operations">Operations</option>
+                `;
+            } else if (course === 'MCA') {
+                options = '<option value="Master of Computer Applications">Master of Computer Applications</option>';
+            }
+            branchSelect.innerHTML = options;
+        }
     };
 
-    yearSelect.addEventListener('change', renderOptions);
-    renderOptions(); 
+    if (courseSelect) courseSelect.addEventListener('change', render);
+    yearSelect.addEventListener('change', render);
+    render();
+
+    if (currentData.year) {
+        yearSelect.value = currentData.year;
+        render(); 
+        if (currentData.semester && semSelect) semSelect.value = currentData.semester;
+        if (currentData.branch && branchSelect) branchSelect.value = currentData.branch;
+    }
+}
+
+// 💥 NOTICEBOARD DROPDOWNS ENGINE (For Admin Tab) 💥
+function initAdminNoticeDropdowns() {
+    const nCourse = document.getElementById('noticeCourse');
+    const nYear = document.getElementById('noticeYear');
+    const nSem = document.getElementById('noticeSemester');
+    const nBranch = document.getElementById('noticeBranch');
+
+    if(!nCourse) return;
+
+    const renderNotices = () => {
+        const course = nCourse.value;
+        
+        let years = ['<option value="All">All Years</option>'];
+        if(course === 'B.Tech') years.push('<option value="1st Year">1st Year</option>','<option value="2nd Year">2nd Year</option>','<option value="3rd Year">3rd Year</option>','<option value="4th Year">4th Year</option>');
+        else if(course === 'MBA' || course === 'MCA') years.push('<option value="1st Year">1st Year</option>','<option value="2nd Year">2nd Year</option>');
+        
+        const savedYear = nYear.value;
+        nYear.innerHTML = years.join('');
+        if(nYear.querySelector(`[value="${savedYear}"]`)) nYear.value = savedYear;
+
+        const year = nYear.value;
+        let sems = ['<option value="All">All Semesters</option>'];
+        if(year === '1st Year') sems.push('<option value="Semester 1">Semester 1</option>','<option value="Semester 2">Semester 2</option>');
+        else if(year === '2nd Year') sems.push('<option value="Semester 3">Semester 3</option>','<option value="Semester 4">Semester 4</option>');
+        else if(year === '3rd Year') sems.push('<option value="Semester 5">Semester 5</option>','<option value="Semester 6">Semester 6</option>');
+        else if(year === '4th Year') sems.push('<option value="Semester 7">Semester 7</option>','<option value="Semester 8">Semester 8</option>');
+        
+        const savedSem = nSem.value;
+        nSem.innerHTML = sems.join('');
+        if(nSem.querySelector(`[value="${savedSem}"]`)) nSem.value = savedSem;
+
+        let branches = ['<option value="All">All Branches</option>'];
+        if(course === 'B.Tech') {
+            if(year === '1st Year') branches.push('<option value="Common 1st Year">Common 1st Year</option>');
+            else branches.push(
+                '<option value="Computer Science and Engineering">Computer Science and Engineering</option>',
+                '<option value="Data Science">Data Science</option>',
+                '<option value="Electrical Communication Engineering">Electrical Communication Engineering</option>',
+                '<option value="EE">EE</option>',
+                '<option value="EEE">EEE</option>',
+                '<option value="Civil">Civil</option>',
+                '<option value="Mechanical">Mechanical</option>'
+            );
+        } else if (course === 'MBA') {
+            branches.push('<option value="Human Resources (HR)">Human Resources (HR)</option>','<option value="Finance">Finance</option>','<option value="Marketing">Marketing</option>','<option value="IT & Systems">IT & Systems</option>','<option value="Operations">Operations</option>');
+        } else if (course === 'MCA') {
+            branches.push('<option value="Master of Computer Applications">Master of Computer Applications</option>');
+        }
+        const savedBranch = nBranch.value;
+        nBranch.innerHTML = branches.join('');
+        if(nBranch.querySelector(`[value="${savedBranch}"]`)) nBranch.value = savedBranch;
+    };
+
+    nCourse.addEventListener('change', renderNotices);
+    nYear.addEventListener('change', renderNotices);
+    renderNotices();
 }
 
 // --- 3. STUDENT REGISTRATION ---
 const registerForm = document.getElementById('registerForm');
 if (registerForm) {
-    updateBranchOptions('year', 'branch'); 
+    initDynamicDropdowns('course', 'year', 'semester', 'branch'); 
 
     registerForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        
         const regNumberInput = document.getElementById('regNumber').value;
         const submitBtn = registerForm.querySelector('button');
         
@@ -102,7 +200,7 @@ if (registerForm) {
             const querySnapshot = await getDocs(q);
 
             if (!querySnapshot.empty) {
-                showToast(`Error: Registration Number '${regNumberInput}' is already registered!`, 'error');
+                showToast(`Error: Registration '${regNumberInput}' is already registered!`, 'error');
                 submitBtn.disabled = false;
                 submitBtn.innerText = "Register Account";
                 return; 
@@ -115,7 +213,7 @@ if (registerForm) {
                 branch: document.getElementById('branch').value,
                 year: document.getElementById('year').value,             
                 semester: document.getElementById('semester').value, 
-                section: "Unassigned", // Admin sets this later 
+                section: "Unassigned", 
                 registration_number: regNumberInput,
                 password: document.getElementById('password').value,
                 profile_pic: "", 
@@ -124,9 +222,7 @@ if (registerForm) {
             
             showToast('Registration Successful! Redirecting...', 'success');
             setTimeout(() => window.location.href = 'student-login.html', 1500);
-            
         } catch (error) {
-            console.error("Registration Error: ", error);
             showToast('Error registering account.', 'error');
             submitBtn.disabled = false;
             submitBtn.innerText = "Register Account";
@@ -149,7 +245,6 @@ if (studentLoginForm) {
             const userData = querySnapshot.docs[0].data();
             userData.id = querySnapshot.docs[0].id; 
             localStorage.setItem('user', JSON.stringify(userData));
-            
             window.location.href = 'student-home.html'; 
         } else {
             document.getElementById('errorMsg').style.display = 'block';
@@ -164,7 +259,6 @@ if (adminLoginForm) {
 
     adminLoginForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        
         const username = document.getElementById('username').value.trim(); 
         const pass = document.getElementById('password').value.trim();
         const submitBtn = adminLoginForm.querySelector('button');
@@ -173,12 +267,7 @@ if (adminLoginForm) {
         submitBtn.disabled = true;
 
         try {
-            const q = query(collection(db, "users"), 
-                where("username", "==", username), 
-                where("password", "==", pass), 
-                where("role", "==", "Admin")
-            );
-            
+            const q = query(collection(db, "users"), where("username", "==", username), where("password", "==", pass), where("role", "==", "Admin"));
             const querySnapshot = await getDocs(q);
 
             if (!querySnapshot.empty) {
@@ -191,9 +280,8 @@ if (adminLoginForm) {
                 document.getElementById('errorMsg').innerText = "Invalid Username or Password.";
             }
         } catch (error) {
-            console.error("Admin Login Error: ", error);
             document.getElementById('errorMsg').style.display = 'block';
-            document.getElementById('errorMsg').innerText = "Database Error. Check Console.";
+            document.getElementById('errorMsg').innerText = "Database Error.";
         } finally {
             submitBtn.innerText = "Access System";
             submitBtn.disabled = false;
@@ -205,71 +293,114 @@ async function ensureAdminExists() {
     try {
         const q = query(collection(db, "users"), where("username", "==", "admin1"));
         const querySnapshot = await getDocs(q);
-        
         if (querySnapshot.empty) {
-            await addDoc(collection(db, "users"), { 
-                role: "Admin", 
-                username: "admin1", 
-                password: "admin123",
-                full_name: "System Admin"
-            });
-            console.log("Default Admin generated!");
+            await addDoc(collection(db, "users"), { role: "Admin", username: "admin1", password: "admin123", full_name: "System Admin" });
         }
-    } catch (e) {
-        console.error("Error checking admin:", e);
-    }
+    } catch (e) { }
 }
 
 // --- 6. STUDENT DASHBOARD MASTER LOGIC ---
 if (user?.role === 'Student') {
     const welcomeText = document.getElementById('welcomeText');
-    const academicInfo = document.getElementById('academicInfo'); 
-    const headerAvatar = document.getElementById('headerAvatar');
-
-    const avatarUrl = user.profile_pic || 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
+    const timeGreeting = document.getElementById('timeGreeting');
+    const welcomeName = document.getElementById('welcomeName');
     
-    if (headerAvatar) headerAvatar.src = avatarUrl;
-    
-    if (academicInfo) {
-        academicInfo.innerText = `${user.course} in ${user.branch} | ${user.year || '1st Year'} (${user.semester || 'Semester 1'}) | Sec: ${user.section || 'Unassigned'}`;
-    }
-
     if (welcomeText && window.location.pathname.includes('student.html') && !window.location.pathname.includes('student-home')) {
          welcomeText.innerText = `Maintenance Portal`;
     }
 
-    const timeGreeting = document.getElementById('timeGreeting');
-    const welcomeName = document.getElementById('welcomeName');
     if (timeGreeting && welcomeName) {
         const hour = new Date().getHours();
         let greeting = "Good Evening";
         if (hour < 12) greeting = "Good Morning";
         else if (hour < 17) greeting = "Good Afternoon";
-        
         timeGreeting.innerText = greeting;
-        welcomeName.innerText = user.full_name;
     }
 
-    const statYear = document.getElementById('statYear');
-    const statSem = document.getElementById('statSem');
-    if (statYear) statYear.innerText = user.year || '1st Year';
-    if (statSem) statSem.innerText = user.semester || 'Sem 1';
+    // 💥 NEW: REAL-TIME STUDENT PROFILE SYNC 💥
+    if (user.id) {
+        const userDocRef = doc(db, "users", user.id);
+        onSnapshot(userDocRef, (docSnap) => {
+            if (docSnap.exists()) {
+                const freshUser = docSnap.data();
+                freshUser.id = docSnap.id;
+                
+                // Update local storage so data stays correct across page reloads
+                localStorage.setItem('user', JSON.stringify(freshUser));
+                
+                // 1. Live Update Header Avatar & Info
+                const headerAvatar = document.getElementById('headerAvatar');
+                const academicInfo = document.getElementById('academicInfo'); 
+                const avatarUrl = freshUser.profile_pic || 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
+                
+                if (headerAvatar) headerAvatar.src = avatarUrl;
+                if (welcomeName) welcomeName.innerText = freshUser.full_name;
+                if (academicInfo) {
+                    academicInfo.innerText = `${freshUser.course} in ${freshUser.branch} | ${freshUser.year || '1st Year'} (${freshUser.semester || 'Semester 1'}) | Sec: ${freshUser.section || 'Unassigned'}`;
+                }
+
+                // 2. Live Update Profile Page Settings
+                const profileAvatarLarge = document.getElementById('profileAvatarLarge');
+                const profileNameDisplay = document.getElementById('profileNameDisplay');
+                const profileYear = document.getElementById('profileYear');
+                const profileSemester = document.getElementById('profileSemester');
+                const profileBranch = document.getElementById('profileBranch');
+                
+                if (profileAvatarLarge) profileAvatarLarge.src = avatarUrl;
+                if (profileNameDisplay) profileNameDisplay.innerText = freshUser.full_name;
+                
+                // If on profile page, push the updated data back into the form dropdowns
+                if (profileYear && profileSemester && profileBranch) {
+                    initDynamicDropdowns(freshUser.course || 'B.Tech', 'profileYear', 'profileSemester', 'profileBranch', { 
+                        year: freshUser.year, semester: freshUser.semester, branch: freshUser.branch 
+                    });
+                }
+            }
+        });
+    }
 
     if (document.getElementById('complaintForm')) initQueriesSystem();
     if (document.getElementById('paymentForm')) initFeeSystem();
-    if (document.getElementById('profileYear')) initProfileSystem(avatarUrl);
+    if (document.getElementById('profileYear')) initProfileSystem(user.profile_pic || 'https://cdn-icons-png.flaticon.com/512/149/149071.png');
+
+    // LIVE NOTICEBOARD RECEIVER
+    const noticeBoard = document.getElementById('studentNoticeBoard');
+    if(noticeBoard) {
+        onSnapshot(collection(db, "notices"), (snapshot) => {
+            // Get freshest user data from localStorage for accurate filtering
+            const activeUser = JSON.parse(localStorage.getItem('user'));
+            
+            let notices = [];
+            snapshot.forEach(doc => notices.push({id: doc.id, ...doc.data()}));
+            
+            notices = notices.filter(n => 
+                (n.course === 'All' || n.course === activeUser.course) &&
+                (n.year === 'All' || n.year === activeUser.year) &&
+                (n.semester === 'All' || n.semester === activeUser.semester) &&
+                (n.branch === 'All' || n.branch === activeUser.branch)
+            );
+
+            notices.sort((a, b) => b.timestamp - a.timestamp); // Newest first
+
+            if(notices.length === 0) {
+                noticeBoard.innerHTML = '<p style="color: #94a3b8; text-align: center; margin-top: 60px; font-style: italic;">No new announcements at this time.</p>';
+            } else {
+                noticeBoard.innerHTML = notices.map((n, i) => `
+                    <div class="notice-item ${i === 0 ? 'highlight' : ''}">
+                        <div style="font-size: 0.75em; color: ${i===0 ? '#fca5a5' : '#64748b'}; font-weight: bold; margin-bottom: 3px;">
+                            ${new Date(n.timestamp).toLocaleString()}
+                        </div>
+                        <p style="margin: 0; color: ${i===0 ? '#f8fafc' : '#cbd5e1'}; font-weight: ${i===0 ? 'bold' : 'normal'}; line-height: 1.4;">
+                            ${n.message}
+                        </p>
+                    </div>
+                `).join('');
+            }
+        });
+    }
 }
 
-// --- SECURED PROFILE SYSTEM ---
 function initProfileSystem(avatarUrl) {
-    document.getElementById('profileNameDisplay').innerText = user.full_name;
-    document.getElementById('profileRegDisplay').innerText = `Registration No: ${user.registration_number}`;
-    document.getElementById('profileAvatarLarge').src = avatarUrl;
-    
-    document.getElementById('profileYear').value = user.year || '1st Year';
-    document.getElementById('profileSemester').value = user.semester || 'Semester 1';
-    document.getElementById('profileBranch').value = user.branch || 'Common 1st Year';
-
     const profileImageInput = document.getElementById('profileImageInput');
     if(profileImageInput) {
         profileImageInput.addEventListener('change', async (e) => {
@@ -284,32 +415,18 @@ function initProfileSystem(avatarUrl) {
             formData.append('upload_preset', UPLOAD_PRESET);
 
             try {
-                const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {
-                    method: 'POST',
-                    body: formData
-                });
+                const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, { method: 'POST', body: formData });
                 const data = await res.json();
-                
                 if (data.secure_url) {
                     const userRef = doc(db, "users", user.id);
                     await updateDoc(userRef, { profile_pic: data.secure_url });
-                    
-                    user.profile_pic = data.secure_url;
-                    localStorage.setItem('user', JSON.stringify(user));
-                    
-                    document.getElementById('profileAvatarLarge').src = data.secure_url;
-                    const headerAvatar = document.getElementById('headerAvatar');
-                    if(headerAvatar) headerAvatar.src = data.secure_url;
                     showToast('Profile picture updated!', 'success');
                 }
-            } catch(err) {
-                showToast('Failed to upload image.', 'error');
-            }
+            } catch(err) { showToast('Failed to upload image.', 'error'); }
         });
     }
 }
 
-// --- QUERIES SYSTEM ---
 function initQueriesSystem() {
     const complaintForm = document.getElementById('complaintForm');
     const activeList = document.getElementById('activeComplaintsList');
@@ -319,19 +436,20 @@ function initQueriesSystem() {
         e.preventDefault();
         const descInput = document.getElementById('description');
         const submitBtn = complaintForm.querySelector('button');
+        
+        // Grab fresh data just in case admin updated it while they were on the page
+        const activeUser = JSON.parse(localStorage.getItem('user'));
 
         submitBtn.disabled = true;
         submitBtn.innerText = "Submitting...";
-        
         await addDoc(collection(db, "complaints"), {
-            student_id: user.id,
-            student_details: `${user.full_name} | ${user.course} (${user.branch}) - Sec: ${user.section || 'Unassigned'}`,
-            reg_number: user.registration_number,
+            student_id: activeUser.id,
+            student_details: `${activeUser.full_name} | ${activeUser.course} (${activeUser.branch}) - Sec: ${activeUser.section || 'Unassigned'}`,
+            reg_number: activeUser.registration_number,
             description: descInput.value,
             status: "Pending",
             created_at: Date.now()
         });
-        
         showToast('Query submitted successfully!', 'success');
         complaintForm.reset(); 
         submitBtn.disabled = false;
@@ -340,12 +458,8 @@ function initQueriesSystem() {
 
     window.deleteQuery = async (queryId) => {
         if(confirm("Are you sure you want to delete this query?")) {
-            try {
-                await deleteDoc(doc(db, "complaints", queryId));
-                showToast("Query deleted successfully!", "success");
-            } catch(error) {
-                showToast("Failed to delete query.", "error");
-            }
+            try { await deleteDoc(doc(db, "complaints", queryId)); showToast("Query deleted successfully!", "success");
+            } catch(error) { showToast("Failed to delete query.", "error"); }
         }
     };
 
@@ -385,12 +499,13 @@ function initQueriesSystem() {
     });
 }
 
-// --- FEES SYSTEM ---
 function initFeeSystem() {
     const paymentForm = document.getElementById('paymentForm');
     const historyList = document.getElementById('paymentHistoryList');
     
-    let semString = user.semester || "Semester 1";
+    // Always calculate using freshest data
+    const activeUser = JSON.parse(localStorage.getItem('user')) || user;
+    let semString = activeUser.semester || "Semester 1";
     let semNumber = parseInt(semString.replace("Semester ", "")) || 1;
     const totalFeeAmount = semNumber * 50000; 
     let remainingBalance = totalFeeAmount;
@@ -412,6 +527,8 @@ function initFeeSystem() {
         const amount = Number(document.getElementById('payAmount').value);
         const gateway = document.getElementById('payGateway').value;
         const method = document.getElementById('payMethod').value;
+        
+        const freshUser = JSON.parse(localStorage.getItem('user')) || user;
 
         if (amount > remainingBalance) {
             showToast(`Error: You only owe ₹${remainingBalance.toLocaleString()}.`, 'warning');
@@ -433,50 +550,35 @@ function initFeeSystem() {
             try {
                 const txnId = 'TXN-' + Math.floor(10000000 + Math.random() * 90000000);
                 await addDoc(collection(db, "payments"), {
-                    student_id: user.id,
-                    full_name: user.full_name,
-                    registration_number: user.registration_number,
-                    course: user.course,
-                    branch: user.branch,
-                    section: user.section || "Unassigned",
-                    year: user.year || "N/A",           
-                    semester: user.semester || "N/A",   
+                    student_id: freshUser.id,
+                    full_name: freshUser.full_name,
+                    registration_number: freshUser.registration_number,
+                    course: freshUser.course,
+                    branch: freshUser.branch,
+                    section: freshUser.section || "Unassigned",
+                    year: freshUser.year || "N/A",           
+                    semester: freshUser.semester || "N/A",   
                     amount: amount,
                     gateway: gateway,
                     method: method,
                     transaction_id: txnId,
                     date: Date.now()
                 });
-
                 showToast(`Successfully paid ₹${amount.toLocaleString()}!`, 'success');
                 paymentForm.reset();
-            } catch (error) {
-                showToast("Payment failed.", "error");
-            } finally {
-                btn.innerText = "Process Secure Payment";
-                btn.disabled = false;
-            }
+            } catch (error) { showToast("Payment failed.", "error"); } 
+            finally { btn.innerText = "Process Secure Payment"; btn.disabled = false; }
         }, 2000);
     });
 
-    // 💥 NEW: Filter Event Listener 💥
     const historySemesterFilter = document.getElementById('historySemesterFilter');
-    if (historySemesterFilter) {
-        historySemesterFilter.addEventListener('change', () => {
-            renderPaymentHistory();
-        });
-    }
+    if (historySemesterFilter) historySemesterFilter.addEventListener('change', renderPaymentHistory);
 
-    // 💥 NEW: Dedicated Render Function for Filtered Receipts 💥
     function renderPaymentHistory() {
         if (!window.userPaymentHistory) return;
-        
         const filterVal = document.getElementById('historySemesterFilter') ? document.getElementById('historySemesterFilter').value : "All";
-        
         let filteredPayments = window.userPaymentHistory;
-        if (filterVal !== "All") {
-            filteredPayments = window.userPaymentHistory.filter(p => p.semester === filterVal);
-        }
+        if (filterVal !== "All") filteredPayments = window.userPaymentHistory.filter(p => p.semester === filterVal);
 
         if (filteredPayments.length === 0) {
             historyList.innerHTML = '<p style="color: #94a3b8; background: rgba(0,0,0,0.3); padding: 20px; border-radius: 8px; text-align: center;">No transactions found for this selection.</p>';
@@ -492,8 +594,8 @@ function initFeeSystem() {
                         <span style="color: #cbd5e1;"><small>🗓️ Paid during: <strong>${p.semester || 'N/A'}</strong></small></span>
                     </p>
                     <div style="display: flex; gap: 10px; margin-top: 15px;">
-                        <button onclick="window.viewReceipt('${p.id}')" style="flex: 1; background: transparent; color: #6366f1; border: 1px solid #6366f1; padding: 10px; border-radius: 8px; cursor: pointer; transition: 0.3s;" onmouseover="this.style.background='rgba(99,102,241,0.1)'" onmouseout="this.style.background='transparent'">👁️ View Receipt</button>
-                        <button onclick="window.downloadReceipt('${p.id}')" style="flex: 1; background: transparent; color: #10b981; border: 1px solid #10b981; padding: 10px; border-radius: 8px; cursor: pointer; transition: 0.3s;" onmouseover="this.style.background='rgba(16,185,129,0.1)'" onmouseout="this.style.background='transparent'">↓ Download PDF</button>
+                        <button onclick="window.viewReceipt('${p.id}')" style="flex: 1; background: transparent; color: #6366f1; border: 1px solid #6366f1; padding: 10px; border-radius: 8px; cursor: pointer;">👁️ View</button>
+                        <button onclick="window.downloadReceipt('${p.id}')" style="flex: 1; background: transparent; color: #10b981; border: 1px solid #10b981; padding: 10px; border-radius: 8px; cursor: pointer;">↓ Download</button>
                     </div>
                 </div>
             `).join('');
@@ -504,23 +606,18 @@ function initFeeSystem() {
     onSnapshot(q, (querySnapshot) => {
         let payments = [];
         let totalPaid = 0;
-
         querySnapshot.forEach((doc) => {
             const data = doc.data();
             payments.push({ id: doc.id, ...data });
             totalPaid += data.amount; 
         });
-        
         remainingBalance = totalFeeAmount - totalPaid;
         window.userPaymentHistory = payments.sort((a, b) => b.date - a.date); 
-
         document.getElementById('totalOwedDisplay').innerText = `₹${totalFeeAmount.toLocaleString()}`;
         document.getElementById('totalPaidDisplay').innerText = `₹${totalPaid.toLocaleString()}`;
         document.getElementById('remainingBalanceDisplay').innerText = `₹${remainingBalance.toLocaleString()}`;
-        
         const payAmountInput = document.getElementById('payAmount');
         const payFeeBtn = document.getElementById('payFeeBtn');
-        
         if (remainingBalance <= 0) {
             payAmountInput.disabled = true;
             payFeeBtn.disabled = true;
@@ -529,13 +626,10 @@ function initFeeSystem() {
             payAmountInput.max = remainingBalance;
             payAmountInput.placeholder = `Max: ₹${remainingBalance}`;
         }
-
-        // Render initially when data loads
         renderPaymentHistory();
     });
 }
 
-// --- SHARED HELPER ---
 function buildReceiptPDF(txn) {
     const { jsPDF } = window.jspdf;
     const pdf = new jsPDF();
@@ -620,6 +714,37 @@ if (user?.role === 'Admin') {
             showToast('Failed to assign section.', 'error');
         }
     };
+
+    const noticeForm = document.getElementById('noticeForm');
+    if (noticeForm) {
+        initAdminNoticeDropdowns(); 
+
+        noticeForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = noticeForm.querySelector('button');
+            btn.innerText = "Broadcasting...";
+            btn.disabled = true;
+
+            try {
+                await addDoc(collection(db, "notices"), {
+                    course: document.getElementById('noticeCourse').value,
+                    year: document.getElementById('noticeYear').value,
+                    semester: document.getElementById('noticeSemester').value,
+                    branch: document.getElementById('noticeBranch').value,
+                    message: document.getElementById('noticeMessage').value,
+                    timestamp: Date.now()
+                });
+                showToast("Broadcast pushed successfully!", "success");
+                noticeForm.reset();
+                initAdminNoticeDropdowns(); 
+            } catch (error) {
+                showToast("Failed to broadcast.", "error");
+            } finally {
+                btn.innerText = "Push to Student Dashboards";
+                btn.disabled = false;
+            }
+        });
+    }
 
     loadAdminData();
 }
@@ -712,14 +837,17 @@ function renderAdminStudents(students) {
         if (dbBranchUpper === "CSE") branchName = "Computer Science and Engineering";
         if (dbBranchUpper === "ECE") branchName = "Electrical Communication Engineering";
 
-        if (!groupedStudents[branchName]) {
-            groupedStudents[branchName] = [];
+        let courseTag = s.course ? `(${s.course}) ` : "";
+        const groupKey = courseTag + branchName;
+
+        if (!groupedStudents[groupKey]) {
+            groupedStudents[groupKey] = [];
         }
-        groupedStudents[branchName].push(s);
+        groupedStudents[groupKey].push(s);
     });
 
     let finalHTML = '';
-    const sortedBranches = Object.keys(groupedStudents).sort();
+    const sortedGroupKeys = Object.keys(groupedStudents).sort();
 
     const semesterToYearMap = {
         1: "1st Year", 2: "1st Year",
@@ -728,30 +856,32 @@ function renderAdminStudents(students) {
         7: "4th Year", 8: "4th Year"
     };
 
-    sortedBranches.forEach(branch => {
+    sortedGroupKeys.forEach(groupKey => {
         finalHTML += `
             <div style="margin-top: 35px; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid rgba(99, 102, 241, 0.3);">
                 <h2 style="color: #818cf8; margin: 0; display: flex; justify-content: space-between; align-items: center; font-size: 1.4em;">
-                    <span>🏢 ${branch}</span>
+                    <span>🏢 ${groupKey}</span>
                     <span style="font-size: 0.6em; background: rgba(99, 102, 241, 0.15); padding: 5px 12px; border-radius: 20px; color: #cbd5e1; border: 1px solid rgba(99, 102, 241, 0.3);">
-                        ${groupedStudents[branch].length} Student(s)
+                        ${groupedStudents[groupKey].length} Student(s)
                     </span>
                 </h2>
             </div>
         `;
 
-        const branchStudents = groupedStudents[branch].sort((a, b) => {
+        const groupStudents = groupedStudents[groupKey].sort((a, b) => {
             const nameA = a.full_name || "Unknown Name";
             const nameB = b.full_name || "Unknown Name";
             return nameA.localeCompare(nameB);
         });
 
-        finalHTML += branchStudents.map(s => {
+        finalHTML += groupStudents.map(s => {
             let currentSemString = s.semester || "Semester 1";
             let currentSemNum = parseInt(currentSemString.replace("Semester ", "")) || 1;
             
+            let maxSem = (s.course === 'MBA' || s.course === 'MCA') ? 4 : 8;
+            
             let semOptionsHTML = "";
-            for(let i = currentSemNum; i <= 8; i++) {
+            for(let i = currentSemNum; i <= maxSem; i++) {
                 semOptionsHTML += `<option value="Semester ${i}">Sem ${i} (${semesterToYearMap[i]})</option>`;
             }
 
@@ -768,7 +898,6 @@ function renderAdminStudents(students) {
                         </div>
                         
                         <div style="display: flex; flex-direction: column; gap: 10px;">
-                            
                             <div style="display: flex; gap: 10px; background: rgba(0,0,0,0.2); padding: 8px 12px; border-radius: 8px; align-items: center; justify-content: flex-end;">
                                 <label style="color: #cbd5e1; font-size: 0.8em; margin: 0;">Promote:</label>
                                 <select id="promoteSem_${s.id}" style="padding: 6px; background: rgba(30,41,59,0.8); color: white; border: 1px solid rgba(255,255,255,0.1); border-radius: 5px; font-size: 0.85em;">
@@ -792,7 +921,6 @@ function renderAdminStudents(students) {
                                     Assign
                                 </button>
                             </div>
-
                         </div>
                     </div>
                 </div>
@@ -803,7 +931,6 @@ function renderAdminStudents(students) {
     listDiv.innerHTML = finalHTML;
 }
 
-// --- 8. NET BANKING REDIRECT LOGIC ---
 if (window.location.pathname.includes('net-banking.html')) {
     const pendingTxn = JSON.parse(localStorage.getItem('pendingTxn'));
     if (pendingTxn && user) {
@@ -816,14 +943,9 @@ if (window.location.pathname.includes('net-banking.html')) {
             setTimeout(async () => {
                 const txnId = 'TXN-' + Math.floor(10000000 + Math.random() * 90000000);
                 await addDoc(collection(db, "payments"), {
-                    student_id: user.id,
-                    full_name: user.full_name,
-                    registration_number: user.registration_number,
-                    amount: Number(pendingTxn.amount),
-                    gateway: pendingTxn.gateway,
-                    method: pendingTxn.method,
-                    transaction_id: txnId,
-                    date: Date.now()
+                    student_id: user.id, full_name: user.full_name, registration_number: user.registration_number,
+                    amount: Number(pendingTxn.amount), gateway: pendingTxn.gateway, method: pendingTxn.method,
+                    transaction_id: txnId, date: Date.now()
                 });
                 localStorage.removeItem('pendingTxn');
                 showToast("Payment Successful!", "success");
@@ -833,7 +955,6 @@ if (window.location.pathname.includes('net-banking.html')) {
     }
 }
 
-// --- 9. GLOBAL PASSWORD TOGGLE (AUTO-INJECTOR) ---
 document.addEventListener('DOMContentLoaded', () => {
     const eyeOpenSVG = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>`;
     const eyeClosedSVG = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>`;
@@ -843,22 +964,18 @@ document.addEventListener('DOMContentLoaded', () => {
         const computedStyle = window.getComputedStyle(input);
         const marginB = computedStyle.marginBottom;
         const marginT = computedStyle.marginTop;
-
         const wrapper = document.createElement('div');
         wrapper.style.position = 'relative';
         wrapper.style.width = '100%';
         wrapper.style.display = 'block';
         wrapper.style.marginBottom = marginB;
         wrapper.style.marginTop = marginT;
-
         input.parentNode.insertBefore(wrapper, input);
         wrapper.appendChild(input);
-        
         input.style.paddingRight = '45px';
         input.style.width = '100%';
         input.style.marginBottom = '0'; 
         input.style.marginTop = '0'; 
-        
         const toggleBtn = document.createElement('span');
         toggleBtn.innerHTML = eyeOpenSVG;
         toggleBtn.style.position = 'absolute';
@@ -868,15 +985,9 @@ document.addEventListener('DOMContentLoaded', () => {
         toggleBtn.style.cursor = 'pointer';
         toggleBtn.style.display = 'flex';
         toggleBtn.style.zIndex = '5';
-        
         toggleBtn.addEventListener('click', () => {
-            if (input.type === 'password') {
-                input.type = 'text';
-                toggleBtn.innerHTML = eyeClosedSVG;
-            } else {
-                input.type = 'password';
-                toggleBtn.innerHTML = eyeOpenSVG;
-            }
+            if (input.type === 'password') { input.type = 'text'; toggleBtn.innerHTML = eyeClosedSVG; } 
+            else { input.type = 'password'; toggleBtn.innerHTML = eyeOpenSVG; }
         });
         wrapper.appendChild(toggleBtn);
     });
