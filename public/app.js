@@ -1,6 +1,7 @@
 // --- 1. FIREBASE SETUP & IMPORTS ---
+// NEW: Added deleteDoc to the import list
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-import { getFirestore, collection, addDoc, getDocs, query, where, updateDoc, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+import { getFirestore, collection, addDoc, getDocs, query, where, updateDoc, doc, onSnapshot, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
 // YOUR FIREBASE CONFIG
 const firebaseConfig = {
@@ -23,7 +24,7 @@ window.logout = () => {
     window.location.href = 'index.html';
 };
 
-// Route Protection (Updated to include student-home and about-college)
+// Route Protection 
 if (!user && (window.location.pathname.includes('admin.html') || window.location.pathname.includes('student.html') || window.location.pathname.includes('student-fees.html') || window.location.pathname.includes('student-profile.html') || window.location.pathname.includes('net-banking.html') || window.location.pathname.includes('student-home.html') || window.location.pathname.includes('about-college.html'))) {
     window.location.href = 'index.html';
 }
@@ -86,7 +87,7 @@ function updateBranchOptions(yearElementId, branchElementId, currentBranch = nul
 // --- 3. STUDENT REGISTRATION ---
 const registerForm = document.getElementById('registerForm');
 if (registerForm) {
-    updateBranchOptions('year', 'branch'); // Attach dynamic branches to Registration Form
+    updateBranchOptions('year', 'branch'); 
 
     registerForm.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -98,7 +99,6 @@ if (registerForm) {
         submitBtn.innerText = "Checking Details...";
 
         try {
-            // Check if Registration Number already exists in Firebase
             const q = query(collection(db, "users"), where("registration_number", "==", regNumberInput));
             const querySnapshot = await getDocs(q);
 
@@ -109,7 +109,6 @@ if (registerForm) {
                 return; 
             }
 
-            // Create new student
             await addDoc(collection(db, "users"), {
                 role: "Student",
                 full_name: document.getElementById('fullName').value,
@@ -120,7 +119,7 @@ if (registerForm) {
                 semester: document.getElementById('semester').value,     
                 registration_number: regNumberInput,
                 password: document.getElementById('password').value,
-                profile_pic: "", // Initialize empty pic
+                profile_pic: "", 
                 fee_status: "Unpaid" 
             });
             
@@ -152,7 +151,6 @@ if (studentLoginForm) {
             userData.id = querySnapshot.docs[0].id; 
             localStorage.setItem('user', JSON.stringify(userData));
             
-            // Redirect to the new home dashboard!
             window.location.href = 'student-home.html'; 
         } else {
             document.getElementById('errorMsg').style.display = 'block';
@@ -198,16 +196,13 @@ if (user?.role === 'Student') {
     const academicInfo = document.getElementById('academicInfo'); 
     const headerAvatar = document.getElementById('headerAvatar');
 
-    // Default Avatar Fallback
     const avatarUrl = user.profile_pic || 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
     
     if (headerAvatar) headerAvatar.src = avatarUrl;
     if (academicInfo) academicInfo.innerText = `${user.course} in ${user.branch} | ${user.year || '1st Year'} (${user.semester || 'Semester 1'})`;
 
-    // Normal Welcome Text (for sub-pages like student.html, student-fees.html)
     if (welcomeText) welcomeText.innerText = `Welcome, ${user.full_name}!`;
 
-    // Dynamic Time Greeting (Specifically for student-home.html)
     const timeGreeting = document.getElementById('timeGreeting');
     const welcomeName = document.getElementById('welcomeName');
     if (timeGreeting && welcomeName) {
@@ -220,7 +215,6 @@ if (user?.role === 'Student') {
         welcomeName.innerText = user.full_name;
     }
 
-    // Initialize Page-Specific Logic dynamically
     if (document.getElementById('complaintForm')) initQueriesSystem();
     if (document.getElementById('paymentForm')) initFeeSystem();
     if (document.getElementById('profileYear')) initProfileSystem(avatarUrl);
@@ -237,7 +231,6 @@ function initProfileSystem(avatarUrl) {
     
     updateBranchOptions('profileYear', 'profileBranch', user.branch);
 
-    // 1. Cloudinary Setup
     const profileImageInput = document.getElementById('profileImageInput');
     profileImageInput.addEventListener('change', async (e) => {
         const file = e.target.files[0];
@@ -280,7 +273,6 @@ function initProfileSystem(avatarUrl) {
         }
     });
 
-    // 2. Academic Info Update
     const updateProfileBtn = document.getElementById('updateProfileBtn');
     updateProfileBtn.addEventListener('click', async () => {
         const newYear = document.getElementById('profileYear').value;
@@ -321,6 +313,7 @@ function initQueriesSystem() {
     const activeList = document.getElementById('activeComplaintsList');
     const resolvedList = document.getElementById('resolvedComplaintsList');
 
+    // 1. Submit form
     complaintForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const descInput = document.getElementById('description');
@@ -344,6 +337,20 @@ function initQueriesSystem() {
         submitBtn.innerText = "Submit Query";
     });
 
+    // 2. NEW: Delete Query Function
+    window.deleteQuery = async (queryId) => {
+        if(confirm("Are you sure you want to delete this query?")) {
+            try {
+                await deleteDoc(doc(db, "complaints", queryId));
+                showToast("Query deleted successfully!", "success");
+            } catch(error) {
+                console.error("Delete Error: ", error);
+                showToast("Failed to delete query.", "error");
+            }
+        }
+    };
+
+    // 3. Listener
     const q = query(collection(db, "complaints"), where("student_id", "==", user.id));
     onSnapshot(q, (querySnapshot) => {
         let complaints = [];
@@ -356,9 +363,16 @@ function initQueriesSystem() {
         activeList.innerHTML = activeComplaints.length === 0 
             ? '<p style="color: #64748b; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px;">No active queries at the moment.</p>' 
             : activeComplaints.map((c, index) => `
-                <div class="card" style="animation-delay: ${index * 0.1}s">
-                    <p><strong>Query:</strong> ${c.description}</p>
-                    <div style="margin-top: 10px;">
+                <div class="card" style="animation-delay: ${index * 0.1}s; position: relative;">
+                    
+                    ${c.status === 'Pending' ? `
+                    <button onclick="window.deleteQuery('${c.id}')" style="position: absolute; top: 15px; right: 15px; background: rgba(225, 29, 72, 0.1); color: #fda4af; border: 1px solid rgba(225, 29, 72, 0.3); padding: 5px 10px; border-radius: 6px; cursor: pointer; font-size: 0.8em; transition: 0.3s; width: auto; margin: 0;" onmouseover="this.style.background='rgba(225, 29, 72, 0.3)'" onmouseout="this.style.background='rgba(225, 29, 72, 0.1)'">
+                        🗑️ Delete
+                    </button>
+                    ` : ''}
+
+                    <p style="padding-right: 80px;"><strong>Query:</strong> ${c.description}</p>
+                    <div style="margin-top: 15px;">
                         <small>Status: <span class="badge ${c.status.replace(' ', '-')}">${c.status}</span></small>
                         <small style="float: right; color: #94a3b8;">${new Date(c.created_at).toLocaleDateString()}</small>
                     </div>
@@ -384,7 +398,6 @@ function initFeeSystem() {
     const paymentForm = document.getElementById('paymentForm');
     const historyList = document.getElementById('paymentHistoryList');
     
-    // Dynamic Fee calc based on Year
     let yearMultiplier = 1;
     if (user.year === '2nd Year') yearMultiplier = 2;
     if (user.year === '3rd Year') yearMultiplier = 3;
@@ -662,3 +675,73 @@ if (window.location.pathname.includes('net-banking.html')) {
         });
     }
 }
+// --- 9. GLOBAL PASSWORD TOGGLE (AUTO-INJECTOR) ---
+document.addEventListener('DOMContentLoaded', () => {
+    // Premium SVG Icons (Matches your SaaS design)
+    const eyeOpenSVG = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>`;
+    const eyeClosedSVG = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>`;
+
+    // Find every single password input on the current page
+    const passwordInputs = document.querySelectorAll('input[type="password"]');
+    
+    passwordInputs.forEach(input => {
+        // Capture original margins so we don't break your layout
+        const computedStyle = window.getComputedStyle(input);
+        const marginB = computedStyle.marginBottom;
+        const marginT = computedStyle.marginTop;
+
+        // Create a wrapper div
+        const wrapper = document.createElement('div');
+        wrapper.style.position = 'relative';
+        wrapper.style.width = '100%';
+        wrapper.style.display = 'block';
+        wrapper.style.marginBottom = marginB;
+        wrapper.style.marginTop = marginT;
+
+        // Wrap the input seamlessly
+        input.parentNode.insertBefore(wrapper, input);
+        wrapper.appendChild(input);
+        
+        // Adjust input styles inside the wrapper so text doesn't hide behind the icon
+        input.style.paddingRight = '45px';
+        input.style.boxSizing = 'border-box';
+        input.style.width = '100%';
+        input.style.marginBottom = '0'; 
+        input.style.marginTop = '0'; 
+        
+        // Create the eye toggle button
+        const toggleBtn = document.createElement('span');
+        toggleBtn.innerHTML = eyeOpenSVG;
+        toggleBtn.style.position = 'absolute';
+        toggleBtn.style.right = '12px';
+        toggleBtn.style.top = '50%';
+        toggleBtn.style.transform = 'translateY(-50%)';
+        toggleBtn.style.cursor = 'pointer';
+        toggleBtn.style.display = 'flex';
+        toggleBtn.style.alignItems = 'center';
+        toggleBtn.style.justifyContent = 'center';
+        toggleBtn.style.zIndex = '5';
+        toggleBtn.style.transition = 'all 0.3s ease';
+        toggleBtn.title = "Show Password";
+        
+        // Hover Effect (Turns Indigo)
+        toggleBtn.addEventListener('mouseenter', () => toggleBtn.querySelector('svg').style.stroke = '#6366f1');
+        toggleBtn.addEventListener('mouseleave', () => toggleBtn.querySelector('svg').style.stroke = '#94a3b8');
+
+        // Click Logic (Switches Type & Icon)
+        toggleBtn.addEventListener('click', () => {
+            if (input.type === 'password') {
+                input.type = 'text';
+                toggleBtn.innerHTML = eyeClosedSVG;
+                toggleBtn.title = "Hide Password";
+            } else {
+                input.type = 'password';
+                toggleBtn.innerHTML = eyeOpenSVG;
+                toggleBtn.title = "Show Password";
+            }
+            toggleBtn.querySelector('svg').style.stroke = '#6366f1'; // Keeps it highlighted after clicking
+        });
+        
+        wrapper.appendChild(toggleBtn);
+    });
+});
