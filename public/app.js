@@ -1,5 +1,4 @@
 // --- 1. FIREBASE SETUP & IMPORTS ---
-// NEW: Added deleteDoc to the import list
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
 import { getFirestore, collection, addDoc, getDocs, query, where, updateDoc, doc, onSnapshot, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
@@ -529,22 +528,23 @@ function initFeeSystem() {
                     </div>
                     <p style="color: #cbd5e1; font-size: 0.9em;"><strong>TXN ID:</strong> ${p.transaction_id} | <strong>Date:</strong> ${new Date(p.date).toLocaleString()}</p>
                     <p style="color: #cbd5e1; font-size: 0.9em;"><strong>Paid via:</strong> ${p.method} (${p.gateway})</p>
-                    <button onclick="window.downloadReceipt('${p.id}')" style="margin-top: 15px; background: transparent; color: #10b981; border: 1px solid #10b981; width: 100%;">
-                        ↓ Download Official Receipt
-                    </button>
+                    
+                    <div style="display: flex; gap: 10px; margin-top: 15px;">
+                        <button onclick="window.viewReceipt('${p.id}')" style="flex: 1; background: transparent; color: #6366f1; border: 1px solid #6366f1; transition: 0.3s; margin: 0; padding: 10px;" onmouseover="this.style.background='rgba(99, 102, 241, 0.1)'" onmouseout="this.style.background='transparent'">
+                            👁️ View
+                        </button>
+                        <button onclick="window.downloadReceipt('${p.id}')" style="flex: 1; background: transparent; color: #10b981; border: 1px solid #10b981; transition: 0.3s; margin: 0; padding: 10px;" onmouseover="this.style.background='rgba(16, 185, 129, 0.1)'" onmouseout="this.style.background='transparent'">
+                            ↓ Download
+                        </button>
+                    </div>
                 </div>
             `).join('');
         }
     });
 }
 
-window.downloadReceipt = (paymentId) => {
-    const txn = window.userPaymentHistory.find(p => p.id === paymentId);
-    if (!txn) {
-        showToast("Receipt data not found!", "error");
-        return;
-    }
-
+// --- SHARED HELPER: Builds the exact PDF document ---
+function buildReceiptPDF(txn) {
     const { jsPDF } = window.jspdf;
     const pdf = new jsPDF();
 
@@ -578,8 +578,27 @@ window.downloadReceipt = (paymentId) => {
     pdf.setTextColor(0, 0, 0);
     pdf.text("Status: SUCCESSFUL", 20, 145);
 
+    return pdf;
+}
+
+// Button 1: Download to Computer
+window.downloadReceipt = (paymentId) => {
+    const txn = window.userPaymentHistory.find(p => p.id === paymentId);
+    if (!txn) return showToast("Receipt data not found!", "error");
+
+    const pdf = buildReceiptPDF(txn);
     pdf.save(`Receipt_${txn.transaction_id}.pdf`);
     showToast("Receipt downloaded successfully!", "success");
+}
+
+// Button 2: View in New Tab
+window.viewReceipt = (paymentId) => {
+    const txn = window.userPaymentHistory.find(p => p.id === paymentId);
+    if (!txn) return showToast("Receipt data not found!", "error");
+
+    const pdf = buildReceiptPDF(txn);
+    const blobUrl = pdf.output("bloburl");
+    window.open(blobUrl, "_blank");
 }
 
 // --- 7. ADMIN DASHBOARD LOGIC ---
@@ -675,6 +694,7 @@ if (window.location.pathname.includes('net-banking.html')) {
         });
     }
 }
+
 // --- 9. GLOBAL PASSWORD TOGGLE (AUTO-INJECTOR) ---
 document.addEventListener('DOMContentLoaded', () => {
     // Premium SVG Icons (Matches your SaaS design)
