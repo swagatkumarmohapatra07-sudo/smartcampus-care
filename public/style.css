@@ -1055,3 +1055,23 @@ body.index-body {
     margin-bottom: 15px;
     display: inline-block;
 }
+/* --- Fix for non-clickable inputs --- */
+#paymentForm input, 
+#paymentForm select, 
+#paymentForm button {
+    position: relative;
+    z-index: 10; /* Forces them above any background glows or hidden divs */
+    pointer-events: auto !important; /* Ensures the mouse can interact with them */
+    cursor: text;
+}
+
+#paymentForm select, 
+#paymentForm button {
+    cursor: pointer;
+}
+
+/* Ensure the Virtual Card and UPI containers don't block the form when hidden */
+#upiUI, #cardUI {
+    clear: both;
+    margin-top: 15px;
+}

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>My Profile</title>
+    <title>My Profile - SmartCampus</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body style="position: relative;">
@@ -17,24 +17,34 @@
         <div class="profile-header">
             <img id="profileAvatarLarge" class="profile-avatar-large" src="https://cdn-icons-png.flaticon.com/512/149/149071.png" alt="Profile">
             <div style="margin-top: 15px;">
-                <h2 id="profileNameDisplay">Name</h2>
-                <p id="profileRegDisplay" style="color: #94a3b8;">Reg No</p>
+                <h2 id="profileNameDisplay" style="color: #f8fafc; margin-bottom: 5px;">Student Name</h2>
+                <p id="profileRegDisplay" style="color: #94a3b8; margin-top: 0;">Reg No</p>
                 <label class="file-upload-label" style="display: inline-block; margin-top: 10px;">
                     <input type="file" id="profileImageInput" accept="image/*" style="display: none;">
-                    Update Photo
+                    Update Profile Photo
                 </label>
             </div>
         </div>
 
-        <div class="card" style="margin-top: 25px;">
-            <h3>Update Academic Info</h3>
-            <div style="display: flex; gap: 10px;">
-                <div style="flex:1;"><label>Year</label><select id="profileYear"><option>1st Year</option><option>2nd Year</option><option>3rd Year</option><option>4th Year</option></select></div>
-                <div style="flex:1;"><label>Sem</label><select id="profileSemester"><option>Semester 1</option><option>Semester 2</option><option>Semester 3</option><option>Semester 4</option></select></div>
+        <div class="card" style="margin-top: 25px; background: rgba(15, 23, 42, 0.8);">
+            <h3 style="color: #818cf8; margin-bottom: 10px;">Academic Information</h3>
+            <div style="background: rgba(245, 158, 11, 0.1); border-left: 4px solid #f59e0b; padding: 12px; border-radius: 4px; margin-bottom: 20px;">
+                <p style="color: #fbbf24; font-size: 0.85em; margin: 0;">🔒 <strong>Secured Record:</strong> Academic progression and promotions are managed exclusively by the College Administration.</p>
             </div>
-            <label>Branch</label>
-            <select id="profileBranch"></select>
-            <button id="updateProfileBtn" style="width: 100%; margin-top: 15px;">Save Changes</button>
+            
+            <div style="display: flex; gap: 15px; margin-bottom: 15px;">
+                <div style="flex:1;">
+                    <label style="color: #cbd5e1;">Current Year</label>
+                    <input type="text" id="profileYear" readonly style="width: 100%; padding: 12px; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.05); color: #94a3b8; border-radius: 8px; cursor: not-allowed;">
+                </div>
+                <div style="flex:1;">
+                    <label style="color: #cbd5e1;">Current Semester</label>
+                    <input type="text" id="profileSemester" readonly style="width: 100%; padding: 12px; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.05); color: #94a3b8; border-radius: 8px; cursor: not-allowed;">
+                </div>
+            </div>
+            
+            <label style="color: #cbd5e1;">Core Branch</label>
+            <input type="text" id="profileBranch" readonly style="width: 100%; padding: 12px; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.05); color: #94a3b8; border-radius: 8px; cursor: not-allowed;">
         </div>
     </div>
     

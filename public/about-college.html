@@ -5,25 +5,24 @@
     <title>About EATM</title>
     <link rel="stylesheet" href="style.css">
 </head>
-<body>
-    <div class="container slide-in">
+<body style="position: relative; min-height: 100vh; overflow-y: auto;">
+
+    <button class="back-circle-btn" onclick="window.history.back()" title="Go Back" style="position: absolute; top: 25px; left: 25px; z-index: 1000;">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="19" y1="12" x2="5" y2="12"></line>
+            <polyline points="12 19 5 12 12 5"></polyline>
+        </svg>
+    </button>
+
+    <div class="container slide-in" style="margin-top: 80px; max-width: 900px;">
         
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
-            
-            <button class="back-circle-btn" onclick="window.history.back()" title="Back to Dashboard">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                    <line x1="19" y1="12" x2="5" y2="12"></line>
-                    <polyline points="12 19 5 12 12 5"></polyline>
-                </svg>
-            </button>
-            
-            <div class="accreditation-logos" style="background: transparent; border: none; padding: 0; margin: 0;">
+        <div style="display: flex; justify-content: center; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
+            <div class="accreditation-logos" style="background: transparent; border: none; padding: 0; margin: 0; display: flex; gap: 15px;">
                 <img src="aicte.png" alt="AICTE" title="AICTE Approved" style="height: 40px;">
                 <img src="bput.png" alt="BPUT" title="BPUT Affiliated" style="height: 40px;">
                 <img src="nba.png" alt="NBA" title="NBA Accredited" style="height: 40px;">
                 <img src="naac.png" alt="NAAC" title="NAAC Accredited" style="height: 40px;">
             </div>
-
         </div>
         
         <div style="text-align: center; margin-top: 10px;">
@@ -44,16 +43,16 @@
                 EATM is dedicated to shaping the future of engineering professionals by providing high-quality technical education. After a common foundation year, students specialize in core branches including Computer Science, Data Science, Electrical & Electronics, Civil, and Mechanical Engineering. The campus is equipped with state-of-the-art laboratories, a vast library, and modern infrastructure to support innovation and research.
             </p>
 
-            <div style="display: flex; gap: 15px; margin-top: 25px; margin-bottom: 10px;">
-                <div style="flex: 1; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 10px; text-align: center; border: 1px solid rgba(255,255,255,0.05);">
+            <div style="display: flex; gap: 15px; margin-top: 25px; margin-bottom: 10px; flex-wrap: wrap;">
+                <div style="flex: 1; min-width: 120px; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 10px; text-align: center; border: 1px solid rgba(255,255,255,0.05);">
                     <span style="display: block; font-size: 1.5em; color: #10b981; font-weight: bold;">2006</span>
                     <span style="font-size: 0.85em; color: #94a3b8;">Year Established</span>
                 </div>
-                <div style="flex: 1; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 10px; text-align: center; border: 1px solid rgba(255,255,255,0.05);">
+                <div style="flex: 1; min-width: 120px; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 10px; text-align: center; border: 1px solid rgba(255,255,255,0.05);">
                     <span style="display: block; font-size: 1.5em; color: #10b981; font-weight: bold;">BPUT</span>
                     <span style="font-size: 0.85em; color: #94a3b8;">Affiliation</span>
                 </div>
-                <div style="flex: 1; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 10px; text-align: center; border: 1px solid rgba(255,255,255,0.05);">
+                <div style="flex: 1; min-width: 120px; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 10px; text-align: center; border: 1px solid rgba(255,255,255,0.05);">
                     <span style="display: block; font-size: 1.5em; color: #10b981; font-weight: bold;">AICTE</span>
                     <span style="font-size: 0.85em; color: #94a3b8;">Approved</span>
                 </div>

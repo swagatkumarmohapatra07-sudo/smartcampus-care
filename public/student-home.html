@@ -4,70 +4,126 @@
     <meta charset="UTF-8">
     <title>Student Dashboard - SmartCampus</title>
     <link rel="stylesheet" href="style.css">
-</head>
-<body>
-    <div class="container slide-in" style="max-width: 1000px;">
+    <style>
+        /* Extra Dashboard Flair Animations */
+        .icon-circle {
+            width: 75px;
+            height: 75px;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            font-size: 2.2em;
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
         
-        <header class="welcome-section stagger-1">
-            <div style="display: flex; align-items: center; gap: 20px;">
-                <img id="headerAvatar" class="profile-avatar-large" src="https://cdn-icons-png.flaticon.com/512/149/149071.png" alt="Avatar" style="width: 80px; height: 80px; border: 3px solid #6366f1;">
-                <div>
-                    <h1 style="margin: 0; font-size: 2em; color: #f8fafc;">
-                        <span id="timeGreeting">Hello</span>, <span id="welcomeName" style="color: #818cf8;">Student</span>!
-                    </h1>
-                    <p id="academicInfo" style="margin: 5px 0 0; color: #94a3b8; font-weight: 500;">Retrieving academic records...</p>
-                </div>
-            </div>
+        .dash-card {
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.4s ease;
+            background: rgba(30, 41, 59, 0.5) !important;
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255,255,255,0.05);
+            padding: 35px 25px;
+            border-radius: 20px;
+            position: relative;
+            overflow: hidden;
+        }
 
-            <div class="quick-stats-row">
-                <div class="mini-stat-card">
-                    <span>Current Year</span>
-                    <strong id="statYear">N/A</strong>
-                </div>
-                <div class="mini-stat-card">
-                    <span>Semester</span>
-                    <strong id="statSem">N/A</strong>
-                </div>
-                <div class="mini-stat-card">
-                    <span>Status</span>
-                    <strong style="color: #10b981;">Active</strong>
-                </div>
-            </div>
-        </header>
+        /* Subtle glass shine effect */
+        .dash-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%;
+            width: 50%; height: 100%;
+            background: linear-gradient(to right, transparent, rgba(255,255,255,0.05), transparent);
+            transform: skewX(-25deg);
+            transition: 0.5s;
+        }
 
-        <div class="action-grid">
+        .dash-card:hover {
+            transform: translateY(-10px);
+            border-color: rgba(255,255,255,0.2);
+        }
+
+        .dash-card:hover::before {
+            left: 125%;
+        }
+
+        .dash-card:hover .icon-circle {
+            transform: scale(1.15) translateY(-5px);
+        }
+    </style>
+</head>
+<body style="min-height: 100vh; overflow-y: auto; background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%); position: relative;">
+
+    <div class="orb orb-1" style="width: 400px; height: 400px; top: -100px; left: -100px; opacity: 0.4;"></div>
+    <div class="orb orb-2" style="width: 300px; height: 300px; bottom: 0; right: -50px; opacity: 0.3; background: #c084fc;"></div>
+
+    <div class="container slide-in" style="margin-top: 40px; max-width: 950px; position: relative; z-index: 10; background: transparent; box-shadow: none;">
+        
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 40px; flex-wrap: wrap; gap: 20px; background: rgba(15, 23, 42, 0.6); padding: 25px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.05); backdrop-filter: blur(10px);">
             
-            <a href="student.html" class="action-card stagger-2">
-                <span class="card-icon">🛠️</span>
-                <h3 style="color: #f8fafc; margin: 10px 0;">Maintenance Queries</h3>
-                <p style="color: #94a3b8; font-size: 0.9em; line-height: 1.5;">Report issues and track facility status in real-time.</p>
-                <div style="margin-top: 15px; color: #6366f1; font-weight: bold; font-size: 0.85em;">Open Portal &rarr;</div>
-            </a>
+            <div style="display: flex; align-items: center; gap: 20px;">
+                
+                <div style="position: relative; cursor: pointer; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);" 
+                     onclick="window.location.href='student-profile.html'" 
+                     title="Edit My Profile" 
+                     onmouseover="this.style.transform='scale(1.08) rotate(-3deg)'" 
+                     onmouseout="this.style.transform='scale(1) rotate(0)'">
+                    
+                    <img id="headerAvatar" src="https://cdn-icons-png.flaticon.com/512/149/149071.png" alt="Avatar" 
+                         style="width: 75px; height: 75px; border-radius: 50%; object-fit: cover; border: 3px solid #818cf8; background: rgba(255,255,255,0.1); box-shadow: 0 0 20px rgba(129, 140, 248, 0.3);">
+                    
+                    <div style="position: absolute; bottom: -2px; right: -5px; background: linear-gradient(135deg, #f59e0b, #d97706); padding: 7px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 3px solid #1e293b; box-shadow: 0 4px 10px rgba(0,0,0,0.5);">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 20h9"></path>
+                            <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                        </svg>
+                    </div>
+                </div>
 
-            <a href="student-fees.html" class="action-card stagger-3">
-                <span class="card-icon">💳</span>
-                <h3 style="color: #f8fafc; margin: 10px 0;">Fee Management</h3>
-                <p style="color: #94a3b8; font-size: 0.9em; line-height: 1.5;">Check pending balances and process secure payments.</p>
-                <div style="margin-top: 15px; color: #6366f1; font-weight: bold; font-size: 0.85em;">Pay Fees &rarr;</div>
-            </a>
+                <div>
+                    <h2 id="timeGreeting" style="margin: 0; font-size: 1.1em; color: #cbd5e1; font-weight: normal; letter-spacing: 1px; text-transform: uppercase;">Loading...</h2>
+                    <h1 id="welcomeName" style="margin: 5px 0; font-size: 2.2em; background: linear-gradient(to right, #818cf8, #c084fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 800;">Student</h1>
+                    <p id="academicInfo" style="margin: 0; color: #10b981; font-size: 0.95em; font-weight: 600; background: rgba(16, 185, 129, 0.1); padding: 4px 12px; border-radius: 20px; display: inline-block; border: 1px solid rgba(16, 185, 129, 0.2);">Loading academic records...</p>
+                </div>
+            </div>
 
-            <a href="student-profile.html" class="action-card stagger-4">
-                <span class="card-icon">👤</span>
-                <h3 style="color: #f8fafc; margin: 10px 0;">My Profile</h3>
-                <p style="color: #94a3b8; font-size: 0.9em; line-height: 1.5;">Manage your academic details and account settings.</p>
-                <div style="margin-top: 15px; color: #6366f1; font-weight: bold; font-size: 0.85em;">Edit Profile &rarr;</div>
-            </a>
-
-            <a href="about-college.html" class="action-card stagger-1" style="border-color: rgba(16, 185, 129, 0.2);">
-                <span class="card-icon">🏛️</span>
-                <h3 style="color: #10b981; margin: 10px 0;">College Info</h3>
-                <p style="color: #94a3b8; font-size: 0.9em; line-height: 1.5;">Explore campus history and academic affiliations.</p>
-                <div style="margin-top: 15px; color: #10b981; font-weight: bold; font-size: 0.85em;">Learn More &rarr;</div>
-            </a>
-
+            <button class="logout-btn" onclick="window.logout()" style="margin: 0; width: auto; font-size: 0.9em; padding: 12px 25px; border-radius: 12px; font-weight: bold; background: rgba(225, 29, 72, 0.1); color: #fb7185; border: 1px solid rgba(225, 29, 72, 0.3);">
+                Secure Logout
+            </button>
         </div>
 
-        <button class="logout-btn" onclick="window.logout()" style="max-width: 200px; margin: 40px auto 0;">Secure Logout</button>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 25px;">
+            
+            <div class="card dash-card" onclick="window.location.href='student-fees.html'" onmouseover="this.style.boxShadow='0 20px 40px rgba(16, 185, 129, 0.15)'" onmouseout="this.style.boxShadow='none'">
+                <div class="icon-circle" style="background: rgba(16, 185, 129, 0.1); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3); box-shadow: inset 0 0 20px rgba(16, 185, 129, 0.2);">💳</div>
+                <h3 style="color: #f8fafc; margin-bottom: 10px; font-size: 1.3em;">Fee Portal</h3>
+                <p style="color: #94a3b8; font-size: 0.95em; margin: 0; line-height: 1.5;">Manage your semester dues and download secure digital receipts.</p>
+            </div>
+
+            <div class="card dash-card" onclick="window.open('https://results.bput.ac.in/', '_blank')" onmouseover="this.style.boxShadow='0 20px 40px rgba(59, 130, 246, 0.15)'" onmouseout="this.style.boxShadow='none'">
+                <div class="icon-circle" style="background: rgba(59, 130, 246, 0.1); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.3); box-shadow: inset 0 0 20px rgba(59, 130, 246, 0.2);">🎓</div>
+                <h3 style="color: #f8fafc; margin-bottom: 10px; font-size: 1.3em;">Check Results</h3>
+                <p style="color: #94a3b8; font-size: 0.95em; margin: 0; line-height: 1.5;">Access your latest academic performance on the BPUT portal.</p>
+            </div>
+
+            <div class="card dash-card" onclick="window.location.href='student.html'" onmouseover="this.style.boxShadow='0 20px 40px rgba(245, 158, 11, 0.15)'" onmouseout="this.style.boxShadow='none'">
+                <div class="icon-circle" style="background: rgba(245, 158, 11, 0.1); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.3); box-shadow: inset 0 0 20px rgba(245, 158, 11, 0.2);">🛠️</div>
+                <h3 style="color: #f8fafc; margin-bottom: 10px; font-size: 1.3em;">Maintenance</h3>
+                <p style="color: #94a3b8; font-size: 0.95em; margin: 0; line-height: 1.5;">Report campus or hostel issues directly to the administration.</p>
+            </div>
+
+            <div class="card dash-card" onclick="window.location.href='about-college.html'" onmouseover="this.style.boxShadow='0 20px 40px rgba(129, 140, 248, 0.15)'" onmouseout="this.style.boxShadow='none'">
+                <div class="icon-circle" style="background: rgba(129, 140, 248, 0.1); color: #818cf8; border: 1px solid rgba(129, 140, 248, 0.3); box-shadow: inset 0 0 20px rgba(129, 140, 248, 0.2);">🏛️</div>
+                <h3 style="color: #f8fafc; margin-bottom: 10px; font-size: 1.3em;">About EATM</h3>
+                <p style="color: #94a3b8; font-size: 0.95em; margin: 0; line-height: 1.5;">Explore our campus vision, facilities, and accreditations.</p>
+            </div>
+
+        </div>
     </div>
     
     <script type="module" src="app.js"></script>

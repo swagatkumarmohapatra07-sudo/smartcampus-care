@@ -113,9 +113,9 @@ if (registerForm) {
                 full_name: document.getElementById('fullName').value,
                 course: document.getElementById('course').value,
                 branch: document.getElementById('branch').value,
-                section: document.getElementById('section').value,
                 year: document.getElementById('year').value,             
-                semester: document.getElementById('semester').value,     
+                semester: document.getElementById('semester').value, 
+                section: "Unassigned", // Admin sets this later 
                 registration_number: regNumberInput,
                 password: document.getElementById('password').value,
                 profile_pic: "", 
@@ -160,32 +160,63 @@ if (studentLoginForm) {
 // --- 5. ADMIN LOGIN ---
 const adminLoginForm = document.getElementById('loginForm');
 if (adminLoginForm) {
-    createAdminIfNotExists();
+    ensureAdminExists();
 
     adminLoginForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        const username = document.getElementById('username').value;
-        const pass = document.getElementById('password').value;
+        
+        const username = document.getElementById('username').value.trim(); 
+        const pass = document.getElementById('password').value.trim();
+        const submitBtn = adminLoginForm.querySelector('button');
 
-        const q = query(collection(db, "users"), where("username", "==", username), where("password", "==", pass), where("role", "==", "Admin"));
-        const querySnapshot = await getDocs(q);
+        submitBtn.innerText = "Authenticating...";
+        submitBtn.disabled = true;
 
-        if (!querySnapshot.empty) {
-            const userData = querySnapshot.docs[0].data();
-            userData.id = querySnapshot.docs[0].id;
-            localStorage.setItem('user', JSON.stringify(userData));
-            window.location.href = 'admin.html';
-        } else {
+        try {
+            const q = query(collection(db, "users"), 
+                where("username", "==", username), 
+                where("password", "==", pass), 
+                where("role", "==", "Admin")
+            );
+            
+            const querySnapshot = await getDocs(q);
+
+            if (!querySnapshot.empty) {
+                const userData = querySnapshot.docs[0].data();
+                userData.id = querySnapshot.docs[0].id;
+                localStorage.setItem('user', JSON.stringify(userData));
+                window.location.href = 'admin.html';
+            } else {
+                document.getElementById('errorMsg').style.display = 'block';
+                document.getElementById('errorMsg').innerText = "Invalid Username or Password.";
+            }
+        } catch (error) {
+            console.error("Admin Login Error: ", error);
             document.getElementById('errorMsg').style.display = 'block';
+            document.getElementById('errorMsg').innerText = "Database Error. Check Console.";
+        } finally {
+            submitBtn.innerText = "Access System";
+            submitBtn.disabled = false;
         }
     });
 }
 
-async function createAdminIfNotExists() {
-    const q = query(collection(db, "users"), where("role", "==", "Admin"));
-    const querySnapshot = await getDocs(q);
-    if (querySnapshot.empty) {
-        await addDoc(collection(db, "users"), { role: "Admin", username: "admin1", password: "admin123" });
+async function ensureAdminExists() {
+    try {
+        const q = query(collection(db, "users"), where("username", "==", "admin1"));
+        const querySnapshot = await getDocs(q);
+        
+        if (querySnapshot.empty) {
+            await addDoc(collection(db, "users"), { 
+                role: "Admin", 
+                username: "admin1", 
+                password: "admin123",
+                full_name: "System Admin"
+            });
+            console.log("Default Admin generated!");
+        }
+    } catch (e) {
+        console.error("Error checking admin:", e);
     }
 }
 
@@ -198,11 +229,15 @@ if (user?.role === 'Student') {
     const avatarUrl = user.profile_pic || 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
     
     if (headerAvatar) headerAvatar.src = avatarUrl;
-    if (academicInfo) academicInfo.innerText = `${user.course} in ${user.branch} | ${user.year || '1st Year'} (${user.semester || 'Semester 1'})`;
+    
+    if (academicInfo) {
+        academicInfo.innerText = `${user.course} in ${user.branch} | ${user.year || '1st Year'} (${user.semester || 'Semester 1'}) | Sec: ${user.section || 'Unassigned'}`;
+    }
 
-    if (welcomeText) welcomeText.innerText = `Welcome, ${user.full_name}!`;
+    if (welcomeText && window.location.pathname.includes('student.html') && !window.location.pathname.includes('student-home')) {
+         welcomeText.innerText = `Maintenance Portal`;
+    }
 
-    // Time-based Greeting
     const timeGreeting = document.getElementById('timeGreeting');
     const welcomeName = document.getElementById('welcomeName');
     if (timeGreeting && welcomeName) {
@@ -215,7 +250,6 @@ if (user?.role === 'Student') {
         welcomeName.innerText = user.full_name;
     }
 
-    // Eye-Catchy Dashboard Stats Update
     const statYear = document.getElementById('statYear');
     const statSem = document.getElementById('statSem');
     if (statYear) statYear.innerText = user.year || '1st Year';
@@ -226,7 +260,7 @@ if (user?.role === 'Student') {
     if (document.getElementById('profileYear')) initProfileSystem(avatarUrl);
 }
 
-// --- NEW: PROFILE & CLOUDINARY UPLOAD SYSTEM ---
+// --- SECURED PROFILE SYSTEM ---
 function initProfileSystem(avatarUrl) {
     document.getElementById('profileNameDisplay').innerText = user.full_name;
     document.getElementById('profileRegDisplay').innerText = `Registration No: ${user.registration_number}`;
@@ -234,83 +268,45 @@ function initProfileSystem(avatarUrl) {
     
     document.getElementById('profileYear').value = user.year || '1st Year';
     document.getElementById('profileSemester').value = user.semester || 'Semester 1';
-    
-    updateBranchOptions('profileYear', 'profileBranch', user.branch);
+    document.getElementById('profileBranch').value = user.branch || 'Common 1st Year';
 
     const profileImageInput = document.getElementById('profileImageInput');
-    profileImageInput.addEventListener('change', async (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
+    if(profileImageInput) {
+        profileImageInput.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
 
-        showToast('Uploading image...', 'warning');
-        
-        const CLOUD_NAME = "dmy74celx"; 
-        const UPLOAD_PRESET = "rcyp6gvo"; 
+            showToast('Uploading image...', 'warning');
+            const CLOUD_NAME = "dmy74celx"; 
+            const UPLOAD_PRESET = "rcyp6gvo"; 
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('upload_preset', UPLOAD_PRESET);
 
-        const formData = new FormData();
-        formData.append('file', file);
-        formData.append('upload_preset', UPLOAD_PRESET);
-
-        try {
-            const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {
-                method: 'POST',
-                body: formData
-            });
-            const data = await res.json();
-            
-            if (data.secure_url) {
-                const userRef = doc(db, "users", user.id);
-                await updateDoc(userRef, { profile_pic: data.secure_url });
+            try {
+                const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await res.json();
                 
-                user.profile_pic = data.secure_url;
-                localStorage.setItem('user', JSON.stringify(user));
-                
-                document.getElementById('profileAvatarLarge').src = data.secure_url;
-                const headerAvatar = document.getElementById('headerAvatar');
-                if(headerAvatar) headerAvatar.src = data.secure_url;
-                
-                showToast('Profile picture updated!', 'success');
-            } else {
-                throw new Error("Cloudinary upload failed");
+                if (data.secure_url) {
+                    const userRef = doc(db, "users", user.id);
+                    await updateDoc(userRef, { profile_pic: data.secure_url });
+                    
+                    user.profile_pic = data.secure_url;
+                    localStorage.setItem('user', JSON.stringify(user));
+                    
+                    document.getElementById('profileAvatarLarge').src = data.secure_url;
+                    const headerAvatar = document.getElementById('headerAvatar');
+                    if(headerAvatar) headerAvatar.src = data.secure_url;
+                    showToast('Profile picture updated!', 'success');
+                }
+            } catch(err) {
+                showToast('Failed to upload image.', 'error');
             }
-        } catch(err) {
-            console.error(err);
-            showToast('Failed to upload image.', 'error');
-        }
-    });
-
-    const updateProfileBtn = document.getElementById('updateProfileBtn');
-    updateProfileBtn.addEventListener('click', async () => {
-        const newYear = document.getElementById('profileYear').value;
-        const newSem = document.getElementById('profileSemester').value;
-        const newBranch = document.getElementById('profileBranch').value;
-
-        if (!newBranch) {
-            showToast('Please select a Core Branch.', 'warning');
-            return;
-        }
-
-        updateProfileBtn.innerText = "Saving...";
-        updateProfileBtn.disabled = true;
-
-        try {
-            const userRef = doc(db, "users", user.id);
-            await updateDoc(userRef, { year: newYear, semester: newSem, branch: newBranch });
-            
-            user.year = newYear;
-            user.semester = newSem;
-            user.branch = newBranch;
-            localStorage.setItem('user', JSON.stringify(user));
-            
-            document.getElementById('academicInfo').innerText = `${user.course} in ${user.branch} | ${user.year} (${user.semester})`;
-            showToast('Profile updated successfully!', 'success');
-        } catch(err) {
-            showToast('Error updating profile.', 'error');
-        } finally {
-            updateProfileBtn.innerText = "Save & Update Profile";
-            updateProfileBtn.disabled = false;
-        }
-    });
+        });
+    }
 }
 
 // --- QUERIES SYSTEM ---
@@ -329,7 +325,7 @@ function initQueriesSystem() {
         
         await addDoc(collection(db, "complaints"), {
             student_id: user.id,
-            student_details: `${user.full_name} | ${user.course} (${user.branch} - Sec ${user.section})`,
+            student_details: `${user.full_name} | ${user.course} (${user.branch}) - Sec: ${user.section || 'Unassigned'}`,
             reg_number: user.registration_number,
             description: descInput.value,
             status: "Pending",
@@ -348,7 +344,6 @@ function initQueriesSystem() {
                 await deleteDoc(doc(db, "complaints", queryId));
                 showToast("Query deleted successfully!", "success");
             } catch(error) {
-                console.error("Delete Error: ", error);
                 showToast("Failed to delete query.", "error");
             }
         }
@@ -367,10 +362,7 @@ function initQueriesSystem() {
             ? '<p style="color: #64748b; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px;">No active queries at the moment.</p>' 
             : activeComplaints.map((c, index) => `
                 <div class="card" style="animation-delay: ${index * 0.1}s; position: relative;">
-                    ${c.status === 'Pending' ? `
-                    <button onclick="window.deleteQuery('${c.id}')" style="position: absolute; top: 15px; right: 15px; background: rgba(225, 29, 72, 0.1); color: #fda4af; border: 1px solid rgba(225, 29, 72, 0.3); padding: 5px 10px; border-radius: 6px; cursor: pointer; font-size: 0.8em; transition: 0.3s; width: auto; margin: 0;">
-                        🗑️ Delete
-                    </button>` : ''}
+                    ${c.status === 'Pending' ? `<button onclick="window.deleteQuery('${c.id}')" style="position: absolute; top: 15px; right: 15px; background: rgba(225, 29, 72, 0.1); color: #fda4af; border: 1px solid rgba(225, 29, 72, 0.3); padding: 5px 10px; border-radius: 6px; cursor: pointer; font-size: 0.8em;">🗑️ Delete</button>` : ''}
                     <p style="padding-right: 80px;"><strong>Query:</strong> ${c.description}</p>
                     <div style="margin-top: 15px;">
                         <small>Status: <span class="badge ${c.status.replace(' ', '-')}">${c.status}</span></small>
@@ -398,12 +390,9 @@ function initFeeSystem() {
     const paymentForm = document.getElementById('paymentForm');
     const historyList = document.getElementById('paymentHistoryList');
     
-    let yearMultiplier = 1;
-    if (user.year === '2nd Year') yearMultiplier = 2;
-    if (user.year === '3rd Year') yearMultiplier = 3;
-    if (user.year === '4th Year') yearMultiplier = 4;
-    
-    const totalFeeAmount = 200000 * yearMultiplier; 
+    let semString = user.semester || "Semester 1";
+    let semNumber = parseInt(semString.replace("Semester ", "")) || 1;
+    const totalFeeAmount = semNumber * 50000; 
     let remainingBalance = totalFeeAmount;
 
     const payMethodSelect = document.getElementById('payMethod');
@@ -437,7 +426,7 @@ function initFeeSystem() {
         }
 
         const btn = document.getElementById('payFeeBtn');
-        btn.innerText = `Authorizing details via ${gateway}...`;
+        btn.innerText = `Processing via ${gateway}...`;
         btn.disabled = true;
 
         setTimeout(async () => {
@@ -449,7 +438,7 @@ function initFeeSystem() {
                     registration_number: user.registration_number,
                     course: user.course,
                     branch: user.branch,
-                    section: user.section,
+                    section: user.section || "Unassigned",
                     year: user.year || "N/A",           
                     semester: user.semester || "N/A",   
                     amount: amount,
@@ -469,6 +458,47 @@ function initFeeSystem() {
             }
         }, 2000);
     });
+
+    // 💥 NEW: Filter Event Listener 💥
+    const historySemesterFilter = document.getElementById('historySemesterFilter');
+    if (historySemesterFilter) {
+        historySemesterFilter.addEventListener('change', () => {
+            renderPaymentHistory();
+        });
+    }
+
+    // 💥 NEW: Dedicated Render Function for Filtered Receipts 💥
+    function renderPaymentHistory() {
+        if (!window.userPaymentHistory) return;
+        
+        const filterVal = document.getElementById('historySemesterFilter') ? document.getElementById('historySemesterFilter').value : "All";
+        
+        let filteredPayments = window.userPaymentHistory;
+        if (filterVal !== "All") {
+            filteredPayments = window.userPaymentHistory.filter(p => p.semester === filterVal);
+        }
+
+        if (filteredPayments.length === 0) {
+            historyList.innerHTML = '<p style="color: #94a3b8; background: rgba(0,0,0,0.3); padding: 20px; border-radius: 8px; text-align: center;">No transactions found for this selection.</p>';
+        } else {
+            historyList.innerHTML = filteredPayments.map((p) => `
+                <div class="card" style="border-left: 4px solid #10b981; margin-bottom: 15px; background: rgba(15, 23, 42, 0.6);">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span style="color: #10b981; font-weight: 800; font-size: 1.2em;">₹${p.amount.toLocaleString()}</span>
+                        <span class="badge" style="background: rgba(16, 185, 129, 0.1); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3);">Success</span>
+                    </div>
+                    <p style="margin-top: 8px; color: #94a3b8; font-size: 0.9em; display: flex; justify-content: space-between; flex-wrap: wrap;">
+                        <span><small>TXN ID: ${p.transaction_id}</small></span>
+                        <span style="color: #cbd5e1;"><small>🗓️ Paid during: <strong>${p.semester || 'N/A'}</strong></small></span>
+                    </p>
+                    <div style="display: flex; gap: 10px; margin-top: 15px;">
+                        <button onclick="window.viewReceipt('${p.id}')" style="flex: 1; background: transparent; color: #6366f1; border: 1px solid #6366f1; padding: 10px; border-radius: 8px; cursor: pointer; transition: 0.3s;" onmouseover="this.style.background='rgba(99,102,241,0.1)'" onmouseout="this.style.background='transparent'">👁️ View Receipt</button>
+                        <button onclick="window.downloadReceipt('${p.id}')" style="flex: 1; background: transparent; color: #10b981; border: 1px solid #10b981; padding: 10px; border-radius: 8px; cursor: pointer; transition: 0.3s;" onmouseover="this.style.background='rgba(16,185,129,0.1)'" onmouseout="this.style.background='transparent'">↓ Download PDF</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+    }
 
     const q = query(collection(db, "payments"), where("student_id", "==", user.id));
     onSnapshot(q, (querySnapshot) => {
@@ -494,33 +524,18 @@ function initFeeSystem() {
         if (remainingBalance <= 0) {
             payAmountInput.disabled = true;
             payFeeBtn.disabled = true;
-            payFeeBtn.innerText = "Course Paid in Full";
+            payFeeBtn.innerText = "Dues Cleared";
         } else {
             payAmountInput.max = remainingBalance;
             payAmountInput.placeholder = `Max: ₹${remainingBalance}`;
         }
 
-        if (payments.length === 0) {
-            historyList.innerHTML = '<p>No history found.</p>';
-        } else {
-            historyList.innerHTML = payments.map((p) => `
-                <div class="card" style="border-left: 4px solid #10b981; margin-bottom: 15px;">
-                    <div style="display: flex; justify-content: space-between;">
-                        <span style="color: #10b981; font-weight: 700;">₹${p.amount.toLocaleString()}</span>
-                        <span class="badge Resolved">Success</span>
-                    </div>
-                    <p><small>TXN ID: ${p.transaction_id}</small></p>
-                    <div style="display: flex; gap: 10px; margin-top: 15px;">
-                        <button onclick="window.viewReceipt('${p.id}')" style="flex: 1; background: transparent; color: #6366f1; border: 1px solid #6366f1; padding: 10px;">👁️ View</button>
-                        <button onclick="window.downloadReceipt('${p.id}')" style="flex: 1; background: transparent; color: #10b981; border: 1px solid #10b981; padding: 10px;">↓ Download</button>
-                    </div>
-                </div>
-            `).join('');
-        }
+        // Render initially when data loads
+        renderPaymentHistory();
     });
 }
 
-// --- SHARED HELPER: Builds the exact PDF document ---
+// --- SHARED HELPER ---
 function buildReceiptPDF(txn) {
     const { jsPDF } = window.jspdf;
     const pdf = new jsPDF();
@@ -540,7 +555,7 @@ function buildReceiptPDF(txn) {
     pdf.setFontSize(12);
     pdf.text(`Received From: ${txn.full_name}`, 20, 95);
     pdf.text(`Registration No: ${txn.registration_number}`, 20, 103);
-    pdf.text(`Course Details: ${txn.course} (${txn.branch}) | ${txn.year} (${txn.semester})`, 20, 111);
+    pdf.text(`Course Details: ${txn.course} (${txn.branch}) | Sec: ${txn.section || 'N/A'} | ${txn.year} (${txn.semester})`, 20, 111);
     pdf.text("--------------------------------------------------------------------------------------", 20, 120);
     pdf.setFontSize(16);
     pdf.setTextColor(16, 185, 129); 
@@ -567,42 +582,225 @@ window.viewReceipt = (paymentId) => {
 };
 
 // --- 7. ADMIN DASHBOARD LOGIC ---
-const adminComplaintsList = document.getElementById('adminComplaintsList');
-if (adminComplaintsList && user?.role === 'Admin') {
+if (user?.role === 'Admin') {
+    const semesterToYearMap = {
+        1: "1st Year", 2: "1st Year",
+        3: "2nd Year", 4: "2nd Year",
+        5: "3rd Year", 6: "3rd Year",
+        7: "4th Year", 8: "4th Year"
+    };
+
     window.updateStatus = async (complaintId, newStatus) => {
         const complaintRef = doc(db, "complaints", complaintId);
         await updateDoc(complaintRef, { status: newStatus });
         showToast(`Query marked as ${newStatus}`, "success");
     };
+    
+    window.promoteStudent = async (studentId) => {
+        const selectedSemString = document.getElementById(`promoteSem_${studentId}`).value;
+        const semNumber = parseInt(selectedSemString.replace("Semester ", ""));
+        const calculatedYear = semesterToYearMap[semNumber];
+
+        try {
+            const studentRef = doc(db, "users", studentId);
+            await updateDoc(studentRef, { year: calculatedYear, semester: selectedSemString });
+            showToast(`Promoted to ${selectedSemString} (${calculatedYear})!`, 'success');
+        } catch (error) {
+            showToast('Failed to update student.', 'error');
+        }
+    };
+
+    window.updateSection = async (studentId) => {
+        const newSec = document.getElementById(`assignSec_${studentId}`).value;
+        try {
+            const studentRef = doc(db, "users", studentId);
+            await updateDoc(studentRef, { section: newSec });
+            showToast(`Section assigned to ${newSec}!`, 'success');
+        } catch (error) {
+            showToast('Failed to assign section.', 'error');
+        }
+    };
+
     loadAdminData();
 }
 
 function loadAdminData() {
-    onSnapshot(collection(db, "complaints"), (querySnapshot) => {
-        let complaints = [];
-        let resolvedCount = 0;
-        querySnapshot.forEach((doc) => {
-            const data = doc.data();
-            complaints.push({ id: doc.id, ...data });
-            if (data.status === 'Resolved') resolvedCount++;
-        });
-        complaints.sort((a, b) => b.created_at - a.created_at);
-        if(document.getElementById('totalCount')) document.getElementById('totalCount').innerText = complaints.length;
-        if(document.getElementById('resolvedCount')) document.getElementById('resolvedCount').innerText = resolvedCount;
+    if(document.getElementById('adminComplaintsList')) {
+        onSnapshot(collection(db, "complaints"), (querySnapshot) => {
+            let complaints = [];
+            let resolvedCount = 0;
+            querySnapshot.forEach((doc) => {
+                const data = doc.data();
+                complaints.push({ id: doc.id, ...data });
+                if (data.status === 'Resolved') resolvedCount++;
+            });
+            complaints.sort((a, b) => b.created_at - a.created_at);
+            if(document.getElementById('totalCount')) document.getElementById('totalCount').innerText = complaints.length;
+            if(document.getElementById('resolvedCount')) document.getElementById('resolvedCount').innerText = resolvedCount;
 
-        adminComplaintsList.innerHTML = complaints.map((c) => `
-            <div class="card">
-                <div style="display: flex; justify-content: space-between;">
-                    <span style="color: #6366f1; font-weight: 600;">Reg: ${c.reg_number}</span>
-                    <span class="badge ${c.status.replace(' ', '-')}">${c.status}</span>
+            document.getElementById('adminComplaintsList').innerHTML = complaints.map((c) => `
+                <div class="card" style="margin-bottom: 15px;">
+                    <div style="display: flex; justify-content: space-between;">
+                        <span style="color: #6366f1; font-weight: 600;">Reg: ${c.reg_number}</span>
+                        <span class="badge ${c.status.replace(' ', '-')}">${c.status}</span>
+                    </div>
+                    <p style="margin-top: 10px;"><strong>Info:</strong> ${c.student_details}</p>
+                    <p style="background: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px;"><strong>Issue:</strong> ${c.description}</p>
+                    ${c.status === 'Pending' ? `<button onclick="updateStatus('${c.id}', 'In Progress')" style="margin-top: 10px; width: 100%;">Mark 'In Progress'</button>` : ''}
+                    ${c.status === 'In Progress' ? `<button onclick="updateStatus('${c.id}', 'Resolved')" style="background: #10b981; margin-top: 10px; width: 100%;">Mark 'Resolved'</button>` : ''}
                 </div>
-                <p><strong>Info:</strong> ${c.student_details}</p>
-                <p><strong>Issue:</strong> ${c.description}</p>
-                ${c.status === 'Pending' ? `<button onclick="updateStatus('${c.id}', 'In Progress')" style="margin-top: 15px; width: 100%;">Mark 'In Progress'</button>` : ''}
-                ${c.status === 'In Progress' ? `<button onclick="updateStatus('${c.id}', 'Resolved')" style="background: #10b981; margin-top: 15px; width: 100%;">Mark 'Resolved'</button>` : ''}
-            </div>
-        `).join('');
+            `).join('');
+        });
+    }
+
+    if(document.getElementById('adminStudentDatabaseList')) {
+        const studentQ = query(collection(db, "users"), where("role", "!=", "Admin"));
+        onSnapshot(studentQ, (querySnapshot) => {
+            let students = [];
+            querySnapshot.forEach((doc) => {
+                students.push({ id: doc.id, ...doc.data() });
+            });
+            window.allStudents = students; 
+            applyAdminFilters();
+        });
+
+        const searchInput = document.getElementById('adminSearchStudent');
+        const branchFilter = document.getElementById('adminBranchFilter');
+        
+        if(searchInput) searchInput.addEventListener('input', applyAdminFilters);
+        if(branchFilter) branchFilter.addEventListener('change', applyAdminFilters);
+    }
+}
+
+function applyAdminFilters() {
+    const searchInput = document.getElementById('adminSearchStudent');
+    const branchFilter = document.getElementById('adminBranchFilter');
+    
+    const term = searchInput ? searchInput.value.toLowerCase() : "";
+    const selectedBranch = branchFilter ? branchFilter.value : "All";
+
+    const filtered = window.allStudents.filter(s => {
+        const name = s.full_name ? s.full_name.toLowerCase() : "";
+        const reg = s.registration_number ? s.registration_number.toLowerCase() : "";
+        
+        let sBranch = s.branch || "Common 1st Year";
+        let dbBranchUpper = sBranch.trim().toUpperCase();
+        if (dbBranchUpper === "CSE") sBranch = "Computer Science and Engineering";
+        if (dbBranchUpper === "ECE") sBranch = "Electrical Communication Engineering";
+        
+        const matchesSearch = name.includes(term) || reg.includes(term);
+        const matchesBranch = selectedBranch === "All" || sBranch === selectedBranch;
+        
+        return matchesSearch && matchesBranch;
     });
+
+    renderAdminStudents(filtered);
+}
+
+function renderAdminStudents(students) {
+    const listDiv = document.getElementById('adminStudentDatabaseList');
+    
+    if(students.length === 0) {
+        listDiv.innerHTML = '<p style="color: #94a3b8; text-align: center; padding: 20px;">No students match this filter.</p>';
+        return;
+    }
+
+    const groupedStudents = {};
+    students.forEach(s => {
+        let branchName = s.branch || "Common 1st Year / Unassigned";
+        let dbBranchUpper = branchName.trim().toUpperCase();
+        if (dbBranchUpper === "CSE") branchName = "Computer Science and Engineering";
+        if (dbBranchUpper === "ECE") branchName = "Electrical Communication Engineering";
+
+        if (!groupedStudents[branchName]) {
+            groupedStudents[branchName] = [];
+        }
+        groupedStudents[branchName].push(s);
+    });
+
+    let finalHTML = '';
+    const sortedBranches = Object.keys(groupedStudents).sort();
+
+    const semesterToYearMap = {
+        1: "1st Year", 2: "1st Year",
+        3: "2nd Year", 4: "2nd Year",
+        5: "3rd Year", 6: "3rd Year",
+        7: "4th Year", 8: "4th Year"
+    };
+
+    sortedBranches.forEach(branch => {
+        finalHTML += `
+            <div style="margin-top: 35px; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid rgba(99, 102, 241, 0.3);">
+                <h2 style="color: #818cf8; margin: 0; display: flex; justify-content: space-between; align-items: center; font-size: 1.4em;">
+                    <span>🏢 ${branch}</span>
+                    <span style="font-size: 0.6em; background: rgba(99, 102, 241, 0.15); padding: 5px 12px; border-radius: 20px; color: #cbd5e1; border: 1px solid rgba(99, 102, 241, 0.3);">
+                        ${groupedStudents[branch].length} Student(s)
+                    </span>
+                </h2>
+            </div>
+        `;
+
+        const branchStudents = groupedStudents[branch].sort((a, b) => {
+            const nameA = a.full_name || "Unknown Name";
+            const nameB = b.full_name || "Unknown Name";
+            return nameA.localeCompare(nameB);
+        });
+
+        finalHTML += branchStudents.map(s => {
+            let currentSemString = s.semester || "Semester 1";
+            let currentSemNum = parseInt(currentSemString.replace("Semester ", "")) || 1;
+            
+            let semOptionsHTML = "";
+            for(let i = currentSemNum; i <= 8; i++) {
+                semOptionsHTML += `<option value="Semester ${i}">Sem ${i} (${semesterToYearMap[i]})</option>`;
+            }
+
+            return `
+                <div class="card" style="margin-bottom: 15px; border-left: 4px solid #f59e0b;">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 15px;">
+                        
+                        <div style="flex: 1; min-width: 250px;">
+                            <h3 style="color: #f8fafc; margin: 0 0 5px 0;">${s.full_name || 'Unknown Student'}</h3>
+                            <p style="color: #94a3b8; margin: 0 0 5px 0; font-size: 0.9em;">Reg: <strong>${s.registration_number || 'N/A'}</strong></p>
+                            <p style="color: #10b981; margin: 0; font-size: 0.85em;">
+                                Status: ${s.year || 'N/A'} - ${s.semester || 'N/A'} | Section: <strong style="color: #f59e0b;">${s.section || 'Unassigned'}</strong>
+                            </p>
+                        </div>
+                        
+                        <div style="display: flex; flex-direction: column; gap: 10px;">
+                            
+                            <div style="display: flex; gap: 10px; background: rgba(0,0,0,0.2); padding: 8px 12px; border-radius: 8px; align-items: center; justify-content: flex-end;">
+                                <label style="color: #cbd5e1; font-size: 0.8em; margin: 0;">Promote:</label>
+                                <select id="promoteSem_${s.id}" style="padding: 6px; background: rgba(30,41,59,0.8); color: white; border: 1px solid rgba(255,255,255,0.1); border-radius: 5px; font-size: 0.85em;">
+                                    ${semOptionsHTML}
+                                </select>
+                                <button onclick="window.promoteStudent('${s.id}')" style="padding: 6px 12px; background: #e11d48; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 0.85em; font-weight:bold;">
+                                    Save
+                                </button>
+                            </div>
+
+                            <div style="display: flex; gap: 10px; background: rgba(0,0,0,0.2); padding: 8px 12px; border-radius: 8px; align-items: center; justify-content: flex-end;">
+                                <label style="color: #cbd5e1; font-size: 0.8em; margin: 0;">Section:</label>
+                                <select id="assignSec_${s.id}" style="padding: 6px; background: rgba(30,41,59,0.8); color: white; border: 1px solid rgba(255,255,255,0.1); border-radius: 5px; font-size: 0.85em;">
+                                    <option value="Unassigned" ${!s.section || s.section === 'Unassigned' ? 'selected' : ''}>Unassigned</option>
+                                    <option value="A" ${s.section === 'A' ? 'selected' : ''}>Sec A</option>
+                                    <option value="B" ${s.section === 'B' ? 'selected' : ''}>Sec B</option>
+                                    <option value="C" ${s.section === 'C' ? 'selected' : ''}>Sec C</option>
+                                    <option value="D" ${s.section === 'D' ? 'selected' : ''}>Sec D</option>
+                                </select>
+                                <button onclick="window.updateSection('${s.id}')" style="padding: 6px 12px; background: #6366f1; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 0.85em; font-weight:bold;">
+                                    Assign
+                                </button>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    });
+
+    listDiv.innerHTML = finalHTML;
 }
 
 // --- 8. NET BANKING REDIRECT LOGIC ---

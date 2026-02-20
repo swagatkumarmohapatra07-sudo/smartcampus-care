@@ -2,23 +2,73 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Admin Dashboard</title>
+    <title>Admin Control Center - SmartCampus</title>
     <link rel="stylesheet" href="style.css">
 </head>
-<body>
-    <div class="container slide-in">
-        <button class="logout-btn" onclick="window.logout()">Logout</button>
-        <h2>Admin Control Panel</h2>
-        
-        <div class="stats">
-            <div class="stat-box">Total Queries: <span id="totalCount">0</span></div>
-            <div class="stat-box">Resolved: <span id="resolvedCount">0</span></div>
+<body style="position: relative; min-height: 100vh; overflow-y: auto; background: linear-gradient(-45deg, #0f172a, #2a0a18, #0f172a);">
+    
+    <button class="logout-btn" onclick="window.logout()" style="position: absolute; top: 25px; right: 30px; width: auto; margin: 0; z-index: 1000; background: rgba(225, 29, 72, 0.2); border-color: rgba(225, 29, 72, 0.4); color: #fda4af;">
+        Secure Logout
+    </button>
+
+    <div class="container slide-in" style="margin-top: 80px; max-width: 1000px;">
+        <div style="text-align: center; margin-bottom: 30px;">
+            <h1 style="color: #fb7185; margin-bottom: 5px;">Admin Control Center</h1>
+            <p style="color: #94a3b8;">Manage students, promotions, and campus operations</p>
         </div>
 
-        <h3>Active Student Queries</h3>
-        <div id="adminComplaintsList"></div>
+        <div style="display: flex; gap: 15px; margin-bottom: 30px; justify-content: center;">
+            <button onclick="switchAdminTab('students')" id="tab-students" style="padding: 12px 25px; border-radius: 8px; border: none; background: #e11d48; color: white; cursor: pointer; font-weight: bold; transition: 0.3s;">
+                Student Database
+            </button>
+            <button onclick="switchAdminTab('queries')" id="tab-queries" style="padding: 12px 25px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(30,41,59,0.6); color: #cbd5e1; cursor: pointer; font-weight: bold; transition: 0.3s;">
+                Maintenance Queries
+            </button>
+        </div>
+
+        <div id="admin-students-section">
+            <div class="card" style="margin-bottom: 20px; background: rgba(15, 23, 42, 0.8); display: flex; gap: 15px; flex-wrap: wrap;">
+                <input type="text" id="adminSearchStudent" placeholder="🔍 Search by Name or Reg No..." style="flex: 2; min-width: 200px; padding: 14px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); color: white; border-radius: 8px;">
+                
+                <select id="adminBranchFilter" style="flex: 1; min-width: 200px; padding: 14px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); color: white; border-radius: 8px;">
+                    <option value="All">All Branches</option>
+                    <option value="Computer Science and Engineering">Computer Science and Engineering</option>
+                    <option value="Data Science">Data Science</option>
+                    <option value="Electrical Communication Engineering">Electrical Communication Engineering</option>
+                    <option value="EE">EE</option>
+                    <option value="EEE">EEE</option>
+                    <option value="Civil">Civil</option>
+                    <option value="Mechanical">Mechanical</option>
+                    <option value="Common 1st Year">Common 1st Year</option>
+                </select>
+            </div>
+            <div id="adminStudentDatabaseList"></div>
+        </div>
+
+        <div id="admin-queries-section" style="display: none;">
+            <div class="stats" style="margin-bottom: 20px;">
+                <div class="stat-box" style="border-color: rgba(99, 102, 241, 0.3);">Total Queries: <br><span id="totalCount" style="color: #6366f1; font-size: 1.5em; font-weight: bold;">0</span></div>
+                <div class="stat-box" style="border-color: rgba(16, 185, 129, 0.3);">Resolved: <br><span id="resolvedCount" style="color: #10b981; font-size: 1.5em; font-weight: bold;">0</span></div>
+            </div>
+            <div id="adminComplaintsList"></div>
+        </div>
+
     </div>
-    
+
+    <script>
+        function switchAdminTab(tab) {
+            document.getElementById('admin-students-section').style.display = tab === 'students' ? 'block' : 'none';
+            document.getElementById('admin-queries-section').style.display = tab === 'queries' ? 'block' : 'none';
+            
+            document.getElementById('tab-students').style.background = tab === 'students' ? '#e11d48' : 'rgba(30,41,59,0.6)';
+            document.getElementById('tab-students').style.color = tab === 'students' ? 'white' : '#cbd5e1';
+            document.getElementById('tab-students').style.border = tab === 'students' ? 'none' : '1px solid rgba(255,255,255,0.1)';
+
+            document.getElementById('tab-queries').style.background = tab === 'queries' ? '#e11d48' : 'rgba(30,41,59,0.6)';
+            document.getElementById('tab-queries').style.color = tab === 'queries' ? 'white' : '#cbd5e1';
+            document.getElementById('tab-queries').style.border = tab === 'queries' ? 'none' : '1px solid rgba(255,255,255,0.1)';
+        }
+    </script>
     <script type="module" src="app.js"></script>
 </body>
 </html>
