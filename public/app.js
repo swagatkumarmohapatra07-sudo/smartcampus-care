@@ -125,7 +125,7 @@ function initDynamicDropdowns(courseRef, yearId, semId, branchId, currentData = 
     }
 }
 
-// 💥 NOTICEBOARD DROPDOWNS ENGINE 💥
+// 💥 NOTICEBOARD DROPDOWNS ENGINE (BULLETPROOF) 💥
 function initAdminNoticeDropdowns() {
     const nCourse = document.getElementById('noticeCourse');
     const nYear = document.getElementById('noticeYear');
@@ -363,7 +363,7 @@ if (user?.role === 'Student') {
     if (document.getElementById('paymentForm')) initFeeSystem();
     if (document.getElementById('profileYear')) initProfileSystem(user.profile_pic || 'https://cdn-icons-png.flaticon.com/512/149/149071.png');
 
-    // LIVE NOTICEBOARD RECEIVER
+    // 💥 LIVE NOTICEBOARD RECEIVER 💥
     const noticeBoard = document.getElementById('studentNoticeBoard');
     if(noticeBoard) {
         onSnapshot(collection(db, "notices"), (snapshot) => {
@@ -472,6 +472,7 @@ function initQueriesSystem() {
             showToast('Query submitted successfully!', 'success');
             complaintForm.reset(); 
         } catch (error) {
+            console.error("Firebase Submission Error:", error);
             showToast('Failed to submit query. Check internet connection.', 'error');
         } finally {
             submitBtn.disabled = false;
@@ -821,14 +822,19 @@ if (user?.role === 'Admin') {
     loadAdminData();
 }
 
-// 💥 ADMIN MAINTENANCE QUERIES RENDERER (BULLETPROOF) 💥
+// 💥 ADMIN MAINTENANCE QUERIES RENDERER (BULLETPROOF & DIAGNOSTIC) 💥
 window.renderAdminQueries = function() {
     try {
         const listDiv = document.getElementById('adminComplaintsList');
         const filterDropdown = document.getElementById('adminQueryFilter');
         const filterVal = filterDropdown ? filterDropdown.value : "All";
         
-        if (!window.allComplaints || !listDiv) return;
+        if (!listDiv) return;
+        
+        if (!window.allComplaints) {
+            listDiv.innerHTML = '<p style="color: #cbd5e1; text-align: center; padding: 20px;">Fetching data from secure server...</p>';
+            return;
+        }
 
         let filtered = window.allComplaints;
         if (filterVal !== "All") {
@@ -836,12 +842,11 @@ window.renderAdminQueries = function() {
         }
 
         if (filtered.length === 0) {
-            listDiv.innerHTML = '<p style="color: #94a3b8; text-align: center; padding: 20px; background: rgba(0,0,0,0.2); border-radius: 8px;">No queries found for this status.</p>';
+            listDiv.innerHTML = `<p style="color: #94a3b8; text-align: center; padding: 20px; background: rgba(0,0,0,0.2); border-radius: 8px;">No queries exist in the database for status: <strong>${filterVal}</strong>.</p>`;
             return;
         }
 
         listDiv.innerHTML = filtered.map((c) => {
-            // Safeguards against missing data crashing the render
             const status = c.status || 'Pending';
             const regNumber = c.reg_number || 'N/A';
             const details = c.student_details || 'Unknown Student';
@@ -879,43 +884,59 @@ window.renderAdminQueries = function() {
 };
 
 function loadAdminData() {
-    if(document.getElementById('adminComplaintsList')) {
-        onSnapshot(collection(db, "complaints"), (querySnapshot) => {
-            let complaints = [];
-            let resolvedCount = 0;
-            querySnapshot.forEach((doc) => {
-                const data = doc.data();
-                complaints.push({ id: doc.id, ...data });
-                if (data.status === 'Resolved') resolvedCount++;
-            });
-            complaints.sort((a, b) => b.created_at - a.created_at);
-            
-            window.allComplaints = complaints; 
-            
-            if(document.getElementById('totalCount')) document.getElementById('totalCount').innerText = complaints.length;
-            if(document.getElementById('resolvedCount')) document.getElementById('resolvedCount').innerText = resolvedCount;
-
-            window.renderAdminQueries(); 
-        });
+    const adminComplaintsList = document.getElementById('adminComplaintsList');
+    
+    // 1. Fetch Maintenance Queries
+    if(adminComplaintsList) {
+        adminComplaintsList.innerHTML = '<p style="color: #6366f1; text-align: center; padding: 20px;">Fetching live queries from Firebase...</p>';
         
-        const adminQueryFilter = document.getElementById('adminQueryFilter');
-        if(adminQueryFilter) adminQueryFilter.addEventListener('change', window.renderAdminQueries);
+        try {
+            onSnapshot(collection(db, "complaints"), (querySnapshot) => {
+                let complaints = [];
+                let resolvedCount = 0;
+                querySnapshot.forEach((doc) => {
+                    const data = doc.data();
+                    complaints.push({ id: doc.id, ...data });
+                    if (data.status === 'Resolved') resolvedCount++;
+                });
+                
+                complaints.sort((a, b) => b.created_at - a.created_at);
+                window.allComplaints = complaints; 
+                
+                if(document.getElementById('totalCount')) document.getElementById('totalCount').innerText = complaints.length;
+                if(document.getElementById('resolvedCount')) document.getElementById('resolvedCount').innerText = resolvedCount;
+
+                window.renderAdminQueries(); 
+            }, (error) => {
+                // 💥 PRINTS SILENT ERRORS TO THE ADMIN SCREEN 💥
+                console.error("FIREBASE ERROR:", error);
+                adminComplaintsList.innerHTML = `
+                    <div style="background: rgba(225,29,72,0.1); border: 1px solid rgba(225,29,72,0.3); padding: 20px; border-radius: 8px; color: #fda4af;">
+                        <h3 style="margin-top: 0;">⚠️ Database Connection Blocked!</h3>
+                        <p>Firebase returned an error: <em>${error.message}</em></p>
+                        <p><strong>How to fix:</strong> Log into your Firebase Console -> Go to Firestore Database -> Click the "Rules" tab -> Change your rules to allow read/write.</p>
+                    </div>
+                `;
+            });
+            
+            const adminQueryFilter = document.getElementById('adminQueryFilter');
+            if(adminQueryFilter) adminQueryFilter.addEventListener('change', window.renderAdminQueries);
+        } catch(e) {
+            adminComplaintsList.innerHTML = `<p style="color: #fca5a5;">Script Error: ${e.message}</p>`;
+        }
     }
 
+    // 2. Fetch Student Database
     if(document.getElementById('adminStudentDatabaseList')) {
-        const studentQ = query(collection(db, "users"), where("role", "!=", "Admin"));
-        onSnapshot(studentQ, (querySnapshot) => {
+        onSnapshot(query(collection(db, "users"), where("role", "!=", "Admin")), (querySnapshot) => {
             let students = [];
-            querySnapshot.forEach((doc) => {
-                students.push({ id: doc.id, ...doc.data() });
-            });
+            querySnapshot.forEach((doc) => students.push({ id: doc.id, ...doc.data() }));
             window.allStudents = students; 
             applyAdminFilters();
         });
 
         const searchInput = document.getElementById('adminSearchStudent');
         const branchFilter = document.getElementById('adminBranchFilter');
-        
         if(searchInput) searchInput.addEventListener('input', applyAdminFilters);
         if(branchFilter) branchFilter.addEventListener('change', applyAdminFilters);
     }
