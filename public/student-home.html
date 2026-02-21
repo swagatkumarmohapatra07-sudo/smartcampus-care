@@ -143,31 +143,38 @@
             border: 1px solid rgba(255,255,255,0.1);
         }
 
-        /* 💥 FLIP CARD SPECIFIC CSS 💥 */
+        /* 💥 FIXED CLICK-TO-FLIP CSS 💥 */
         .flip-card {
             background-color: transparent;
             min-height: 310px;
             cursor: pointer;
+            perspective: 1000px;
         }
+
         .flip-card-inner {
             position: relative;
             width: 100%;
             height: 100%;
             text-align: center;
-            transition: transform 0.8s;
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
             transform-style: preserve-3d;
         }
-        .flip-card:hover .flip-card-inner {
+
+        /* Toggle flip based on class instead of hover */
+        .flip-card.flipped .flip-card-inner {
             transform: rotateY(180deg);
         }
+
         .flip-front, .flip-back {
             position: absolute;
             width: 100%;
             height: 100%;
-            -webkit-backface-visibility: hidden;
+            -webkit-backface-visibility: hidden; /* Fix for Safari */
             backface-visibility: hidden;
             border-radius: 25px;
+            box-sizing: border-box;
         }
+
         .flip-back {
             transform: rotateY(180deg);
         }
@@ -257,7 +264,7 @@
                 <div style="margin-top: 20px; color: #f472b6; font-weight: bold; font-size: 0.9em; display: flex; align-items: center; gap: 5px;">Discover <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg></div>
             </div>
 
-            <div class="flip-card">
+            <div class="flip-card" onclick="this.classList.toggle('flipped')">
                 <div class="flip-card-inner">
                     <div class="flip-front bento-card card-attendance-front">
                         <h3 style="color: white; margin: 0 0 15px 0; font-size: 1.4em;">My Attendance</h3>
@@ -267,14 +274,14 @@
                                 <span id="attendancePercentageDisplay" style="font-size: 1.8em; font-weight: 800; color: #f8fafc;">--%</span>
                             </div>
                         </div>
-                        <p style="color: #94a3b8; font-size: 0.8em; margin-top: 10px; font-weight: bold;">Hover to see trends ➝</p>
+                        <p style="color: #94a3b8; font-size: 0.8em; margin-top: 10px; font-weight: bold;">Click to view trends ➝</p>
                     </div>
                     <div class="flip-back bento-card card-attendance-back">
                         <h3 style="color: white; margin: 0 0 10px 0; font-size: 1.2em;">Presence Trends</h3>
                         <div style="height: 160px; width: 100%;">
                             <canvas id="attendanceBarChart"></canvas>
                         </div>
-                        <p id="attendanceStatusText" style="margin-top: 10px; color: #cbd5e1; font-size: 0.75em;">Syncing live records...</p>
+                        <p id="attendanceStatusText" style="margin-top: 10px; color: #cbd5e1; font-size: 0.75em;">Click to return</p>
                     </div>
                 </div>
             </div>
