@@ -867,15 +867,14 @@ function loadAdminData() {
             });
             complaints.sort((a, b) => b.created_at - a.created_at);
             
-            window.allComplaints = complaints; // Save globally for the dropdown filter
+            window.allComplaints = complaints; 
             
             if(document.getElementById('totalCount')) document.getElementById('totalCount').innerText = complaints.length;
             if(document.getElementById('resolvedCount')) document.getElementById('resolvedCount').innerText = resolvedCount;
 
-            window.renderAdminQueries(); // Force initial render
+            window.renderAdminQueries(); 
         });
         
-        // Listen to the Dropdown
         const adminQueryFilter = document.getElementById('adminQueryFilter');
         if(adminQueryFilter) adminQueryFilter.addEventListener('change', window.renderAdminQueries);
     }
