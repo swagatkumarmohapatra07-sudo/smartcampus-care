@@ -800,12 +800,14 @@ if (user?.role === 'Admin') {
     loadAdminData();
 }
 
-// 💥 ADMIN MAINTENANCE QUERIES RENDERER (BULLETPROOF & DIAGNOSTIC) 💥
+// 💥 ADMIN MAINTENANCE QUERIES RENDERER (ULTRA-STRICT FILTER) 💥
 window.renderAdminQueries = function() {
     try {
         const listDiv = document.getElementById('adminComplaintsList');
         const filterDropdown = document.getElementById('adminQueryFilter');
-        const filterVal = filterDropdown ? filterDropdown.value : "All";
+        
+        // Forcefully grab the exact text value and trim hidden spaces
+        const filterVal = filterDropdown ? String(filterDropdown.value).trim() : "All";
         
         if (!listDiv) return;
         
@@ -815,12 +817,17 @@ window.renderAdminQueries = function() {
         }
 
         let filtered = window.allComplaints;
+
+        // Strict Filtering Logic
         if (filterVal !== "All") {
-            filtered = window.allComplaints.filter(c => c.status === filterVal);
+            filtered = window.allComplaints.filter(c => {
+                const docStatus = c.status ? String(c.status).trim() : 'Pending';
+                return docStatus === filterVal;
+            });
         }
 
         if (filtered.length === 0) {
-            listDiv.innerHTML = `<p style="color: #94a3b8; text-align: center; padding: 20px; background: rgba(0,0,0,0.2); border-radius: 8px;">No queries exist in the database for status: <strong>${filterVal}</strong>.</p>`;
+            listDiv.innerHTML = `<p style="color: #94a3b8; text-align: center; padding: 20px; background: rgba(0,0,0,0.2); border-radius: 8px;">No queries exist in the database for status: <strong style="color: #f8fafc;">${filterVal}</strong>.</p>`;
             return;
         }
 
@@ -886,7 +893,6 @@ function loadAdminData() {
 
                 window.renderAdminQueries(); 
             }, (error) => {
-                // 💥 THIS PRINTS THE SILENT ERROR TO THE SCREEN 💥
                 console.error("FIREBASE ERROR:", error);
                 alert("🚨 FIREBASE DATABASE ERROR 🚨\n\nYour database is blocking access! This usually means your 30-day Test Mode Rules have expired.\n\nPlease go to Firebase Console -> Firestore Database -> Rules -> set 'allow read, write: if true;'");
                 adminComplaintsList.innerHTML = `
@@ -897,9 +903,6 @@ function loadAdminData() {
                     </div>
                 `;
             });
-            
-            const adminQueryFilter = document.getElementById('adminQueryFilter');
-            if(adminQueryFilter) adminQueryFilter.addEventListener('change', window.renderAdminQueries);
         } catch(e) {
             adminComplaintsList.innerHTML = `<p style="color: #fca5a5;">Script Error: ${e.message}</p>`;
         }
