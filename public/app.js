@@ -23,6 +23,7 @@ window.logout = () => {
     window.location.href = 'index.html';
 };
 
+// Route Protection 
 if (!user && (window.location.pathname.includes('admin.html') || window.location.pathname.includes('student.html') || window.location.pathname.includes('student-fees.html') || window.location.pathname.includes('student-profile.html') || window.location.pathname.includes('net-banking.html') || window.location.pathname.includes('student-home.html') || window.location.pathname.includes('about-college.html'))) {
     window.location.href = 'index.html';
 }
@@ -46,7 +47,7 @@ window.showToast = (message, type = 'success') => {
     }, 3500);
 };
 
-// 💥 DYNAMIC DROPDOWNS ENGINE 💥
+// 💥 DYNAMIC DROPDOWNS ENGINE (For Registration & Profile) 💥
 function initDynamicDropdowns(courseRef, yearId, semId, branchId, currentData = {}) {
     const yearSelect = document.getElementById(yearId);
     const semSelect = document.getElementById(semId);
@@ -124,57 +125,60 @@ function initDynamicDropdowns(courseRef, yearId, semId, branchId, currentData = 
     }
 }
 
-// 💥 NOTICEBOARD DROPDOWNS ENGINE (For Admin Tab) 💥
+// 💥 NOTICEBOARD DROPDOWNS ENGINE 💥
 function initAdminNoticeDropdowns() {
     const nCourse = document.getElementById('noticeCourse');
     const nYear = document.getElementById('noticeYear');
     const nSem = document.getElementById('noticeSemester');
     const nBranch = document.getElementById('noticeBranch');
 
-    if(!nCourse) return;
+    if (!nCourse || !nYear || !nSem || !nBranch) return;
 
     const renderNotices = () => {
         const course = nCourse.value;
+        const currentYear = nYear.value || "All";
+        const currentSem = nSem.value || "All";
+        const currentBranch = nBranch.value || "All";
         
-        let years = ['<option value="All">All Years</option>'];
-        if(course === 'B.Tech') years.push('<option value="1st Year">1st Year</option>','<option value="2nd Year">2nd Year</option>','<option value="3rd Year">3rd Year</option>','<option value="4th Year">4th Year</option>');
-        else if(course === 'MBA' || course === 'MCA') years.push('<option value="1st Year">1st Year</option>','<option value="2nd Year">2nd Year</option>');
-        
-        const savedYear = nYear.value;
-        nYear.innerHTML = years.join('');
-        if(nYear.querySelector(`[value="${savedYear}"]`)) nYear.value = savedYear;
-
-        const year = nYear.value;
-        let sems = ['<option value="All">All Semesters</option>'];
-        if(year === '1st Year') sems.push('<option value="Semester 1">Semester 1</option>','<option value="Semester 2">Semester 2</option>');
-        else if(year === '2nd Year') sems.push('<option value="Semester 3">Semester 3</option>','<option value="Semester 4">Semester 4</option>');
-        else if(year === '3rd Year') sems.push('<option value="Semester 5">Semester 5</option>','<option value="Semester 6">Semester 6</option>');
-        else if(year === '4th Year') sems.push('<option value="Semester 7">Semester 7</option>','<option value="Semester 8">Semester 8</option>');
-        
-        const savedSem = nSem.value;
-        nSem.innerHTML = sems.join('');
-        if(nSem.querySelector(`[value="${savedSem}"]`)) nSem.value = savedSem;
-
-        let branches = ['<option value="All">All Branches</option>'];
-        if(course === 'B.Tech') {
-            if(year === '1st Year') branches.push('<option value="Common 1st Year">Common 1st Year</option>');
-            else branches.push(
-                '<option value="Computer Science and Engineering">Computer Science and Engineering</option>',
-                '<option value="Data Science">Data Science</option>',
-                '<option value="Electrical Communication Engineering">Electrical Communication Engineering</option>',
-                '<option value="EE">EE</option>',
-                '<option value="EEE">EEE</option>',
-                '<option value="Civil">Civil</option>',
-                '<option value="Mechanical">Mechanical</option>'
-            );
-        } else if (course === 'MBA') {
-            branches.push('<option value="Human Resources (HR)">Human Resources (HR)</option>','<option value="Finance">Finance</option>','<option value="Marketing">Marketing</option>','<option value="IT & Systems">IT & Systems</option>','<option value="Operations">Operations</option>');
-        } else if (course === 'MCA') {
-            branches.push('<option value="Master of Computer Applications">Master of Computer Applications</option>');
+        let yearHTML = '<option value="All">All Years</option>';
+        if (course === 'B.Tech') {
+            yearHTML += '<option value="1st Year">1st Year</option><option value="2nd Year">2nd Year</option><option value="3rd Year">3rd Year</option><option value="4th Year">4th Year</option>';
+        } else {
+            yearHTML += '<option value="1st Year">1st Year</option><option value="2nd Year">2nd Year</option>';
         }
-        const savedBranch = nBranch.value;
-        nBranch.innerHTML = branches.join('');
-        if(nBranch.querySelector(`[value="${savedBranch}"]`)) nBranch.value = savedBranch;
+        
+        nYear.innerHTML = yearHTML;
+        if (yearHTML.includes(`value="${currentYear}"`)) nYear.value = currentYear;
+        else nYear.value = "All";
+
+        const selectedYear = nYear.value;
+        let semHTML = '<option value="All">All Semesters</option>';
+        
+        if (selectedYear === '1st Year') semHTML += '<option value="Semester 1">Semester 1</option><option value="Semester 2">Semester 2</option>';
+        else if (selectedYear === '2nd Year') semHTML += '<option value="Semester 3">Semester 3</option><option value="Semester 4">Semester 4</option>';
+        else if (selectedYear === '3rd Year') semHTML += '<option value="Semester 5">Semester 5</option><option value="Semester 6">Semester 6</option>';
+        else if (selectedYear === '4th Year') semHTML += '<option value="Semester 7">Semester 7</option><option value="Semester 8">Semester 8</option>';
+        
+        nSem.innerHTML = semHTML;
+        if (semHTML.includes(`value="${currentSem}"`)) nSem.value = currentSem;
+        else nSem.value = "All";
+
+        let branchHTML = '<option value="All">All Branches</option>';
+        if (course === 'B.Tech') {
+            if (selectedYear === '1st Year') {
+                branchHTML += '<option value="Common 1st Year">Common 1st Year</option>';
+            } else {
+                branchHTML += '<option value="Computer Science and Engineering">Computer Science and Engineering</option><option value="Data Science">Data Science</option><option value="Electrical Communication Engineering">Electrical Communication Engineering</option><option value="EE">EE</option><option value="EEE">EEE</option><option value="Civil">Civil</option><option value="Mechanical">Mechanical</option>';
+            }
+        } else if (course === 'MBA') {
+            branchHTML += '<option value="Human Resources (HR)">Human Resources (HR)</option><option value="Finance">Finance</option><option value="Marketing">Marketing</option><option value="IT & Systems">IT & Systems</option><option value="Operations">Operations</option>';
+        } else if (course === 'MCA') {
+            branchHTML += '<option value="Master of Computer Applications">Master of Computer Applications</option>';
+        }
+        
+        nBranch.innerHTML = branchHTML;
+        if (branchHTML.includes(`value="${currentBranch}"`)) nBranch.value = currentBranch;
+        else nBranch.value = "All";
     };
 
     nCourse.addEventListener('change', renderNotices);
@@ -317,7 +321,7 @@ if (user?.role === 'Student') {
         timeGreeting.innerText = greeting;
     }
 
-    // 💥 NEW: REAL-TIME STUDENT PROFILE SYNC 💥
+    // 💥 REAL-TIME STUDENT PROFILE SYNC 💥
     if (user.id) {
         const userDocRef = doc(db, "users", user.id);
         onSnapshot(userDocRef, (docSnap) => {
@@ -325,10 +329,8 @@ if (user?.role === 'Student') {
                 const freshUser = docSnap.data();
                 freshUser.id = docSnap.id;
                 
-                // Update local storage so data stays correct across page reloads
                 localStorage.setItem('user', JSON.stringify(freshUser));
                 
-                // 1. Live Update Header Avatar & Info
                 const headerAvatar = document.getElementById('headerAvatar');
                 const academicInfo = document.getElementById('academicInfo'); 
                 const avatarUrl = freshUser.profile_pic || 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
@@ -339,7 +341,6 @@ if (user?.role === 'Student') {
                     academicInfo.innerText = `${freshUser.course} in ${freshUser.branch} | ${freshUser.year || '1st Year'} (${freshUser.semester || 'Semester 1'}) | Sec: ${freshUser.section || 'Unassigned'}`;
                 }
 
-                // 2. Live Update Profile Page Settings
                 const profileAvatarLarge = document.getElementById('profileAvatarLarge');
                 const profileNameDisplay = document.getElementById('profileNameDisplay');
                 const profileYear = document.getElementById('profileYear');
@@ -349,7 +350,6 @@ if (user?.role === 'Student') {
                 if (profileAvatarLarge) profileAvatarLarge.src = avatarUrl;
                 if (profileNameDisplay) profileNameDisplay.innerText = freshUser.full_name;
                 
-                // If on profile page, push the updated data back into the form dropdowns
                 if (profileYear && profileSemester && profileBranch) {
                     initDynamicDropdowns(freshUser.course || 'B.Tech', 'profileYear', 'profileSemester', 'profileBranch', { 
                         year: freshUser.year, semester: freshUser.semester, branch: freshUser.branch 
@@ -367,20 +367,30 @@ if (user?.role === 'Student') {
     const noticeBoard = document.getElementById('studentNoticeBoard');
     if(noticeBoard) {
         onSnapshot(collection(db, "notices"), (snapshot) => {
-            // Get freshest user data from localStorage for accurate filtering
             const activeUser = JSON.parse(localStorage.getItem('user'));
             
             let notices = [];
             snapshot.forEach(doc => notices.push({id: doc.id, ...doc.data()}));
             
-            notices = notices.filter(n => 
-                (n.course === 'All' || n.course === activeUser.course) &&
-                (n.year === 'All' || n.year === activeUser.year) &&
-                (n.semester === 'All' || n.semester === activeUser.semester) &&
-                (n.branch === 'All' || n.branch === activeUser.branch)
-            );
+            notices = notices.filter(n => {
+                if (n.targets && Array.isArray(n.targets)) {
+                    return n.targets.some(t => 
+                        (t.course === 'All' || t.course === activeUser.course) &&
+                        (t.year === 'All' || t.year === activeUser.year) &&
+                        (t.semester === 'All' || t.semester === activeUser.semester) &&
+                        (t.branch === 'All' || t.branch === activeUser.branch)
+                    );
+                } 
+                else if (n.course) {
+                    return (n.course === 'All' || n.course === activeUser.course) &&
+                           (n.year === 'All' || n.year === activeUser.year) &&
+                           (n.semester === 'All' || n.semester === activeUser.semester) &&
+                           (n.branch === 'All' || n.branch === activeUser.branch);
+                }
+                return false;
+            });
 
-            notices.sort((a, b) => b.timestamp - a.timestamp); // Newest first
+            notices.sort((a, b) => b.timestamp - a.timestamp); 
 
             if(notices.length === 0) {
                 noticeBoard.innerHTML = '<p style="color: #94a3b8; text-align: center; margin-top: 60px; font-style: italic;">No new announcements at this time.</p>';
@@ -427,43 +437,59 @@ function initProfileSystem(avatarUrl) {
     }
 }
 
+// 💥 MAINTENANCE & QUERIES SYSTEM (STUDENT SIDE) 💥
 function initQueriesSystem() {
     const complaintForm = document.getElementById('complaintForm');
     const activeList = document.getElementById('activeComplaintsList');
     const resolvedList = document.getElementById('resolvedComplaintsList');
 
+    if (!complaintForm) return;
+
+    const activeUser = JSON.parse(localStorage.getItem('user')) || user;
+    const safeQueryId = activeUser.id || activeUser.registration_number || "UNKNOWN_USER";
+
     complaintForm.addEventListener('submit', async (e) => {
         e.preventDefault();
+        
         const descInput = document.getElementById('description');
         const submitBtn = complaintForm.querySelector('button');
-        
-        // Grab fresh data just in case admin updated it while they were on the page
-        const activeUser = JSON.parse(localStorage.getItem('user'));
+
+        if (!descInput || !descInput.value.trim()) return;
 
         submitBtn.disabled = true;
-        submitBtn.innerText = "Submitting...";
-        await addDoc(collection(db, "complaints"), {
-            student_id: activeUser.id,
-            student_details: `${activeUser.full_name} | ${activeUser.course} (${activeUser.branch}) - Sec: ${activeUser.section || 'Unassigned'}`,
-            reg_number: activeUser.registration_number,
-            description: descInput.value,
-            status: "Pending",
-            created_at: Date.now()
-        });
-        showToast('Query submitted successfully!', 'success');
-        complaintForm.reset(); 
-        submitBtn.disabled = false;
-        submitBtn.innerText = "Submit Query";
+        const originalText = submitBtn.innerText;
+        submitBtn.innerText = "Submitting securely...";
+
+        try {
+            await addDoc(collection(db, "complaints"), {
+                student_id: safeQueryId,
+                student_details: `${activeUser.full_name || 'Unknown'} | ${activeUser.course || 'Course'} (${activeUser.branch || 'Branch'}) - Sec: ${activeUser.section || 'Unassigned'}`,
+                reg_number: activeUser.registration_number || "Unknown",
+                description: descInput.value.trim(),
+                status: "Pending",
+                created_at: Date.now()
+            });
+            showToast('Query submitted successfully!', 'success');
+            complaintForm.reset(); 
+        } catch (error) {
+            showToast('Failed to submit query. Check internet connection.', 'error');
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.innerText = originalText;
+        }
     });
 
     window.deleteQuery = async (queryId) => {
-        if(confirm("Are you sure you want to delete this query?")) {
-            try { await deleteDoc(doc(db, "complaints", queryId)); showToast("Query deleted successfully!", "success");
+        if(confirm("Are you sure you want to permanently delete this query?")) {
+            try { 
+                await deleteDoc(doc(db, "complaints", queryId)); 
+                showToast("Query deleted successfully!", "success");
             } catch(error) { showToast("Failed to delete query.", "error"); }
         }
     };
 
-    const q = query(collection(db, "complaints"), where("student_id", "==", user.id));
+    const q = query(collection(db, "complaints"), where("student_id", "==", safeQueryId));
+    
     onSnapshot(q, (querySnapshot) => {
         let complaints = [];
         querySnapshot.forEach((doc) => complaints.push({ id: doc.id, ...doc.data() }));
@@ -472,30 +498,34 @@ function initQueriesSystem() {
         const activeComplaints = complaints.filter(c => c.status !== 'Resolved');
         const resolvedComplaints = complaints.filter(c => c.status === 'Resolved');
 
-        activeList.innerHTML = activeComplaints.length === 0 
-            ? '<p style="color: #64748b; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px;">No active queries at the moment.</p>' 
-            : activeComplaints.map((c, index) => `
-                <div class="card" style="animation-delay: ${index * 0.1}s; position: relative;">
-                    ${c.status === 'Pending' ? `<button onclick="window.deleteQuery('${c.id}')" style="position: absolute; top: 15px; right: 15px; background: rgba(225, 29, 72, 0.1); color: #fda4af; border: 1px solid rgba(225, 29, 72, 0.3); padding: 5px 10px; border-radius: 6px; cursor: pointer; font-size: 0.8em;">🗑️ Delete</button>` : ''}
-                    <p style="padding-right: 80px;"><strong>Query:</strong> ${c.description}</p>
-                    <div style="margin-top: 15px;">
-                        <small>Status: <span class="badge ${c.status.replace(' ', '-')}">${c.status}</span></small>
-                        <small style="float: right; color: #94a3b8;">${new Date(c.created_at).toLocaleDateString()}</small>
+        if (activeList) {
+            activeList.innerHTML = activeComplaints.length === 0 
+                ? '<p style="color: #64748b; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px; text-align: center;">No active queries at the moment.</p>' 
+                : activeComplaints.map((c) => `
+                    <div class="card" style="background: rgba(15, 23, 42, 0.6); position: relative; margin-bottom: 15px; border-left: 4px solid #f59e0b;">
+                        ${c.status === 'Pending' ? `<button onclick="window.deleteQuery('${c.id}')" style="position: absolute; top: 15px; right: 15px; background: rgba(225, 29, 72, 0.1); color: #fda4af; border: 1px solid rgba(225, 29, 72, 0.3); padding: 5px 10px; border-radius: 6px; cursor: pointer; font-size: 0.8em; transition: 0.3s;" onmouseover="this.style.background='rgba(225, 29, 72, 0.3)'" onmouseout="this.style.background='rgba(225, 29, 72, 0.1)'">🗑️ Delete</button>` : ''}
+                        <p style="padding-right: 80px; color: #f8fafc; margin: 0 0 15px 0; font-size: 1.05em;"><strong>Query:</strong> ${c.description}</p>
+                        <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 12px;">
+                            <small style="color: #94a3b8;">Status: <span class="badge ${c.status.replace(' ', '-')}">${c.status}</span></small>
+                            <small style="color: #64748b;">${new Date(c.created_at).toLocaleDateString()}</small>
+                        </div>
                     </div>
-                </div>
-            `).join('');
+                `).join('');
+        }
 
-        resolvedList.innerHTML = resolvedComplaints.length === 0 
-            ? '<p style="color: #64748b; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px;">No resolved queries yet.</p>' 
-            : resolvedComplaints.map((c, index) => `
-                <div class="card" style="animation-delay: ${index * 0.1}s; border-left: 4px solid #10b981; opacity: 0.8;">
-                    <p><strong>Query:</strong> ${c.description}</p>
-                    <div style="margin-top: 10px;">
-                        <small>Status: <span class="badge ${c.status.replace(' ', '-')}">${c.status}</span></small>
-                        <small style="float: right; color: #94a3b8;">${new Date(c.created_at).toLocaleDateString()}</small>
+        if (resolvedList) {
+            resolvedList.innerHTML = resolvedComplaints.length === 0 
+                ? '<p style="color: #64748b; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px; text-align: center;">No resolved queries yet.</p>' 
+                : resolvedComplaints.map((c) => `
+                    <div class="card" style="background: rgba(16, 185, 129, 0.05); border-left: 4px solid #10b981; margin-bottom: 15px;">
+                        <p style="color: #f8fafc; margin: 0 0 15px 0;"><strong>Query:</strong> ${c.description}</p>
+                        <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 12px;">
+                            <small style="color: #94a3b8;">Status: <span class="badge ${c.status.replace(' ', '-')}">${c.status}</span></small>
+                            <small style="color: #64748b;">${new Date(c.created_at).toLocaleDateString()}</small>
+                        </div>
                     </div>
-                </div>
-            `).join('');
+                `).join('');
+        }
     });
 }
 
@@ -503,7 +533,6 @@ function initFeeSystem() {
     const paymentForm = document.getElementById('paymentForm');
     const historyList = document.getElementById('paymentHistoryList');
     
-    // Always calculate using freshest data
     const activeUser = JSON.parse(localStorage.getItem('user')) || user;
     let semString = activeUser.semester || "Semester 1";
     let semNumber = parseInt(semString.replace("Semester ", "")) || 1;
@@ -715,32 +744,75 @@ if (user?.role === 'Admin') {
         }
     };
 
+    // MULTI-TARGET BROADCAST LOGIC
     const noticeForm = document.getElementById('noticeForm');
-    if (noticeForm) {
+    const addTargetBtn = document.getElementById('addTargetBtn');
+    const targetGroupsContainer = document.getElementById('targetGroupsContainer');
+    let noticeTargets = [];
+
+    function renderTargets() {
+        if (!targetGroupsContainer) return;
+        targetGroupsContainer.innerHTML = noticeTargets.map((t, i) => `
+            <span style="background: rgba(59, 130, 246, 0.2); border: 1px solid rgba(59, 130, 246, 0.4); color: white; padding: 6px 12px; border-radius: 8px; font-size: 0.85em; display: inline-flex; align-items: center; gap: 8px;">
+                ${t.course} ➝ ${t.year} ➝ ${t.semester} ➝ ${t.branch}
+                <b style="cursor: pointer; color: #fca5a5; font-size: 1.1em;" onclick="removeNoticeTarget(${i})" title="Remove">✖</b>
+            </span>
+        `).join('');
+    }
+
+    window.removeNoticeTarget = (index) => {
+        noticeTargets.splice(index, 1);
+        renderTargets();
+    };
+
+    if (noticeForm && addTargetBtn) {
         initAdminNoticeDropdowns(); 
+
+        addTargetBtn.addEventListener('click', () => {
+            const c = document.getElementById('noticeCourse').value;
+            const y = document.getElementById('noticeYear').value;
+            const s = document.getElementById('noticeSemester').value;
+            const b = document.getElementById('noticeBranch').value;
+            
+            if (!noticeTargets.some(t => t.course === c && t.year === y && t.semester === s && t.branch === b)) {
+                noticeTargets.push({ course: c, year: y, semester: s, branch: b });
+                renderTargets();
+            } else {
+                showToast("Audience already added!", "warning");
+            }
+        });
 
         noticeForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const btn = noticeForm.querySelector('button');
+            
+            if (noticeTargets.length === 0) {
+                noticeTargets.push({
+                    course: document.getElementById('noticeCourse').value,
+                    year: document.getElementById('noticeYear').value,
+                    semester: document.getElementById('noticeSemester').value,
+                    branch: document.getElementById('noticeBranch').value
+                });
+            }
+
+            const btn = noticeForm.querySelector('button[type="submit"]');
             btn.innerText = "Broadcasting...";
             btn.disabled = true;
 
             try {
                 await addDoc(collection(db, "notices"), {
-                    course: document.getElementById('noticeCourse').value,
-                    year: document.getElementById('noticeYear').value,
-                    semester: document.getElementById('noticeSemester').value,
-                    branch: document.getElementById('noticeBranch').value,
+                    targets: noticeTargets,
                     message: document.getElementById('noticeMessage').value,
                     timestamp: Date.now()
                 });
                 showToast("Broadcast pushed successfully!", "success");
                 noticeForm.reset();
+                noticeTargets = []; 
+                renderTargets();    
                 initAdminNoticeDropdowns(); 
             } catch (error) {
                 showToast("Failed to broadcast.", "error");
             } finally {
-                btn.innerText = "Push to Student Dashboards";
+                btn.innerText = "Push Broadcast";
                 btn.disabled = false;
             }
         });
@@ -748,6 +820,40 @@ if (user?.role === 'Admin') {
 
     loadAdminData();
 }
+
+// 💥 ADMIN MAINTENANCE QUERIES RENDERER (WITH FILTER) 💥
+window.renderAdminQueries = function() {
+    const listDiv = document.getElementById('adminComplaintsList');
+    const filterVal = document.getElementById('adminQueryFilter') ? document.getElementById('adminQueryFilter').value : "All";
+    
+    if (!window.allComplaints || !listDiv) return;
+
+    let filtered = window.allComplaints;
+    if (filterVal !== "All") {
+        filtered = window.allComplaints.filter(c => c.status === filterVal);
+    }
+
+    if (filtered.length === 0) {
+        listDiv.innerHTML = '<p style="color: #94a3b8; text-align: center; padding: 20px; background: rgba(0,0,0,0.2); border-radius: 8px;">No queries found.</p>';
+        return;
+    }
+
+    listDiv.innerHTML = filtered.map((c) => `
+        <div class="card" style="margin-bottom: 15px; border-left: 4px solid ${c.status === 'Resolved' ? '#10b981' : (c.status === 'In Progress' ? '#3b82f6' : '#f59e0b')};">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                <span style="color: #6366f1; font-weight: 600;">Reg: ${c.reg_number || 'N/A'}</span>
+                <span class="badge" style="background: ${c.status === 'Resolved' ? 'rgba(16, 185, 129, 0.2)' : (c.status === 'In Progress' ? 'rgba(59, 130, 246, 0.2)' : 'rgba(245, 158, 11, 0.2)')}; color: ${c.status === 'Resolved' ? '#34d399' : (c.status === 'In Progress' ? '#60a5fa' : '#fbbf24')}; border: 1px solid currentColor;">${c.status}</span>
+            </div>
+            <p style="margin-top: 10px; color: #cbd5e1; font-size: 0.95em;"><strong>Info:</strong> ${c.student_details}</p>
+            <p style="background: rgba(0,0,0,0.3); padding: 12px; border-radius: 8px; color: #f8fafc; margin-bottom: 15px; font-size: 0.95em; border: 1px solid rgba(255,255,255,0.05);"><strong>Issue:</strong> ${c.description}</p>
+            
+            <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                ${c.status === 'Pending' ? `<button onclick="window.updateStatus('${c.id}', 'In Progress')" style="padding: 8px 15px; border-radius: 8px; background: rgba(59, 130, 246, 0.2); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.4); cursor: pointer; transition: 0.3s; font-weight: bold;">Mark 'In Progress'</button>` : ''}
+                ${c.status === 'In Progress' ? `<button onclick="window.updateStatus('${c.id}', 'Resolved')" style="padding: 8px 15px; border-radius: 8px; background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); cursor: pointer; transition: 0.3s; font-weight: bold;">Mark 'Resolved'</button>` : ''}
+            </div>
+        </div>
+    `).join('');
+};
 
 function loadAdminData() {
     if(document.getElementById('adminComplaintsList')) {
@@ -760,22 +866,18 @@ function loadAdminData() {
                 if (data.status === 'Resolved') resolvedCount++;
             });
             complaints.sort((a, b) => b.created_at - a.created_at);
+            
+            window.allComplaints = complaints; // Save globally for the dropdown filter
+            
             if(document.getElementById('totalCount')) document.getElementById('totalCount').innerText = complaints.length;
             if(document.getElementById('resolvedCount')) document.getElementById('resolvedCount').innerText = resolvedCount;
 
-            document.getElementById('adminComplaintsList').innerHTML = complaints.map((c) => `
-                <div class="card" style="margin-bottom: 15px;">
-                    <div style="display: flex; justify-content: space-between;">
-                        <span style="color: #6366f1; font-weight: 600;">Reg: ${c.reg_number}</span>
-                        <span class="badge ${c.status.replace(' ', '-')}">${c.status}</span>
-                    </div>
-                    <p style="margin-top: 10px;"><strong>Info:</strong> ${c.student_details}</p>
-                    <p style="background: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px;"><strong>Issue:</strong> ${c.description}</p>
-                    ${c.status === 'Pending' ? `<button onclick="updateStatus('${c.id}', 'In Progress')" style="margin-top: 10px; width: 100%;">Mark 'In Progress'</button>` : ''}
-                    ${c.status === 'In Progress' ? `<button onclick="updateStatus('${c.id}', 'Resolved')" style="background: #10b981; margin-top: 10px; width: 100%;">Mark 'Resolved'</button>` : ''}
-                </div>
-            `).join('');
+            window.renderAdminQueries(); // Force initial render
         });
+        
+        // Listen to the Dropdown
+        const adminQueryFilter = document.getElementById('adminQueryFilter');
+        if(adminQueryFilter) adminQueryFilter.addEventListener('change', window.renderAdminQueries);
     }
 
     if(document.getElementById('adminStudentDatabaseList')) {
@@ -929,30 +1031,6 @@ function renderAdminStudents(students) {
     });
 
     listDiv.innerHTML = finalHTML;
-}
-
-if (window.location.pathname.includes('net-banking.html')) {
-    const pendingTxn = JSON.parse(localStorage.getItem('pendingTxn'));
-    if (pendingTxn && user) {
-        document.getElementById('sbiAmount').innerText = pendingTxn.amount;
-        document.getElementById('sbiLoginForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const btn = document.getElementById('sbiPayBtn');
-            btn.innerText = "Processing...";
-            btn.disabled = true;
-            setTimeout(async () => {
-                const txnId = 'TXN-' + Math.floor(10000000 + Math.random() * 90000000);
-                await addDoc(collection(db, "payments"), {
-                    student_id: user.id, full_name: user.full_name, registration_number: user.registration_number,
-                    amount: Number(pendingTxn.amount), gateway: pendingTxn.gateway, method: pendingTxn.method,
-                    transaction_id: txnId, date: Date.now()
-                });
-                localStorage.removeItem('pendingTxn');
-                showToast("Payment Successful!", "success");
-                setTimeout(() => { window.location.href = 'student-fees.html'; }, 2000);
-            }, 2000);
-        });
-    }
 }
 
 document.addEventListener('DOMContentLoaded', () => {

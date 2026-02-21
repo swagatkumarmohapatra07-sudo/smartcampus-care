@@ -2,37 +2,48 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Maintenance Queries</title>
+    <title>Maintenance Portal - SmartCampus</title>
     <link rel="stylesheet" href="style.css">
 </head>
-<body style="position: relative;">
-    <button class="back-circle-btn" onclick="window.location.href='student-home.html'" title="Back to Dashboard" style="position: absolute; top: 20px; left: 20px; z-index: 100;">
+<body style="min-height: 100vh; overflow-y: auto; background: linear-gradient(-45deg, #0f172a, #1e1b4b, #0f172a);">
+
+    <button class="back-circle-btn" onclick="window.location.href='student-home.html'" title="Back to Dashboard" style="position: absolute; top: 25px; left: 25px; z-index: 100000;">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <line x1="19" y1="12" x2="5" y2="12"></line>
             <polyline points="12 19 5 12 12 5"></polyline>
         </svg>
     </button>
 
-    <div class="container slide-in" style="margin-top: 60px;">
-        <h2 style="margin-bottom: 5px; display: flex; align-items: center;">
-            <img id="headerAvatar" class="profile-avatar-small" src="https://cdn-icons-png.flaticon.com/512/149/149071.png" alt="Avatar">
-            <span id="welcomeText" style="margin-left: 8px;">Maintenance Portal</span>
-        </h2>
-        <p id="academicInfo" style="color: #94a3b8; font-weight: 500; margin-bottom: 30px;">Loading student details...</p>
+    <div class="container slide-in" style="margin-top: 80px; max-width: 800px; position: relative; z-index: 10;">
+        
+        <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 30px;">
+            <div style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); padding: 15px; border-radius: 15px;">
+                <span style="font-size: 2em;">🛠️</span>
+            </div>
+            <div>
+                <h1 style="color: #f59e0b; margin: 0; font-size: 2em;">Maintenance Portal</h1>
+                <p style="color: #94a3b8; margin: 5px 0 0 0;">Lodge complaints and track resolution status</p>
+            </div>
+        </div>
 
-        <div class="card">
-            <h3>Raise a New Query</h3>
+        <div class="card" style="background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(255,255,255,0.05); margin-bottom: 40px;">
+            <h3 style="color: #f8fafc; margin-bottom: 15px;">Raise a New Query</h3>
             <form id="complaintForm">
-                <textarea id="description" placeholder="Describe the issue (e.g., Fan not working in Room 302)..." rows="4" required></textarea>
-                <button type="submit">Submit Query</button>
+                <textarea id="description" rows="4" placeholder="Describe your campus or hostel issue here..." required style="width: 100%; padding: 15px; background: rgba(0,0,0,0.3); color: white; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; resize: vertical; margin-bottom: 15px; box-sizing: border-box;"></textarea>
+                <button type="submit" style="width: 100%; padding: 15px; background: #f59e0b; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.3s;" onmouseover="this.style.background='#d97706'" onmouseout="this.style.background='#f59e0b'">
+                    Submit Query
+                </button>
             </form>
         </div>
 
-        <h3 style="margin-top: 30px; color: #6366f1;">Active Queries</h3>
-        <div id="activeComplaintsList"></div>
+        <h3 style="color: #cbd5e1; margin-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px;">Active Queries</h3>
+        <div id="activeComplaintsList" style="margin-bottom: 40px;">
+            </div>
 
-        <h3 style="margin-top: 30px; color: #10b981;">Resolved History</h3>
-        <div id="resolvedComplaintsList"></div>
+        <h3 style="color: #10b981; margin-bottom: 15px; border-bottom: 1px solid rgba(16, 185, 129, 0.2); padding-bottom: 10px;">Resolved Queries</h3>
+        <div id="resolvedComplaintsList">
+            </div>
+
     </div>
     
     <script type="module" src="app.js"></script>

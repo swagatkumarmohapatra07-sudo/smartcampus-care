@@ -1075,3 +1075,20 @@ body.index-body {
     clear: both;
     margin-top: 15px;
 }
+/* --- FIX FOR HIDDEN / INVISIBLE DROPDOWN OPTIONS --- */
+select option {
+    background-color: #0f172a; /* Deep dark blue background */
+    color: #f8fafc; /* Crisp white text */
+    padding: 10px;
+}
+
+select optgroup {
+    background-color: #1e293b; /* Slightly lighter dark blue for group headers */
+    color: #94a3b8; /* Grayish text for headers */
+    font-weight: bold;
+}
+
+/* Ensure the select element itself has a pointer cursor */
+select {
+    cursor: pointer;
+}
