@@ -821,38 +821,61 @@ if (user?.role === 'Admin') {
     loadAdminData();
 }
 
-// 💥 ADMIN MAINTENANCE QUERIES RENDERER (WITH FILTER) 💥
+// 💥 ADMIN MAINTENANCE QUERIES RENDERER (BULLETPROOF) 💥
 window.renderAdminQueries = function() {
-    const listDiv = document.getElementById('adminComplaintsList');
-    const filterVal = document.getElementById('adminQueryFilter') ? document.getElementById('adminQueryFilter').value : "All";
-    
-    if (!window.allComplaints || !listDiv) return;
+    try {
+        const listDiv = document.getElementById('adminComplaintsList');
+        const filterDropdown = document.getElementById('adminQueryFilter');
+        const filterVal = filterDropdown ? filterDropdown.value : "All";
+        
+        if (!window.allComplaints || !listDiv) return;
 
-    let filtered = window.allComplaints;
-    if (filterVal !== "All") {
-        filtered = window.allComplaints.filter(c => c.status === filterVal);
-    }
+        let filtered = window.allComplaints;
+        if (filterVal !== "All") {
+            filtered = window.allComplaints.filter(c => c.status === filterVal);
+        }
 
-    if (filtered.length === 0) {
-        listDiv.innerHTML = '<p style="color: #94a3b8; text-align: center; padding: 20px; background: rgba(0,0,0,0.2); border-radius: 8px;">No queries found.</p>';
-        return;
-    }
+        if (filtered.length === 0) {
+            listDiv.innerHTML = '<p style="color: #94a3b8; text-align: center; padding: 20px; background: rgba(0,0,0,0.2); border-radius: 8px;">No queries found for this status.</p>';
+            return;
+        }
 
-    listDiv.innerHTML = filtered.map((c) => `
-        <div class="card" style="margin-bottom: 15px; border-left: 4px solid ${c.status === 'Resolved' ? '#10b981' : (c.status === 'In Progress' ? '#3b82f6' : '#f59e0b')};">
-            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-                <span style="color: #6366f1; font-weight: 600;">Reg: ${c.reg_number || 'N/A'}</span>
-                <span class="badge" style="background: ${c.status === 'Resolved' ? 'rgba(16, 185, 129, 0.2)' : (c.status === 'In Progress' ? 'rgba(59, 130, 246, 0.2)' : 'rgba(245, 158, 11, 0.2)')}; color: ${c.status === 'Resolved' ? '#34d399' : (c.status === 'In Progress' ? '#60a5fa' : '#fbbf24')}; border: 1px solid currentColor;">${c.status}</span>
-            </div>
-            <p style="margin-top: 10px; color: #cbd5e1; font-size: 0.95em;"><strong>Info:</strong> ${c.student_details}</p>
-            <p style="background: rgba(0,0,0,0.3); padding: 12px; border-radius: 8px; color: #f8fafc; margin-bottom: 15px; font-size: 0.95em; border: 1px solid rgba(255,255,255,0.05);"><strong>Issue:</strong> ${c.description}</p>
+        listDiv.innerHTML = filtered.map((c) => {
+            // Safeguards against missing data crashing the render
+            const status = c.status || 'Pending';
+            const regNumber = c.reg_number || 'N/A';
+            const details = c.student_details || 'Unknown Student';
+            const desc = c.description || 'No description provided';
             
-            <div style="display: flex; gap: 10px; justify-content: flex-end;">
-                ${c.status === 'Pending' ? `<button onclick="window.updateStatus('${c.id}', 'In Progress')" style="padding: 8px 15px; border-radius: 8px; background: rgba(59, 130, 246, 0.2); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.4); cursor: pointer; transition: 0.3s; font-weight: bold;">Mark 'In Progress'</button>` : ''}
-                ${c.status === 'In Progress' ? `<button onclick="window.updateStatus('${c.id}', 'Resolved')" style="padding: 8px 15px; border-radius: 8px; background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); cursor: pointer; transition: 0.3s; font-weight: bold;">Mark 'Resolved'</button>` : ''}
-            </div>
-        </div>
-    `).join('');
+            let bColor = '#f59e0b';
+            let bgBadge = 'rgba(245, 158, 11, 0.2)';
+            let textBadge = '#fbbf24';
+            
+            if (status === 'Resolved') {
+                bColor = '#10b981'; bgBadge = 'rgba(16, 185, 129, 0.2)'; textBadge = '#34d399';
+            } else if (status === 'In Progress') {
+                bColor = '#3b82f6'; bgBadge = 'rgba(59, 130, 246, 0.2)'; textBadge = '#60a5fa';
+            }
+
+            return `
+                <div class="card" style="margin-bottom: 15px; border-left: 4px solid ${bColor};">
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                        <span style="color: #6366f1; font-weight: 600;">Reg: ${regNumber}</span>
+                        <span class="badge" style="background: ${bgBadge}; color: ${textBadge}; border: 1px solid currentColor;">${status}</span>
+                    </div>
+                    <p style="margin-top: 10px; color: #cbd5e1; font-size: 0.95em;"><strong>Info:</strong> ${details}</p>
+                    <p style="background: rgba(0,0,0,0.3); padding: 12px; border-radius: 8px; color: #f8fafc; margin-bottom: 15px; font-size: 0.95em; border: 1px solid rgba(255,255,255,0.05);"><strong>Issue:</strong> ${desc}</p>
+                    
+                    <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                        ${status === 'Pending' ? `<button onclick="window.updateStatus('${c.id}', 'In Progress')" style="padding: 8px 15px; border-radius: 8px; background: rgba(59, 130, 246, 0.2); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.4); cursor: pointer; transition: 0.3s; font-weight: bold;">Mark 'In Progress'</button>` : ''}
+                        ${status === 'In Progress' ? `<button onclick="window.updateStatus('${c.id}', 'Resolved')" style="padding: 8px 15px; border-radius: 8px; background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); cursor: pointer; transition: 0.3s; font-weight: bold;">Mark 'Resolved'</button>` : ''}
+                    </div>
+                </div>
+            `;
+        }).join('');
+    } catch (err) {
+        console.error("Render Error:", err);
+    }
 };
 
 function loadAdminData() {
