@@ -90,7 +90,7 @@
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: 25px;
             margin-top: 25px;
-            perspective: 1000px; /* Required for flip effect */
+            perspective: 1000px;
         }
 
         .bento-card {
@@ -146,9 +146,9 @@
         /* 💥 FIXED CLICK-TO-FLIP CSS 💥 */
         .flip-card {
             background-color: transparent;
-            min-height: 310px;
-            cursor: pointer;
+            height: 310px; /* Fixed height is crucial to stop the jitter */
             perspective: 1000px;
+            cursor: pointer;
         }
 
         .flip-card-inner {
@@ -160,7 +160,6 @@
             transform-style: preserve-3d;
         }
 
-        /* Toggle flip based on class instead of hover */
         .flip-card.flipped .flip-card-inner {
             transform: rotateY(180deg);
         }
@@ -169,10 +168,12 @@
             position: absolute;
             width: 100%;
             height: 100%;
-            -webkit-backface-visibility: hidden; /* Fix for Safari */
+            -webkit-backface-visibility: hidden;
             backface-visibility: hidden;
             border-radius: 25px;
             box-sizing: border-box;
+            top: 0;
+            left: 0;
         }
 
         .flip-back {
