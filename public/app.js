@@ -47,69 +47,85 @@ window.showToast = (message, type = 'success') => {
     }, 3500);
 };
 
+// --- SAFE DROPDOWN BUILDER ---
+function safelyPopulateDropdown(selectId, optionsArray, currentValue) {
+    const selectEl = document.getElementById(selectId);
+    if (!selectEl) return;
+    
+    selectEl.options.length = 0; 
+    
+    optionsArray.forEach(opt => {
+        selectEl.add(new Option(opt.label, opt.value));
+    });
+
+    if (Array.from(selectEl.options).some(o => o.value === currentValue)) {
+        selectEl.value = currentValue;
+    } else {
+        selectEl.selectedIndex = 0;
+    }
+}
+
 // 💥 DYNAMIC DROPDOWNS ENGINE (For Registration & Profile) 💥
 function initDynamicDropdowns(courseRef, yearId, semId, branchId, currentData = {}) {
-    const yearSelect = document.getElementById(yearId);
-    const semSelect = document.getElementById(semId);
-    const branchSelect = document.getElementById(branchId);
     const courseSelect = document.getElementById(courseRef); 
-
+    const yearSelect = document.getElementById(yearId);
     if (!yearSelect) return;
 
     const render = () => {
         const course = courseSelect ? courseSelect.value : courseRef;
-        
         const savedYear = yearSelect.value;
-        let years = ['1st Year', '2nd Year'];
-        if (course === 'B.Tech') years.push('3rd Year', '4th Year');
+        const semSelect = document.getElementById(semId);
+        const branchSelect = document.getElementById(branchId);
         
-        yearSelect.innerHTML = years.map(y => `<option value="${y}">${y}</option>`).join('');
-        if (years.includes(savedYear)) yearSelect.value = savedYear;
+        let years = [{label: '1st Year', value: '1st Year'}, {label: '2nd Year', value: '2nd Year'}];
+        if (course === 'B.Tech') {
+            years.push({label: '3rd Year', value: '3rd Year'}, {label: '4th Year', value: '4th Year'});
+        }
+        safelyPopulateDropdown(yearId, years, savedYear);
         
         const year = yearSelect.value;
 
         if (semSelect) {
             const savedSem = semSelect.value;
             let sems = [];
-            if (year === '1st Year') sems = ['Semester 1', 'Semester 2'];
-            else if (year === '2nd Year') sems = ['Semester 3', 'Semester 4'];
-            else if (year === '3rd Year') sems = ['Semester 5', 'Semester 6'];
-            else if (year === '4th Year') sems = ['Semester 7', 'Semester 8'];
-            
-            semSelect.innerHTML = sems.map(s => `<option value="${s}">${s}</option>`).join('');
-            if (sems.includes(savedSem)) semSelect.value = savedSem;
+            if (year === '1st Year') sems = [{label: 'Semester 1', value: 'Semester 1'}, {label: 'Semester 2', value: 'Semester 2'}];
+            else if (year === '2nd Year') sems = [{label: 'Semester 3', value: 'Semester 3'}, {label: 'Semester 4', value: 'Semester 4'}];
+            else if (year === '3rd Year') sems = [{label: 'Semester 5', value: 'Semester 5'}, {label: 'Semester 6', value: 'Semester 6'}];
+            else if (year === '4th Year') sems = [{label: 'Semester 7', value: 'Semester 7'}, {label: 'Semester 8', value: 'Semester 8'}];
+            safelyPopulateDropdown(semId, sems, savedSem);
         }
 
         if (branchSelect) {
-            let options = '';
+            const savedBranch = branchSelect.value;
+            let branches = [];
             if (course === 'B.Tech') {
                 if (year === '1st Year') {
-                    options = '<option value="Common 1st Year">Common 1st Year</option>';
+                    branches.push({label: 'Common 1st Year', value: 'Common 1st Year'});
                 } else {
-                    options = `
-                        <option value="">Select Core Branch</option>
-                        <option value="Computer Science and Engineering">Computer Science and Engineering</option>
-                        <option value="Data Science">Data Science</option>
-                        <option value="Electrical Communication Engineering">Electrical Communication Engineering</option>
-                        <option value="EE">EE</option>
-                        <option value="EEE">EEE</option>
-                        <option value="Civil">Civil</option>
-                        <option value="Mechanical">Mechanical</option>
-                    `;
+                    branches = [
+                        {label: 'Select Core Branch', value: ''},
+                        {label: 'Computer Science and Engineering', value: 'Computer Science and Engineering'},
+                        {label: 'Data Science', value: 'Data Science'},
+                        {label: 'Electrical Communication Engineering', value: 'Electrical Communication Engineering'},
+                        {label: 'EE', value: 'EE'},
+                        {label: 'EEE', value: 'EEE'},
+                        {label: 'Civil', value: 'Civil'},
+                        {label: 'Mechanical', value: 'Mechanical'}
+                    ];
                 }
             } else if (course === 'MBA') {
-                options = `
-                    <option value="">Select Specialization</option>
-                    <option value="Human Resources (HR)">Human Resources (HR)</option>
-                    <option value="Finance">Finance</option>
-                    <option value="Marketing">Marketing</option>
-                    <option value="IT & Systems">IT & Systems</option>
-                    <option value="Operations">Operations</option>
-                `;
+                branches = [
+                    {label: 'Select Specialization', value: ''},
+                    {label: 'Human Resources (HR)', value: 'Human Resources (HR)'},
+                    {label: 'Finance', value: 'Finance'},
+                    {label: 'Marketing', value: 'Marketing'},
+                    {label: 'IT & Systems', value: 'IT & Systems'},
+                    {label: 'Operations', value: 'Operations'}
+                ];
             } else if (course === 'MCA') {
-                options = '<option value="Master of Computer Applications">Master of Computer Applications</option>';
+                branches.push({label: 'Master of Computer Applications', value: 'Master of Computer Applications'});
             }
-            branchSelect.innerHTML = options;
+            safelyPopulateDropdown(branchId, branches, savedBranch);
         }
     };
 
@@ -120,65 +136,59 @@ function initDynamicDropdowns(courseRef, yearId, semId, branchId, currentData = 
     if (currentData.year) {
         yearSelect.value = currentData.year;
         render(); 
-        if (currentData.semester && semSelect) semSelect.value = currentData.semester;
-        if (currentData.branch && branchSelect) branchSelect.value = currentData.branch;
+        if (currentData.semester && document.getElementById(semId)) document.getElementById(semId).value = currentData.semester;
+        if (currentData.branch && document.getElementById(branchId)) document.getElementById(branchId).value = currentData.branch;
     }
 }
 
-// 💥 NOTICEBOARD DROPDOWNS ENGINE (BULLETPROOF) 💥
+// 💥 NOTICEBOARD DROPDOWNS ENGINE 💥
 function initAdminNoticeDropdowns() {
     const nCourse = document.getElementById('noticeCourse');
     const nYear = document.getElementById('noticeYear');
-    const nSem = document.getElementById('noticeSemester');
-    const nBranch = document.getElementById('noticeBranch');
-
-    if (!nCourse || !nYear || !nSem || !nBranch) return;
+    if (!nCourse || !nYear) return;
 
     const renderNotices = () => {
         const course = nCourse.value;
         const currentYear = nYear.value || "All";
-        const currentSem = nSem.value || "All";
-        const currentBranch = nBranch.value || "All";
+        const currentSem = document.getElementById('noticeSemester').value || "All";
+        const currentBranch = document.getElementById('noticeBranch').value || "All";
         
-        let yearHTML = '<option value="All">All Years</option>';
+        let years = [{label: 'All Years', value: 'All'}, {label: '1st Year', value: '1st Year'}, {label: '2nd Year', value: '2nd Year'}];
         if (course === 'B.Tech') {
-            yearHTML += '<option value="1st Year">1st Year</option><option value="2nd Year">2nd Year</option><option value="3rd Year">3rd Year</option><option value="4th Year">4th Year</option>';
-        } else {
-            yearHTML += '<option value="1st Year">1st Year</option><option value="2nd Year">2nd Year</option>';
+            years.push({label: '3rd Year', value: '3rd Year'}, {label: '4th Year', value: '4th Year'});
         }
-        
-        nYear.innerHTML = yearHTML;
-        if (yearHTML.includes(`value="${currentYear}"`)) nYear.value = currentYear;
-        else nYear.value = "All";
+        safelyPopulateDropdown('noticeYear', years, currentYear);
 
         const selectedYear = nYear.value;
-        let semHTML = '<option value="All">All Semesters</option>';
-        
-        if (selectedYear === '1st Year') semHTML += '<option value="Semester 1">Semester 1</option><option value="Semester 2">Semester 2</option>';
-        else if (selectedYear === '2nd Year') semHTML += '<option value="Semester 3">Semester 3</option><option value="Semester 4">Semester 4</option>';
-        else if (selectedYear === '3rd Year') semHTML += '<option value="Semester 5">Semester 5</option><option value="Semester 6">Semester 6</option>';
-        else if (selectedYear === '4th Year') semHTML += '<option value="Semester 7">Semester 7</option><option value="Semester 8">Semester 8</option>';
-        
-        nSem.innerHTML = semHTML;
-        if (semHTML.includes(`value="${currentSem}"`)) nSem.value = currentSem;
-        else nSem.value = "All";
+        let sems = [{label: 'All Semesters', value: 'All'}];
+        if (selectedYear === '1st Year') sems.push({label: 'Semester 1', value: 'Semester 1'}, {label: 'Semester 2', value: 'Semester 2'});
+        else if (selectedYear === '2nd Year') sems.push({label: 'Semester 3', value: 'Semester 3'}, {label: 'Semester 4', value: 'Semester 4'});
+        else if (selectedYear === '3rd Year') sems.push({label: 'Semester 5', value: 'Semester 5'}, {label: 'Semester 6', value: 'Semester 6'});
+        else if (selectedYear === '4th Year') sems.push({label: 'Semester 7', value: 'Semester 7'}, {label: 'Semester 8', value: 'Semester 8'});
+        safelyPopulateDropdown('noticeSemester', sems, currentSem);
 
-        let branchHTML = '<option value="All">All Branches</option>';
+        let branches = [{label: 'All Branches', value: 'All'}];
         if (course === 'B.Tech') {
             if (selectedYear === '1st Year') {
-                branchHTML += '<option value="Common 1st Year">Common 1st Year</option>';
+                branches.push({label: 'Common 1st Year', value: 'Common 1st Year'});
             } else {
-                branchHTML += '<option value="Computer Science and Engineering">Computer Science and Engineering</option><option value="Data Science">Data Science</option><option value="Electrical Communication Engineering">Electrical Communication Engineering</option><option value="EE">EE</option><option value="EEE">EEE</option><option value="Civil">Civil</option><option value="Mechanical">Mechanical</option>';
+                branches.push(
+                    {label: 'Computer Science and Engineering', value: 'Computer Science and Engineering'},
+                    {label: 'Data Science', value: 'Data Science'},
+                    {label: 'Electrical Communication Engineering', value: 'Electrical Communication Engineering'},
+                    {label: 'EE', value: 'EE'}, {label: 'EEE', value: 'EEE'}, {label: 'Civil', value: 'Civil'}, {label: 'Mechanical', value: 'Mechanical'}
+                );
             }
         } else if (course === 'MBA') {
-            branchHTML += '<option value="Human Resources (HR)">Human Resources (HR)</option><option value="Finance">Finance</option><option value="Marketing">Marketing</option><option value="IT & Systems">IT & Systems</option><option value="Operations">Operations</option>';
+            branches.push(
+                {label: 'Human Resources (HR)', value: 'Human Resources (HR)'},
+                {label: 'Finance', value: 'Finance'}, {label: 'Marketing', value: 'Marketing'},
+                {label: 'IT & Systems', value: 'IT & Systems'}, {label: 'Operations', value: 'Operations'}
+            );
         } else if (course === 'MCA') {
-            branchHTML += '<option value="Master of Computer Applications">Master of Computer Applications</option>';
+            branches.push({label: 'Master of Computer Applications', value: 'Master of Computer Applications'});
         }
-        
-        nBranch.innerHTML = branchHTML;
-        if (branchHTML.includes(`value="${currentBranch}"`)) nBranch.value = currentBranch;
-        else nBranch.value = "All";
+        safelyPopulateDropdown('noticeBranch', branches, currentBranch);
     };
 
     nCourse.addEventListener('change', renderNotices);
@@ -190,46 +200,33 @@ function initAdminNoticeDropdowns() {
 const registerForm = document.getElementById('registerForm');
 if (registerForm) {
     initDynamicDropdowns('course', 'year', 'semester', 'branch'); 
-
     registerForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const regNumberInput = document.getElementById('regNumber').value;
         const submitBtn = registerForm.querySelector('button');
-        
         submitBtn.disabled = true;
         submitBtn.innerText = "Checking Details...";
-
         try {
             const q = query(collection(db, "users"), where("registration_number", "==", regNumberInput));
             const querySnapshot = await getDocs(q);
-
             if (!querySnapshot.empty) {
                 showToast(`Error: Registration '${regNumberInput}' is already registered!`, 'error');
                 submitBtn.disabled = false;
                 submitBtn.innerText = "Register Account";
                 return; 
             }
-
             await addDoc(collection(db, "users"), {
-                role: "Student",
-                full_name: document.getElementById('fullName').value,
-                course: document.getElementById('course').value,
-                branch: document.getElementById('branch').value,
-                year: document.getElementById('year').value,             
-                semester: document.getElementById('semester').value, 
-                section: "Unassigned", 
-                registration_number: regNumberInput,
-                password: document.getElementById('password').value,
-                profile_pic: "", 
-                fee_status: "Unpaid" 
+                role: "Student", full_name: document.getElementById('fullName').value,
+                course: document.getElementById('course').value, branch: document.getElementById('branch').value,
+                year: document.getElementById('year').value, semester: document.getElementById('semester').value, 
+                section: "Unassigned", registration_number: regNumberInput,
+                password: document.getElementById('password').value, profile_pic: "", fee_status: "Unpaid" 
             });
-            
             showToast('Registration Successful! Redirecting...', 'success');
             setTimeout(() => window.location.href = 'student-login.html', 1500);
         } catch (error) {
             showToast('Error registering account.', 'error');
-            submitBtn.disabled = false;
-            submitBtn.innerText = "Register Account";
+            submitBtn.disabled = false; submitBtn.innerText = "Register Account";
         }
     });
 }
@@ -241,10 +238,8 @@ if (studentLoginForm) {
         e.preventDefault();
         const regNum = document.getElementById('regNumber').value;
         const pass = document.getElementById('password').value;
-
         const q = query(collection(db, "users"), where("registration_number", "==", regNum), where("password", "==", pass), where("role", "==", "Student"));
         const querySnapshot = await getDocs(q);
-
         if (!querySnapshot.empty) {
             const userData = querySnapshot.docs[0].data();
             userData.id = querySnapshot.docs[0].id; 
@@ -260,20 +255,15 @@ if (studentLoginForm) {
 const adminLoginForm = document.getElementById('loginForm');
 if (adminLoginForm) {
     ensureAdminExists();
-
     adminLoginForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const username = document.getElementById('username').value.trim(); 
         const pass = document.getElementById('password').value.trim();
         const submitBtn = adminLoginForm.querySelector('button');
-
-        submitBtn.innerText = "Authenticating...";
-        submitBtn.disabled = true;
-
+        submitBtn.innerText = "Authenticating..."; submitBtn.disabled = true;
         try {
             const q = query(collection(db, "users"), where("username", "==", username), where("password", "==", pass), where("role", "==", "Admin"));
             const querySnapshot = await getDocs(q);
-
             if (!querySnapshot.empty) {
                 const userData = querySnapshot.docs[0].data();
                 userData.id = querySnapshot.docs[0].id;
@@ -287,8 +277,7 @@ if (adminLoginForm) {
             document.getElementById('errorMsg').style.display = 'block';
             document.getElementById('errorMsg').innerText = "Database Error.";
         } finally {
-            submitBtn.innerText = "Access System";
-            submitBtn.disabled = false;
+            submitBtn.innerText = "Access System"; submitBtn.disabled = false;
         }
     });
 }
@@ -321,14 +310,12 @@ if (user?.role === 'Student') {
         timeGreeting.innerText = greeting;
     }
 
-    // 💥 REAL-TIME STUDENT PROFILE SYNC 💥
     if (user.id) {
         const userDocRef = doc(db, "users", user.id);
         onSnapshot(userDocRef, (docSnap) => {
             if (docSnap.exists()) {
                 const freshUser = docSnap.data();
                 freshUser.id = docSnap.id;
-                
                 localStorage.setItem('user', JSON.stringify(freshUser));
                 
                 const headerAvatar = document.getElementById('headerAvatar');
@@ -344,13 +331,11 @@ if (user?.role === 'Student') {
                 const profileAvatarLarge = document.getElementById('profileAvatarLarge');
                 const profileNameDisplay = document.getElementById('profileNameDisplay');
                 const profileYear = document.getElementById('profileYear');
-                const profileSemester = document.getElementById('profileSemester');
-                const profileBranch = document.getElementById('profileBranch');
                 
                 if (profileAvatarLarge) profileAvatarLarge.src = avatarUrl;
                 if (profileNameDisplay) profileNameDisplay.innerText = freshUser.full_name;
                 
-                if (profileYear && profileSemester && profileBranch) {
+                if (profileYear) {
                     initDynamicDropdowns(freshUser.course || 'B.Tech', 'profileYear', 'profileSemester', 'profileBranch', { 
                         year: freshUser.year, semester: freshUser.semester, branch: freshUser.branch 
                     });
@@ -363,12 +348,11 @@ if (user?.role === 'Student') {
     if (document.getElementById('paymentForm')) initFeeSystem();
     if (document.getElementById('profileYear')) initProfileSystem(user.profile_pic || 'https://cdn-icons-png.flaticon.com/512/149/149071.png');
 
-    // 💥 LIVE NOTICEBOARD RECEIVER 💥
+    // LIVE NOTICEBOARD RECEIVER
     const noticeBoard = document.getElementById('studentNoticeBoard');
     if(noticeBoard) {
         onSnapshot(collection(db, "notices"), (snapshot) => {
             const activeUser = JSON.parse(localStorage.getItem('user'));
-            
             let notices = [];
             snapshot.forEach(doc => notices.push({id: doc.id, ...doc.data()}));
             
@@ -380,8 +364,7 @@ if (user?.role === 'Student') {
                         (t.semester === 'All' || t.semester === activeUser.semester) &&
                         (t.branch === 'All' || t.branch === activeUser.branch)
                     );
-                } 
-                else if (n.course) {
+                } else if (n.course) {
                     return (n.course === 'All' || n.course === activeUser.course) &&
                            (n.year === 'All' || n.year === activeUser.year) &&
                            (n.semester === 'All' || n.semester === activeUser.semester) &&
@@ -416,14 +399,12 @@ function initProfileSystem(avatarUrl) {
         profileImageInput.addEventListener('change', async (e) => {
             const file = e.target.files[0];
             if (!file) return;
-
             showToast('Uploading image...', 'warning');
             const CLOUD_NAME = "dmy74celx"; 
             const UPLOAD_PRESET = "rcyp6gvo"; 
             const formData = new FormData();
             formData.append('file', file);
             formData.append('upload_preset', UPLOAD_PRESET);
-
             try {
                 const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, { method: 'POST', body: formData });
                 const data = await res.json();
@@ -437,7 +418,6 @@ function initProfileSystem(avatarUrl) {
     }
 }
 
-// 💥 MAINTENANCE & QUERIES SYSTEM (STUDENT SIDE) 💥
 function initQueriesSystem() {
     const complaintForm = document.getElementById('complaintForm');
     const activeList = document.getElementById('activeComplaintsList');
@@ -450,7 +430,6 @@ function initQueriesSystem() {
 
     complaintForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        
         const descInput = document.getElementById('description');
         const submitBtn = complaintForm.querySelector('button');
 
@@ -472,7 +451,6 @@ function initQueriesSystem() {
             showToast('Query submitted successfully!', 'success');
             complaintForm.reset(); 
         } catch (error) {
-            console.error("Firebase Submission Error:", error);
             showToast('Failed to submit query. Check internet connection.', 'error');
         } finally {
             submitBtn.disabled = false;
@@ -908,8 +886,9 @@ function loadAdminData() {
 
                 window.renderAdminQueries(); 
             }, (error) => {
-                // 💥 PRINTS SILENT ERRORS TO THE ADMIN SCREEN 💥
+                // 💥 THIS PRINTS THE SILENT ERROR TO THE SCREEN 💥
                 console.error("FIREBASE ERROR:", error);
+                alert("🚨 FIREBASE DATABASE ERROR 🚨\n\nYour database is blocking access! This usually means your 30-day Test Mode Rules have expired.\n\nPlease go to Firebase Console -> Firestore Database -> Rules -> set 'allow read, write: if true;'");
                 adminComplaintsList.innerHTML = `
                     <div style="background: rgba(225,29,72,0.1); border: 1px solid rgba(225,29,72,0.3); padding: 20px; border-radius: 8px; color: #fda4af;">
                         <h3 style="margin-top: 0;">⚠️ Database Connection Blocked!</h3>
@@ -933,6 +912,9 @@ function loadAdminData() {
             querySnapshot.forEach((doc) => students.push({ id: doc.id, ...doc.data() }));
             window.allStudents = students; 
             applyAdminFilters();
+        }, (error) => {
+            console.error("FIREBASE STUDENT DB ERROR:", error);
+            document.getElementById('adminStudentDatabaseList').innerHTML = `<p style="color: #fda4af; padding: 20px; border: 1px solid #e11d48; border-radius: 8px; text-align: center;">Failed to load students. Database rules might be blocking access.</p>`;
         });
 
         const searchInput = document.getElementById('adminSearchStudent');
