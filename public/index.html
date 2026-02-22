@@ -3,60 +3,68 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SmartCampus Hub - Welcome</title>
+    <title>SmartCampus Hub</title>
     <link rel="stylesheet" href="style.css">
 </head>
-<body class="index-body" style="margin: 0; position: relative;">
+<body class="index-body">
     
     <div class="orb orb-1"></div>
     <div class="orb orb-2"></div>
-
+    
     <div class="index-wrapper">
-        
-        <nav class="index-nav stagger-1">
+        <nav class="index-nav">
             <a href="#" class="index-logo">
-                <span style="font-size: 1.5em; filter: drop-shadow(0 0 10px rgba(99,102,241,0.5));">🎓</span> 
-                SmartCampus
+                <span>🎓</span> SmartCampus
             </a>
-            <div class="index-nav-links">
-                <a href="features.html" class="nav-link-btn">Features</a>
+            
+            <div class="hamburger" id="mobile-menu-btn">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+
+            <div class="index-nav-links" id="nav-links">
+                <a href="#features" class="nav-link-btn">Features</a>
                 <a href="about-us.html" class="nav-link-btn">About Us</a>
-                <a href="admin-login.html" class="nav-link-btn" style="background: rgba(225, 29, 72, 0.15); border-color: rgba(225, 29, 72, 0.3); color: #fda4af;">Admin Portal</a>
+                <a href="admin.html" class="nav-link-btn admin-link">Admin Portal</a>
             </div>
         </nav>
 
         <main class="index-hero">
-            
-            <div class="hero-text stagger-2">
+            <div class="hero-text stagger-1">
                 <h1>Next-Gen Campus Management.</h1>
                 <p>Welcome to your unified university portal. Seamlessly manage your academic profile, clear semester fees in real-time, and track maintenance queries all in one secure, intelligent dashboard.</p>
                 
-                <div style="display: flex; gap: 15px; flex-wrap: wrap;">
-                    <span style="background: rgba(16, 185, 129, 0.2); color: #34d399; padding: 6px 12px; border-radius: 20px; font-size: 0.85em; border: 1px solid rgba(16, 185, 129, 0.3);">✓ Smart Ledgers</span>
-                    <span style="background: rgba(99, 102, 241, 0.2); color: #818cf8; padding: 6px 12px; border-radius: 20px; font-size: 0.85em; border: 1px solid rgba(99, 102, 241, 0.3);">✓ Real-time Sync</span>
-                    <span style="background: rgba(245, 158, 11, 0.2); color: #fbbf24; padding: 6px 12px; border-radius: 20px; font-size: 0.85em; border: 1px solid rgba(245, 158, 11, 0.3);">✓ Secure Auth</span>
+                <div class="feature-pills">
+                    <span class="pill-green">✓ Smart Ledgers</span>
+                    <span class="pill-blue">✓ Real-time Sync</span>
+                    <span class="pill-yellow">✓ Secure Auth</span>
                 </div>
             </div>
 
-            <div class="hero-card stagger-3">
-                <h3 style="color: #f8fafc; margin-bottom: 5px; font-size: 1.5em;">Welcome Back</h3>
-                <p style="color: #94a3b8; margin-bottom: 25px; font-size: 0.9em;">Please authenticate to continue</p>
+            <div class="hero-card index-glass-card stagger-2">
+                <h2 style="margin-bottom: 5px;">Welcome Back</h2>
+                <p style="color: #94a3b8; font-size: 0.9em; margin-bottom: 25px;">Please authenticate to continue</p>
                 
-                <a href="student-login.html" class="primary-btn-large">
-                    Student Login &rarr;
-                </a>
+                <a href="student-login.html" class="primary-btn-large">Student Login &rarr;</a>
                 
-                <div style="margin: 20px 0; border-top: 1px solid rgba(255,255,255,0.1); position: relative;">
-                    <span style="position: absolute; top: -10px; left: 50%; transform: translateX(-50%); background: #1e293b; padding: 0 10px; color: #64748b; font-size: 0.8em; border-radius: 5px;">OR</span>
+                <div class="divider">
+                    <hr><span>OR</span><hr>
                 </div>
 
-                <a href="register.html" class="secondary-btn-large">
-                    Create New Account
-                </a>
+                <a href="student-register.html" class="secondary-btn-large">Create New Account</a>
             </div>
-
         </main>
     </div>
 
+    <script>
+        const menuBtn = document.getElementById('mobile-menu-btn');
+        const navLinks = document.getElementById('nav-links');
+
+        menuBtn.addEventListener('click', () => {
+            menuBtn.classList.toggle('active');
+            navLinks.classList.toggle('active');
+        });
+    </script>
 </body>
 </html>
