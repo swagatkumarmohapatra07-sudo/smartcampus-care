@@ -1092,48 +1092,155 @@ select optgroup {
 select {
     cursor: pointer;
 }
+
 /* ==========================================================================
-   📱 MASTER MOBILE RESPONSIVE LAYOUT 
+   📱 MASTER MOBILE RESPONSIVE LAYOUT (FIXED SCROLL & LAYOUT)
    ========================================================================== */
 
 @media screen and (max-width: 850px) {
     
-    /* 1. Global Setup */
-    body {
+    /* --- 1. Unlock Height & Fix Scrolling --- */
+    html, body, .home-body, .index-body {
+        height: auto !important;
+        min-height: 100vh;
+        overflow-x: hidden !important;
+        overflow-y: auto !important; /* Restores vertical scrolling */
+        font-size: 16px !important;
         padding: 10px;
-        overflow-x: hidden;
     }
 
-    .container, .dashboard-container {
+    /* Wrap the main content properly */
+    main, .container, .dashboard-container, .index-wrapper, .index-hero {
+        height: auto !important; /* Removes the 100vh lock */
+        min-height: 100vh;
         margin-top: 10px !important;
         padding: 10px !important;
         width: 100% !important;
         max-width: 100% !important;
         box-sizing: border-box;
-    }
-
-    /* 2. Fix the Landing Page (Next-Gen Campus Text) */
-    /* Forces the text on top and login box on the bottom */
-    div[style*="display: flex"], main {
-        flex-direction: column !important;
+        flex-direction: column !important; /* Stacks Left Text & Right Login Box */
+        align-items: center !important;
         text-align: center !important;
     }
-
-    h1 {
-        font-size: 2.2rem !important;
-        line-height: 1.2 !important;
-        word-wrap: break-word !important;
+    
+    .index-wrapper {
+        padding-bottom: 50px !important; /* Adds space at the very bottom */
     }
 
-    .index-glass-card, .card {
+    /* --- 2. Fix the Navigation Bar --- */
+    .index-nav, .tech-nav, nav {
+        flex-direction: column;
+        gap: 12px;
+        padding: 15px 10px !important;
+        text-align: center;
+        height: auto !important;
+    }
+
+    .index-nav-links {
+        display: flex !important;
+        flex-direction: row !important; /* Keeps links side-by-side */
+        flex-wrap: wrap !important;
+        justify-content: center;
+        gap: 8px !important;
+    }
+
+    .index-nav-links a {
+        font-size: 0.85rem !important; /* Smaller font so they fit neatly */
+        padding: 8px 12px !important;
+        flex: 1 1 auto; /* Allows them to wrap evenly */
+    }
+
+    /* --- 3. Fix the Index Page Text & Pills --- */
+    h1, .hero-text h1 {
+        font-size: 2.3rem !important;
+        line-height: 1.2 !important;
+        margin-top: 20px !important;
+    }
+
+    /* Target the Feature Pills Container specifically */
+    div[style*="gap: 15px; margin-top: 30px;"], 
+    .feature-pills,
+    .action-buttons {
+        display: flex !important;
+        flex-direction: row !important; /* Force them to be side-by-side */
+        flex-wrap: wrap !important;
+        justify-content: center !important;
+        gap: 10px !important;
+        width: 100%;
+    }
+
+    /* Target the individual pills */
+    div[style*="gap: 15px; margin-top: 30px;"] span, 
+    .feature-pills span,
+    .action-buttons span {
+        width: auto !important; /* Stops them from stretching full width */
+        font-size: 0.85rem !important;
+        padding: 6px 12px !important;
+    }
+
+    /* --- 4. Fix Login Cards & Forms --- */
+    .index-glass-card, .card, .hero-card {
         width: 100% !important;
         max-width: 100% !important;
-        padding: 25px 15px !important;
-        margin: 15px 0 !important;
+        padding: 30px 20px !important;
+        margin: 40px 0 50px 0 !important; /* Pushes the login box down slightly */
         box-sizing: border-box !important;
     }
 
-    /* 3. Fix Student Dashboard Profile & Attendance */
+    .index-glass-card h2, .hero-card h2 {
+        font-size: 1.8rem !important;
+    }
+
+    /* Expand input tap targets */
+    input, select, textarea, button {
+        font-size: 1rem !important;
+        padding: 12px 15px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    /* --- 5. Admin Dashboard Fixes --- */
+    div[style*="justify-content: center; flex-wrap: wrap;"] {
+        flex-direction: column;
+        width: 100%;
+        gap: 10px;
+    }
+    
+    div[style*="justify-content: center; flex-wrap: wrap;"] button {
+        width: 100%;
+        margin: 0;
+    }
+
+    .controls-group input, 
+    .controls-group select,
+    select[id^="admin"], 
+    input[id^="admin"],
+    select[id^="notice"],
+    select[id^="att"],
+    select[id^="tt"],
+    input[id^="att"] {
+        width: 100% !important;
+        min-width: 100% !important;
+        box-sizing: border-box;
+    }
+
+    .student-glass-card > div, 
+    .card > div[style*="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap;"] {
+        flex-direction: column !important;
+        gap: 15px !important;
+    }
+
+    .student-glass-card div[style*="display: flex; flex-direction: column; gap: 10px;"] {
+        width: 100%;
+    }
+
+    .student-glass-card div[style*="display: flex; gap: 10px; background: rgba(0,0,0,0.3);"] {
+        flex-wrap: wrap;
+        justify-content: space-between !important;
+        width: 100%;
+    }
+
+    /* --- 6. Student Dashboard Fixes --- */
     .profile-banner {
         flex-direction: column !important;
         text-align: center !important;
@@ -1147,7 +1254,6 @@ select {
         line-height: 1.5;
     }
 
-    /* Force Notices and Attendance sections to stack vertically */
     div[style*="display: flex; overflow: hidden"],
     div[style*="display: flex; flex-wrap: wrap; overflow: hidden"] {
         flex-direction: column !important;
@@ -1161,25 +1267,22 @@ select {
         border-bottom: 1px solid rgba(255,255,255,0.1) !important;
     }
 
-    /* Fix Bento Grid sizing */
     .bento-grid {
         grid-template-columns: 1fr !important;
         gap: 15px !important;
     }
+    
     .bento-card {
         padding: 25px 20px !important;
         min-height: auto !important;
     }
 
-    /* 4. Increase Tap Sizes for Mobile */
-    input, select, textarea, button {
-        font-size: 1rem !important;
-        padding: 12px 15px !important;
-        width: 100% !important;
-        box-sizing: border-box !important;
+    /* --- 7. Modals & Floating Buttons --- */
+    .tt-modal-content {
+        width: 95vw !important;
+        padding: 15px !important;
     }
 
-    /* Floating Logout Button fix */
     button[style*="position: fixed; bottom: 20px;"] {
         width: auto !important;
         bottom: 10px !important;
@@ -1187,4 +1290,14 @@ select {
         font-size: 0.85rem !important;
         padding: 8px 16px !important;
     }
+}
+
+/* ==========================================================================
+   📱 VERY SMALL PHONES (max 400px)
+   ========================================================================== */
+@media screen and (max-width: 400px) {
+    html, body { font-size: 15px !important; }
+    .profile-banner img, #headerAvatar { width: 80px !important; height: 80px !important; }
+    .index-logo, .tech-logo { font-size: 1.2em !important; }
+    h1, .hero-text h1 { font-size: 2rem !important; }
 }
