@@ -4,6 +4,32 @@
     <meta charset="UTF-8">
     <title>Admin Control Center - SmartCampus</title>
     <link rel="stylesheet" href="style.css">
+    <style>
+        /* Modern Toggle Switch for Attendance */
+        .toggle-checkbox { display: none; }
+        .toggle-label {
+            position: relative; display: inline-block; width: 60px; height: 30px;
+            background-color: rgba(225, 29, 72, 0.4); border-radius: 30px;
+            cursor: pointer; transition: 0.3s; box-shadow: inset 0 0 5px rgba(0,0,0,0.5);
+            border: 1px solid rgba(225, 29, 72, 0.6);
+        }
+        .toggle-label::after {
+            content: ''; position: absolute; top: 2px; left: 2px; width: 24px; height: 24px;
+            background-color: white; border-radius: 50%; transition: 0.3s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+        .toggle-checkbox:checked + .toggle-label {
+            background-color: rgba(16, 185, 129, 0.4); border-color: rgba(16, 185, 129, 0.6);
+        }
+        .toggle-checkbox:checked + .toggle-label::after {
+            transform: translateX(30px); background-color: #10b981;
+        }
+        .att-status-text {
+            font-weight: bold; width: 70px; text-align: right;
+        }
+        .status-present { color: #34d399; }
+        .status-absent { color: #f43f5e; }
+    </style>
 </head>
 <body style="position: relative; min-height: 100vh; overflow-y: auto; background: linear-gradient(-45deg, #0f172a, #2a0a18, #0f172a);">
     
@@ -26,6 +52,12 @@
             </button>
             <button onclick="switchAdminTab('notices')" id="tab-notices" style="padding: 12px 25px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(30,41,59,0.6); color: #cbd5e1; cursor: pointer; font-weight: bold; transition: 0.3s;">
                 Noticeboard
+            </button>
+            <button onclick="switchAdminTab('attendance')" id="tab-attendance" style="padding: 12px 25px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(30,41,59,0.6); color: #cbd5e1; cursor: pointer; font-weight: bold; transition: 0.3s;">
+                Roll Call
+            </button>
+            <button onclick="switchAdminTab('timetables')" id="tab-timetables" style="padding: 12px 25px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(30,41,59,0.6); color: #cbd5e1; cursor: pointer; font-weight: bold; transition: 0.3s;">
+                Timetables
             </button>
         </div>
 
@@ -84,7 +116,6 @@
                 </h3>
                 
                 <form id="noticeForm">
-                    
                     <div style="background: rgba(0,0,0,0.2); padding: 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); margin-bottom: 15px;">
                         <h4 style="margin: 0 0 15px 0; color: #cbd5e1; font-size: 0.9em; text-transform: uppercase;">1. Build Audience List</h4>
                         
@@ -117,8 +148,7 @@
                         </div>
                     </div>
 
-                    <div id="targetGroupsContainer" style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; min-height: 35px;">
-                        </div>
+                    <div id="targetGroupsContainer" style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; min-height: 35px;"></div>
                     
                     <h4 style="margin: 0 0 10px 0; color: #cbd5e1; font-size: 0.9em; text-transform: uppercase;">2. Broadcast Message</h4>
                     <textarea id="noticeMessage" rows="3" placeholder="Type your important announcement here..." required style="width: 100%; padding: 15px; border-radius: 8px; background: rgba(0,0,0,0.3); color: white; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 15px; resize: vertical;"></textarea>
@@ -130,6 +160,129 @@
             </div>
         </div>
 
+        <div id="admin-attendance-section" style="display: none;">
+            <div class="card" style="background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(16, 185, 129, 0.3);">
+                <h3 style="color: #34d399; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+                    <span>📋</span> Class Roll Call
+                </h3>
+                
+                <div style="background: rgba(0,0,0,0.2); padding: 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); margin-bottom: 20px;">
+                    <div style="display: flex; gap: 15px; margin-bottom: 15px; flex-wrap: wrap;">
+                        <div style="flex: 1; min-width: 150px;">
+                            <label style="color: #94a3b8; font-size: 0.8em; margin-bottom: 5px; display: block;">Date</label>
+                            <input type="date" id="attDate" style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(0,0,0,0.3); color: white; border: 1px solid rgba(255,255,255,0.1);">
+                        </div>
+                        <div style="flex: 1; min-width: 150px;">
+                            <label style="color: #94a3b8; font-size: 0.8em; margin-bottom: 5px; display: block;">Course</label>
+                            <select id="attCourse" style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(0,0,0,0.3); color: white; border: 1px solid rgba(255,255,255,0.1);">
+                                <option value="B.Tech">B.Tech</option>
+                                <option value="MBA">MBA</option>
+                                <option value="MCA">MCA</option>
+                            </select>
+                        </div>
+                        <div style="flex: 1; min-width: 150px;">
+                            <label style="color: #94a3b8; font-size: 0.8em; margin-bottom: 5px; display: block;">Year</label>
+                            <select id="attYear" style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(0,0,0,0.3); color: white; border: 1px solid rgba(255,255,255,0.1);"></select>
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 15px;">
+                        <div style="flex: 1; min-width: 150px;">
+                            <label style="color: #94a3b8; font-size: 0.8em; margin-bottom: 5px; display: block;">Semester</label>
+                            <select id="attSemester" style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(0,0,0,0.3); color: white; border: 1px solid rgba(255,255,255,0.1);"></select>
+                        </div>
+                        <div style="flex: 1; min-width: 150px;">
+                            <label style="color: #94a3b8; font-size: 0.8em; margin-bottom: 5px; display: block;">Branch</label>
+                            <select id="attBranch" style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(0,0,0,0.3); color: white; border: 1px solid rgba(255,255,255,0.1);"></select>
+                        </div>
+                        <div style="flex: 1; min-width: 150px;">
+                            <label style="color: #94a3b8; font-size: 0.8em; margin-bottom: 5px; display: block;">Section</label>
+                            <select id="attSection" style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(0,0,0,0.3); color: white; border: 1px solid rgba(255,255,255,0.1);">
+                                <option value="All">All Sections</option>
+                                <option value="A">Sec A</option>
+                                <option value="B">Sec B</option>
+                                <option value="C">Sec C</option>
+                                <option value="D">Sec D</option>
+                                <option value="Unassigned">Unassigned</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <button onclick="window.loadAttendanceList()" style="width: 100%; padding: 12px; background: rgba(59, 130, 246, 0.2); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.4); border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.3s;">
+                        Fetch Students
+                    </button>
+                </div>
+
+                <div id="attendanceListContainer" style="margin-bottom: 20px;">
+                    <p style="color: #64748b; text-align: center; font-style: italic; background: rgba(0,0,0,0.2); padding: 20px; border-radius: 8px;">Select a class and click "Fetch Students" to start roll call.</p>
+                </div>
+                
+                <button id="submitAttendanceBtn" onclick="window.saveAttendance()" style="display: none; width: 100%; padding: 15px; background: #10b981; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1.1em; transition: 0.3s;">
+                    Save Secure Attendance
+                </button>
+            </div>
+        </div>
+
+        <div id="admin-timetables-section" style="display: none;">
+            <div class="card" style="background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(168, 85, 247, 0.3);">
+                <h3 style="color: #c084fc; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+                    <span>📅</span> Publish Class Timetable
+                </h3>
+                
+                <form id="timetableForm">
+                    <div style="background: rgba(0,0,0,0.2); padding: 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); margin-bottom: 15px;">
+                        <h4 style="margin: 0 0 15px 0; color: #cbd5e1; font-size: 0.9em; text-transform: uppercase;">1. Select Target Class</h4>
+                        
+                        <div style="display: flex; gap: 15px; margin-bottom: 15px; flex-wrap: wrap;">
+                            <div style="flex: 1; min-width: 150px;">
+                                <label style="color: #94a3b8; font-size: 0.8em; margin-bottom: 5px; display: block;">Course</label>
+                                <select id="ttCourse" style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(0,0,0,0.3); color: white; border: 1px solid rgba(255,255,255,0.1);">
+                                    <option value="B.Tech">B.Tech</option>
+                                    <option value="MBA">MBA</option>
+                                    <option value="MCA">MCA</option>
+                                </select>
+                            </div>
+                            <div style="flex: 1; min-width: 150px;">
+                                <label style="color: #94a3b8; font-size: 0.8em; margin-bottom: 5px; display: block;">Year</label>
+                                <select id="ttYear" style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(0,0,0,0.3); color: white; border: 1px solid rgba(255,255,255,0.1);"></select>
+                            </div>
+                        </div>
+                        
+                        <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                            <div style="flex: 1; min-width: 150px;">
+                                <label style="color: #94a3b8; font-size: 0.8em; margin-bottom: 5px; display: block;">Semester</label>
+                                <select id="ttSemester" style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(0,0,0,0.3); color: white; border: 1px solid rgba(255,255,255,0.1);"></select>
+                            </div>
+                            <div style="flex: 1; min-width: 150px;">
+                                <label style="color: #94a3b8; font-size: 0.8em; margin-bottom: 5px; display: block;">Branch</label>
+                                <select id="ttBranch" style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(0,0,0,0.3); color: white; border: 1px solid rgba(255,255,255,0.1);"></select>
+                            </div>
+                            <div style="flex: 1; min-width: 150px;">
+                                <label style="color: #94a3b8; font-size: 0.8em; margin-bottom: 5px; display: block;">Section</label>
+                                <select id="ttSection" style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(0,0,0,0.3); color: white; border: 1px solid rgba(255,255,255,0.1);">
+                                    <option value="A">Sec A</option>
+                                    <option value="B">Sec B</option>
+                                    <option value="C">Sec C</option>
+                                    <option value="D">Sec D</option>
+                                    <option value="Unassigned">Unassigned</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <h4 style="margin: 0 0 10px 0; color: #cbd5e1; font-size: 0.9em; text-transform: uppercase;">2. Upload Timetable Image</h4>
+                    <input type="file" id="ttImageInput" accept="image/*" required style="width: 100%; padding: 15px; border-radius: 8px; background: rgba(0,0,0,0.3); color: white; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 15px;">
+                    
+                    <button type="submit" id="ttSubmitBtn" style="width: 100%; padding: 15px; background: #9333ea; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1.1em; transition: 0.3s;">
+                        Publish Timetable
+                    </button>
+                </form>
+
+                <div id="adminTimetableList" style="margin-top: 30px;">
+                    </div>
+            </div>
+        </div>
+
     </div>
 
     <script>
@@ -137,12 +290,17 @@
             document.getElementById('admin-students-section').style.display = tab === 'students' ? 'block' : 'none';
             document.getElementById('admin-queries-section').style.display = tab === 'queries' ? 'block' : 'none';
             document.getElementById('admin-notices-section').style.display = tab === 'notices' ? 'block' : 'none';
+            document.getElementById('admin-attendance-section').style.display = tab === 'attendance' ? 'block' : 'none';
+            document.getElementById('admin-timetables-section').style.display = tab === 'timetables' ? 'block' : 'none';
             
-            const tabs = ['students', 'queries', 'notices'];
+            const tabs = ['students', 'queries', 'notices', 'attendance', 'timetables'];
             tabs.forEach(t => {
-                document.getElementById('tab-' + t).style.background = tab === t ? '#e11d48' : 'rgba(30,41,59,0.6)';
-                document.getElementById('tab-' + t).style.color = tab === t ? 'white' : '#cbd5e1';
-                document.getElementById('tab-' + t).style.border = tab === t ? 'none' : '1px solid rgba(255,255,255,0.1)';
+                const el = document.getElementById('tab-' + t);
+                if (el) {
+                    el.style.background = tab === t ? '#e11d48' : 'rgba(30,41,59,0.6)';
+                    el.style.color = tab === t ? 'white' : '#cbd5e1';
+                    el.style.border = tab === t ? 'none' : '1px solid rgba(255,255,255,0.1)';
+                }
             });
         }
     </script>

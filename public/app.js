@@ -1,6 +1,7 @@
 // --- 1. FIREBASE SETUP & IMPORTS ---
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-import { getFirestore, collection, addDoc, getDocs, query, where, updateDoc, doc, onSnapshot, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+// 💥 ADDED 'getDoc' to reliably fetch existing attendance 💥
+import { getFirestore, collection, addDoc, getDocs, getDoc, query, where, updateDoc, doc, onSnapshot, deleteDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
 // YOUR FIREBASE CONFIG
 const firebaseConfig = {
@@ -23,8 +24,8 @@ window.logout = () => {
     window.location.href = 'index.html';
 };
 
-// Route Protection 
-if (!user && (window.location.pathname.includes('admin.html') || window.location.pathname.includes('student.html') || window.location.pathname.includes('student-fees.html') || window.location.pathname.includes('student-profile.html') || window.location.pathname.includes('net-banking.html') || window.location.pathname.includes('student-home.html') || window.location.pathname.includes('about-college.html'))) {
+// Route Protection (ADDED technician.html)
+if (!user && (window.location.pathname.includes('admin.html') || window.location.pathname.includes('technician.html') || window.location.pathname.includes('student.html') || window.location.pathname.includes('student-fees.html') || window.location.pathname.includes('student-profile.html') || window.location.pathname.includes('net-banking.html') || window.location.pathname.includes('student-home.html') || window.location.pathname.includes('about-college.html'))) {
     window.location.href = 'index.html';
 }
 
@@ -251,7 +252,7 @@ if (studentLoginForm) {
     });
 }
 
-// --- 5. ADMIN LOGIN ---
+// --- 5. ADMIN / STAFF LOGIN ---
 const adminLoginForm = document.getElementById('loginForm');
 if (adminLoginForm) {
     ensureAdminExists();
@@ -262,13 +263,23 @@ if (adminLoginForm) {
         const submitBtn = adminLoginForm.querySelector('button');
         submitBtn.innerText = "Authenticating..."; submitBtn.disabled = true;
         try {
-            const q = query(collection(db, "users"), where("username", "==", username), where("password", "==", pass), where("role", "==", "Admin"));
+            const q = query(collection(db, "users"), where("username", "==", username), where("password", "==", pass));
             const querySnapshot = await getDocs(q);
             if (!querySnapshot.empty) {
                 const userData = querySnapshot.docs[0].data();
                 userData.id = querySnapshot.docs[0].id;
-                localStorage.setItem('user', JSON.stringify(userData));
-                window.location.href = 'admin.html';
+                
+                if (userData.role === "Admin" || userData.role === "Technician") {
+                    localStorage.setItem('user', JSON.stringify(userData));
+                    if (userData.role === "Admin") {
+                        window.location.href = 'admin.html';
+                    } else {
+                        window.location.href = 'technician.html';
+                    }
+                } else {
+                    document.getElementById('errorMsg').style.display = 'block';
+                    document.getElementById('errorMsg').innerText = "Access Denied: Not a staff account.";
+                }
             } else {
                 document.getElementById('errorMsg').style.display = 'block';
                 document.getElementById('errorMsg').innerText = "Invalid Username or Password.";
@@ -288,6 +299,12 @@ async function ensureAdminExists() {
         const querySnapshot = await getDocs(q);
         if (querySnapshot.empty) {
             await addDoc(collection(db, "users"), { role: "Admin", username: "admin1", password: "admin123", full_name: "System Admin" });
+        }
+        
+        const qTech = query(collection(db, "users"), where("username", "==", "tech1"));
+        const querySnapshotTech = await getDocs(qTech);
+        if (querySnapshotTech.empty) {
+            await addDoc(collection(db, "users"), { role: "Technician", username: "tech1", password: "tech123", full_name: "Campus Tech Support" });
         }
     } catch (e) { }
 }
@@ -342,6 +359,13 @@ if (user?.role === 'Student') {
                 }
             }
         });
+
+        // 💥 TRIGGER THE STUDENT ATTENDANCE GRAPHS 💥
+        setTimeout(() => {
+            if(document.getElementById('attendanceDoughnut')) {
+                initAttendanceGraphs(user.id);
+            }
+        }, 500); // Small delay ensures HTML canvas is ready
     }
 
     if (document.getElementById('complaintForm')) initQueriesSystem();
@@ -391,6 +415,159 @@ if (user?.role === 'Student') {
             }
         });
     }
+
+    // 💥 VIEW TIMETABLE LOGIC FOR STUDENT DASHBOARD 💥
+    window.viewMyTimetable = async () => {
+        const modal = document.getElementById('timetableModal');
+        const container = document.getElementById('ttImageContainer');
+        if (!modal || !container) return;
+
+        modal.style.display = 'flex';
+        container.innerHTML = '<p style="color: #6366f1;">Locating your section\'s timetable...</p>';
+
+        const activeUser = JSON.parse(localStorage.getItem('user'));
+        if (!activeUser) return;
+
+        // Build exact match identifier
+        const matchString = `${activeUser.course}_${activeUser.year}_${activeUser.semester}_${activeUser.branch}_${activeUser.section || 'Unassigned'}`;
+        
+        try {
+            const q = query(collection(db, "timetables"), where("targetId", "==", matchString));
+            const querySnapshot = await getDocs(q);
+            
+            if (querySnapshot.empty) {
+                container.innerHTML = `<p style="color: #fca5a5; background: rgba(225,29,72,0.1); padding: 20px; border-radius: 8px;">No timetable published yet for ${activeUser.course} ${activeUser.branch} (Sec ${activeUser.section || 'Unassigned'}). Check back later!</p>`;
+            } else {
+                // If there are multiple updates, grab the most recent one
+                let tts = [];
+                querySnapshot.forEach(doc => tts.push(doc.data()));
+                tts.sort((a,b) => b.timestamp - a.timestamp);
+                
+                // Image is wrapped in a clickable target tag
+                container.innerHTML = `
+                    <a href="${tts[0].imageUrl}" target="_blank" title="Click to view full size image in new tab">
+                        <img src="${tts[0].imageUrl}" alt="Class Timetable" />
+                    </a>
+                    <p style="color: #a5b4fc; font-size: 0.85em; margin-top: 15px;">🔍 Click the image to view it full size</p>
+                `;
+            }
+        } catch (error) {
+            container.innerHTML = `<p style="color: #fca5a5;">Failed to load timetable. Check connection.</p>`;
+        }
+    };
+}
+
+// 💥 DRAW CHART.JS GRAPHS ON STUDENT DASHBOARD 💥
+function initAttendanceGraphs(studentId) {
+    const doughnutCtx = document.getElementById('attendanceDoughnut');
+    const barCtx = document.getElementById('attendanceBarChart');
+    if(!doughnutCtx || !barCtx) return;
+
+    const q = query(collection(db, "attendance"), where("student_id", "==", studentId));
+    
+    onSnapshot(q, (snapshot) => {
+        let totalDays = 0;
+        let presentDays = 0;
+        let monthlyData = {};
+
+        snapshot.forEach(doc => {
+            const data = doc.data();
+            totalDays++;
+            
+            // Group by Month (e.g., "2026-02")
+            const monthStr = data.date ? data.date.substring(0, 7) : "Unknown"; 
+            if(!monthlyData[monthStr]) monthlyData[monthStr] = { present: 0, total: 0 };
+            monthlyData[monthStr].total++;
+
+            if(data.status === "Present") {
+                presentDays++;
+                monthlyData[monthStr].present++;
+            }
+        });
+
+        if(totalDays === 0) {
+            document.getElementById('attendancePercentageDisplay').innerText = "N/A";
+            document.getElementById('attendanceStatusText').innerText = "No classes recorded yet.";
+            document.getElementById('attendanceStatusText').style.color = "#94a3b8";
+            return;
+        }
+
+        const percentage = Math.round((presentDays / totalDays) * 100);
+        document.getElementById('attendancePercentageDisplay').innerText = percentage + "%";
+        
+        let ringColor = '#10b981'; // Green
+        let statusMsg = "Great attendance!";
+        let textColor = "#34d399";
+        
+        if (percentage < 75 && percentage >= 60) {
+            ringColor = '#f59e0b'; // Yellow
+            statusMsg = "Warning: Approaching Limit";
+            textColor = "#fbbf24";
+        } else if (percentage < 60) {
+            ringColor = '#f43f5e'; // Red
+            statusMsg = "Critical: Low Attendance!";
+            textColor = "#fca5a5";
+        }
+
+        document.getElementById('attendanceStatusText').innerText = statusMsg;
+        document.getElementById('attendanceStatusText').style.color = textColor;
+
+        // Destroy old charts to prevent glitching
+        if(window.attDoughnutChart) window.attDoughnutChart.destroy();
+        if(window.attBarChart) window.attBarChart.destroy();
+
+        // Doughnut Chart
+        window.attDoughnutChart = new Chart(doughnutCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Present', 'Absent'],
+                datasets: [{
+                    data: [presentDays, totalDays - presentDays],
+                    backgroundColor: [ringColor, 'rgba(255, 255, 255, 0.1)'],
+                    borderWidth: 0,
+                    hoverOffset: 4
+                }]
+            },
+            options: {
+                cutout: '78%', responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { display: false }, tooltip: { enabled: true } },
+                animation: { animateScale: true, animateRotate: true }
+            }
+        });
+
+        // Bar Chart
+        const sortedMonths = Object.keys(monthlyData).sort();
+        const barLabels = sortedMonths.map(m => {
+            if(m === "Unknown") return m;
+            const d = new Date(m + "-01");
+            return d.toLocaleString('default', { month: 'short' }); 
+        });
+        const barValues = sortedMonths.map(m => monthlyData[m].present);
+
+        window.attBarChart = new Chart(barCtx, {
+            type: 'bar',
+            data: {
+                labels: barLabels,
+                datasets: [{
+                    label: 'Days Present',
+                    data: barValues,
+                    backgroundColor: 'rgba(236, 72, 153, 0.8)', // Neon Pink
+                    borderRadius: 6,
+                    barPercentage: 0.5
+                }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { stepSize: 5, color: '#94a3b8' } },
+                    x: { grid: { display: false }, ticks: { color: '#cbd5e1', font: {weight: 'bold'} } }
+                }
+            }
+        });
+    }, (error) => {
+        console.error("Error drawing charts:", error);
+    });
 }
 
 function initProfileSystem(avatarUrl) {
@@ -697,6 +874,19 @@ if (user?.role === 'Admin') {
         await updateDoc(complaintRef, { status: newStatus });
         showToast(`Query marked as ${newStatus}`, "success");
     };
+
+    // 💥 ARCHIVE QUERY FOR ADMIN ONLY 💥
+    window.archiveAdminQuery = async (queryId) => {
+        if(confirm("Remove this resolved query from the Admin view? (It will still be visible to the student)")) {
+            try {
+                const complaintRef = doc(db, "complaints", queryId);
+                await updateDoc(complaintRef, { admin_deleted: true });
+                showToast("Query removed from Admin view.", "success");
+            } catch (error) {
+                showToast("Failed to remove query.", "error");
+            }
+        }
+    };
     
     window.promoteStudent = async (studentId) => {
         const selectedSemString = document.getElementById(`promoteSem_${studentId}`).value;
@@ -797,16 +987,297 @@ if (user?.role === 'Admin') {
         });
     }
 
+    // 💥 SMART ATTENDANCE (ROLL CALL) LOGIC 💥
+    function initAdminAttendanceDropdowns() {
+        const aCourse = document.getElementById('attCourse');
+        const aYear = document.getElementById('attYear');
+        if (!aCourse || !aYear) return;
+
+        const renderAtt = () => {
+            const course = aCourse.value;
+            const currentYear = aYear.value || "All";
+            const currentSem = document.getElementById('attSemester').value || "All";
+            const currentBranch = document.getElementById('attBranch').value || "All";
+            
+            let years = [{label: 'All Years', value: 'All'}, {label: '1st Year', value: '1st Year'}, {label: '2nd Year', value: '2nd Year'}];
+            if (course === 'B.Tech') { years.push({label: '3rd Year', value: '3rd Year'}, {label: '4th Year', value: '4th Year'}); }
+            safelyPopulateDropdown('attYear', years, currentYear);
+
+            const selectedYear = aYear.value;
+            let sems = [{label: 'All Semesters', value: 'All'}];
+            if (selectedYear === '1st Year') sems.push({label: 'Semester 1', value: 'Semester 1'}, {label: 'Semester 2', value: 'Semester 2'});
+            else if (selectedYear === '2nd Year') sems.push({label: 'Semester 3', value: 'Semester 3'}, {label: 'Semester 4', value: 'Semester 4'});
+            else if (selectedYear === '3rd Year') sems.push({label: 'Semester 5', value: 'Semester 5'}, {label: 'Semester 6', value: 'Semester 6'});
+            else if (selectedYear === '4th Year') sems.push({label: 'Semester 7', value: 'Semester 7'}, {label: 'Semester 8', value: 'Semester 8'});
+            safelyPopulateDropdown('attSemester', sems, currentSem);
+
+            let branches = [{label: 'All Branches', value: 'All'}];
+            if (course === 'B.Tech') {
+                if (selectedYear === '1st Year') branches.push({label: 'Common 1st Year', value: 'Common 1st Year'});
+                else branches.push( {label: 'Computer Science and Engineering', value: 'Computer Science and Engineering'}, {label: 'Data Science', value: 'Data Science'}, {label: 'Electrical Communication Engineering', value: 'Electrical Communication Engineering'}, {label: 'EE', value: 'EE'}, {label: 'EEE', value: 'EEE'}, {label: 'Civil', value: 'Civil'}, {label: 'Mechanical', value: 'Mechanical'} );
+            } else if (course === 'MBA') {
+                branches.push( {label: 'Human Resources (HR)', value: 'Human Resources (HR)'}, {label: 'Finance', value: 'Finance'}, {label: 'Marketing', value: 'Marketing'}, {label: 'IT & Systems', value: 'IT & Systems'}, {label: 'Operations', value: 'Operations'} );
+            } else if (course === 'MCA') {
+                branches.push({label: 'Master of Computer Applications', value: 'Master of Computer Applications'});
+            }
+            safelyPopulateDropdown('attBranch', branches, currentBranch);
+        };
+
+        aCourse.addEventListener('change', renderAtt);
+        aYear.addEventListener('change', renderAtt);
+        renderAtt();
+        
+        const dateInput = document.getElementById('attDate');
+        if(dateInput) dateInput.value = new Date().toISOString().split('T')[0];
+    }
+    
+    initAdminAttendanceDropdowns();
+
+    window.toggleAttendanceText = (studentId) => {
+        const checkbox = document.getElementById(`att_${studentId}`);
+        const textLabel = document.getElementById(`att_text_${studentId}`);
+        if(checkbox.checked) {
+            textLabel.innerText = "Present";
+            textLabel.className = "att-status-text status-present";
+        } else {
+            textLabel.innerText = "Absent";
+            textLabel.className = "att-status-text status-absent";
+        }
+    };
+
+    // 💥 BYPASSING FIREBASE INDEX RULES TO FETCH PREVIOUS STATES 💥
+    window.loadAttendanceList = async () => {
+        if(!window.allStudents) return showToast("Student data is still loading...", "warning");
+        
+        const dateVal = document.getElementById('attDate').value;
+        if(!dateVal) return showToast("Please select a date.", "warning");
+
+        const listContainer = document.getElementById('attendanceListContainer');
+        const submitBtn = document.getElementById('submitAttendanceBtn');
+        
+        listContainer.innerHTML = `<p style="color: #6366f1; text-align: center; padding: 20px;">Scanning Database for Previous Records...</p>`;
+
+        const course = document.getElementById('attCourse').value;
+        const year = document.getElementById('attYear').value;
+        const sem = document.getElementById('attSemester').value;
+        const branch = document.getElementById('attBranch').value;
+        const section = document.getElementById('attSection').value;
+        
+        let targetStudents = window.allStudents.filter(s => {
+            const matchesCourse = (course === "All" || s.course === course);
+            const matchesYear = (year === "All" || s.year === year);
+            const matchesSem = (sem === "All" || s.semester === sem);
+            
+            let sBranch = s.branch || "Common 1st Year";
+            if (sBranch.trim().toUpperCase() === "CSE") sBranch = "Computer Science and Engineering";
+            const matchesBranch = (branch === "All" || sBranch === branch);
+            
+            const matchesSec = (section === "All" || (s.section || "Unassigned") === section);
+            
+            return matchesCourse && matchesYear && matchesSem && matchesBranch && matchesSec;
+        });
+
+        if(targetStudents.length === 0) {
+            listContainer.innerHTML = `<p style="color: #fca5a5; text-align: center; padding: 20px; background: rgba(225, 29, 72, 0.1); border-radius: 8px;">No students found in this class combination.</p>`;
+            submitBtn.style.display = 'none';
+            return;
+        }
+
+        // We use exact document IDs to guarantee we fetch the status without needing a Firebase Index!
+        const existingDataMap = {};
+        try {
+            await Promise.all(targetStudents.map(async (s) => {
+                const docRef = doc(db, "attendance", `${s.id}_${dateVal}`);
+                const docSnap = await getDoc(docRef);
+                if (docSnap.exists()) {
+                    existingDataMap[s.id] = docSnap.data().status;
+                }
+            }));
+        } catch(err) {
+            console.error("Failed to read old attendance", err);
+        }
+
+        targetStudents.sort((a,b) => (a.full_name || "").localeCompare(b.full_name || ""));
+
+        listContainer.innerHTML = targetStudents.map((s, index) => {
+            const isPresent = existingDataMap[s.id] === "Absent" ? false : true;
+            
+            const statusText = isPresent ? "Present" : "Absent";
+            const statusClass = isPresent ? "status-present" : "status-absent";
+            const checkedAttr = isPresent ? "checked" : "";
+
+            return `
+            <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.05); padding: 15px 20px; border-radius: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <h4 style="color: #f8fafc; margin: 0 0 5px 0;">${index + 1}. ${s.full_name}</h4>
+                    <p style="color: #94a3b8; font-size: 0.85em; margin: 0;">Reg: <strong>${s.registration_number || 'N/A'}</strong></p>
+                </div>
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <span id="att_text_${s.id}" class="att-status-text ${statusClass}">${statusText}</span>
+                    
+                    <input type="checkbox" id="att_${s.id}" class="att-toggle toggle-checkbox" ${checkedAttr}
+                           data-sid="${s.id}" data-sname="${s.full_name}" 
+                           data-course="${s.course}" data-branch="${s.branch}"
+                           data-sem="${s.semester}" data-sec="${s.section || 'Unassigned'}"
+                           onchange="window.toggleAttendanceText('${s.id}')">
+                           
+                    <label for="att_${s.id}" class="toggle-label"></label>
+                </div>
+            </div>
+            `;
+        }).join('');
+        
+        submitBtn.style.display = 'block';
+    };
+
+    window.saveAttendance = async () => {
+        const dateVal = document.getElementById('attDate').value;
+        if(!dateVal) return showToast("Please select a date for roll call.", "warning");
+
+        const checkboxes = document.querySelectorAll('.att-toggle');
+        if(checkboxes.length === 0) return;
+
+        const btn = document.getElementById('submitAttendanceBtn');
+        btn.innerText = "Saving to Database...";
+        btn.disabled = true;
+
+        try {
+            for(let box of checkboxes) {
+                const sId = box.dataset.sid;
+                const docId = `${sId}_${dateVal}`; 
+                
+                await setDoc(doc(db, "attendance", docId), {
+                    student_id: sId,
+                    student_name: box.dataset.sname,
+                    date: dateVal,
+                    course: box.dataset.course,
+                    branch: box.dataset.branch,
+                    semester: box.dataset.sem,
+                    section: box.dataset.sec,
+                    status: box.checked ? "Present" : "Absent",
+                    timestamp: Date.now()
+                });
+            }
+            showToast("Roll Call saved successfully!", "success");
+            document.getElementById('attendanceListContainer').innerHTML = `<p style="color: #10b981; text-align: center; font-weight: bold; background: rgba(16, 185, 129, 0.1); padding: 20px; border-radius: 8px;">✔️ Attendance saved for ${dateVal}. Select a new class to continue.</p>`;
+            btn.style.display = 'none';
+
+        } catch(error) {
+            console.error("Save Error", error);
+            showToast("Failed to save attendance. Check connection.", "error");
+        } finally {
+            btn.innerText = "Save Secure Attendance";
+            btn.disabled = false;
+        }
+    };
+
+    // 💥 ADMIN TIMETABLE UPLOAD LOGIC 💥
+    const ttForm = document.getElementById('timetableForm');
+    if (ttForm) {
+        function initAdminTimetableDropdowns() {
+            const tCourse = document.getElementById('ttCourse');
+            const tYear = document.getElementById('ttYear');
+            if (!tCourse || !tYear) return;
+
+            const renderTT = () => {
+                const course = tCourse.value;
+                const currentYear = tYear.value;
+                
+                let years = [{label: '1st Year', value: '1st Year'}, {label: '2nd Year', value: '2nd Year'}];
+                if (course === 'B.Tech') { years.push({label: '3rd Year', value: '3rd Year'}, {label: '4th Year', value: '4th Year'}); }
+                safelyPopulateDropdown('ttYear', years, currentYear || years[0].value);
+
+                const selectedYear = tYear.value;
+                let sems = [];
+                if (selectedYear === '1st Year') sems.push({label: 'Semester 1', value: 'Semester 1'}, {label: 'Semester 2', value: 'Semester 2'});
+                else if (selectedYear === '2nd Year') sems.push({label: 'Semester 3', value: 'Semester 3'}, {label: 'Semester 4', value: 'Semester 4'});
+                else if (selectedYear === '3rd Year') sems.push({label: 'Semester 5', value: 'Semester 5'}, {label: 'Semester 6', value: 'Semester 6'});
+                else if (selectedYear === '4th Year') sems.push({label: 'Semester 7', value: 'Semester 7'}, {label: 'Semester 8', value: 'Semester 8'});
+                safelyPopulateDropdown('ttSemester', sems, document.getElementById('ttSemester').value || sems[0].value);
+
+                let branches = [];
+                if (course === 'B.Tech') {
+                    if (selectedYear === '1st Year') branches.push({label: 'Common 1st Year', value: 'Common 1st Year'});
+                    else branches.push( {label: 'Computer Science and Engineering', value: 'Computer Science and Engineering'}, {label: 'Data Science', value: 'Data Science'}, {label: 'Electrical Communication Engineering', value: 'Electrical Communication Engineering'}, {label: 'EE', value: 'EE'}, {label: 'EEE', value: 'EEE'}, {label: 'Civil', value: 'Civil'}, {label: 'Mechanical', value: 'Mechanical'} );
+                } else if (course === 'MBA') {
+                    branches.push( {label: 'Human Resources (HR)', value: 'Human Resources (HR)'}, {label: 'Finance', value: 'Finance'}, {label: 'Marketing', value: 'Marketing'}, {label: 'IT & Systems', value: 'IT & Systems'}, {label: 'Operations', value: 'Operations'} );
+                } else if (course === 'MCA') {
+                    branches.push({label: 'Master of Computer Applications', value: 'Master of Computer Applications'});
+                }
+                safelyPopulateDropdown('ttBranch', branches, document.getElementById('ttBranch').value || branches[0].value);
+            };
+
+            tCourse.addEventListener('change', renderTT);
+            tYear.addEventListener('change', renderTT);
+            renderTT();
+        }
+        
+        initAdminTimetableDropdowns();
+
+        ttForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const fileInput = document.getElementById('ttImageInput');
+            const file = fileInput.files[0];
+            if (!file) return showToast("Please select an image file.", "warning");
+
+            const btn = document.getElementById('ttSubmitBtn');
+            btn.innerText = "Uploading Image to Secure Cloud...";
+            btn.disabled = true;
+
+            const CLOUD_NAME = "dmy74celx"; 
+            const UPLOAD_PRESET = "rcyp6gvo"; 
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('upload_preset', UPLOAD_PRESET);
+
+            try {
+                const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, { method: 'POST', body: formData });
+                const data = await res.json();
+                
+                if (data.secure_url) {
+                    const course = document.getElementById('ttCourse').value;
+                    const year = document.getElementById('ttYear').value;
+                    const sem = document.getElementById('ttSemester').value;
+                    const branch = document.getElementById('ttBranch').value;
+                    const sec = document.getElementById('ttSection').value;
+
+                    const targetId = `${course}_${year}_${sem}_${branch}_${sec}`;
+
+                    btn.innerText = "Linking to Database...";
+
+                    await addDoc(collection(db, "timetables"), {
+                        targetId: targetId,
+                        course: course,
+                        year: year,
+                        semester: sem,
+                        branch: branch,
+                        section: sec,
+                        imageUrl: data.secure_url,
+                        timestamp: Date.now()
+                    });
+
+                    showToast(`Timetable published for Sec ${sec}!`, "success");
+                    ttForm.reset();
+                } else {
+                    throw new Error("Cloudinary upload failed");
+                }
+            } catch (err) {
+                showToast("Failed to publish timetable.", "error");
+                console.error(err);
+            } finally {
+                btn.innerText = "Publish Timetable";
+                btn.disabled = false;
+            }
+        });
+    }
+
     loadAdminData();
 }
 
-// 💥 ADMIN MAINTENANCE QUERIES RENDERER (ULTRA-STRICT FILTER) 💥
 window.renderAdminQueries = function() {
     try {
         const listDiv = document.getElementById('adminComplaintsList');
         const filterDropdown = document.getElementById('adminQueryFilter');
-        
-        // Forcefully grab the exact text value and trim hidden spaces
         const filterVal = filterDropdown ? String(filterDropdown.value).trim() : "All";
         
         if (!listDiv) return;
@@ -818,7 +1289,6 @@ window.renderAdminQueries = function() {
 
         let filtered = window.allComplaints;
 
-        // Strict Filtering Logic
         if (filterVal !== "All") {
             filtered = window.allComplaints.filter(c => {
                 const docStatus = c.status ? String(c.status).trim() : 'Pending';
@@ -859,6 +1329,8 @@ window.renderAdminQueries = function() {
                     <div style="display: flex; gap: 10px; justify-content: flex-end;">
                         ${status === 'Pending' ? `<button onclick="window.updateStatus('${c.id}', 'In Progress')" style="padding: 8px 15px; border-radius: 8px; background: rgba(59, 130, 246, 0.2); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.4); cursor: pointer; transition: 0.3s; font-weight: bold;">Mark 'In Progress'</button>` : ''}
                         ${status === 'In Progress' ? `<button onclick="window.updateStatus('${c.id}', 'Resolved')" style="padding: 8px 15px; border-radius: 8px; background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); cursor: pointer; transition: 0.3s; font-weight: bold;">Mark 'Resolved'</button>` : ''}
+                        
+                        ${status === 'Resolved' ? `<button onclick="window.archiveAdminQuery('${c.id}')" style="padding: 8px 15px; border-radius: 8px; background: rgba(225, 29, 72, 0.2); color: #fda4af; border: 1px solid rgba(225, 29, 72, 0.4); cursor: pointer; transition: 0.3s; font-weight: bold;">🗑️ Remove</button>` : ''}
                     </div>
                 </div>
             `;
@@ -871,18 +1343,20 @@ window.renderAdminQueries = function() {
 function loadAdminData() {
     const adminComplaintsList = document.getElementById('adminComplaintsList');
     
-    // 1. Fetch Maintenance Queries
     if(adminComplaintsList) {
         adminComplaintsList.innerHTML = '<p style="color: #6366f1; text-align: center; padding: 20px;">Fetching live queries from Firebase...</p>';
-        
         try {
             onSnapshot(collection(db, "complaints"), (querySnapshot) => {
                 let complaints = [];
                 let resolvedCount = 0;
                 querySnapshot.forEach((doc) => {
                     const data = doc.data();
-                    complaints.push({ id: doc.id, ...data });
-                    if (data.status === 'Resolved') resolvedCount++;
+                    
+                    // 💥 FILTER OUT ARCHIVED QUERIES 💥
+                    if (data.admin_deleted !== true) {
+                        complaints.push({ id: doc.id, ...data });
+                        if (data.status === 'Resolved') resolvedCount++;
+                    }
                 });
                 
                 complaints.sort((a, b) => b.created_at - a.created_at);
@@ -908,7 +1382,6 @@ function loadAdminData() {
         }
     }
 
-    // 2. Fetch Student Database
     if(document.getElementById('adminStudentDatabaseList')) {
         onSnapshot(query(collection(db, "users"), where("role", "!=", "Admin")), (querySnapshot) => {
             let students = [];
@@ -1059,6 +1532,121 @@ function renderAdminStudents(students) {
     });
 
     listDiv.innerHTML = finalHTML;
+}
+
+// 💥 8. TECHNICIAN DASHBOARD LOGIC 💥
+if (user?.role === 'Technician' && window.location.pathname.includes('technician.html')) {
+    const techNameDisplay = document.getElementById('tech-name-display');
+    if (techNameDisplay) techNameDisplay.innerText = `Welcome, ${user.full_name || 'Tech'}`;
+
+    const ticketContainer = document.getElementById('ticket-container');
+    const logoutBtn = document.getElementById('logout-btn');
+    
+    // UI Controls
+    const techSearchInput = document.getElementById('techSearch');
+    const techSortSelect = document.getElementById('techSort');
+    const techFilterSelect = document.getElementById('techFilter');
+    
+    if (logoutBtn) logoutBtn.addEventListener('click', window.logout);
+
+    window.updateTechStatus = async (ticketId, newStatus) => {
+        try {
+            const ticketRef = doc(db, "complaints", ticketId);
+            await updateDoc(ticketRef, { status: newStatus });
+            showToast(`Task marked as ${newStatus}`, "success");
+        } catch (err) {
+            showToast(`Failed to update task`, "error");
+        }
+    };
+
+    // Client-side render function so search/sort happens instantly
+    window.renderTechTickets = () => {
+        if (!ticketContainer || !window.allTechTickets) return;
+
+        const searchTerm = (techSearchInput ? techSearchInput.value : '').toLowerCase();
+        const sortVal = techSortSelect ? techSortSelect.value : 'newest';
+        const filterVal = techFilterSelect ? techFilterSelect.value : 'all';
+
+        // Filter Phase
+        let filteredTickets = window.allTechTickets.filter(t => {
+            // Check status filter
+            const statusMatch = filterVal === 'all' || t.status === filterVal;
+            
+            // Search everything: reg number, details, description
+            const searchString = `${t.reg_number || ''} ${t.student_details || ''} ${t.description || ''}`.toLowerCase();
+            const searchMatch = searchString.includes(searchTerm);
+            
+            return statusMatch && searchMatch;
+        });
+
+        // Sort Phase
+        if (sortVal === 'newest') {
+            filteredTickets.sort((a, b) => b.created_at - a.created_at);
+        } else if (sortVal === 'oldest') {
+            filteredTickets.sort((a, b) => a.created_at - b.created_at);
+        }
+
+        if (filteredTickets.length === 0) {
+            ticketContainer.innerHTML = '<p style="color: #94a3b8; grid-column: 1 / -1;">No active tasks matching your criteria.</p>';
+            return;
+        }
+
+        // Render Phase
+        ticketContainer.innerHTML = filteredTickets.map(t => {
+            const status = t.status || 'In Progress'; // Fallback
+            let statusClass = 'status-progress';
+            if(status === 'Resolved') statusClass = 'status-resolved';
+
+            return `
+                <div class="ticket-card">
+                    <div class="ticket-header">
+                        <span class="ticket-id">Reg: ${t.reg_number || 'N/A'}</span>
+                        <span class="status-badge ${statusClass}">${status}</span>
+                    </div>
+                    <div class="ticket-body">
+                        <h3>${t.student_details?.split('|')[0] || 'Unknown Student'}</h3>
+                        <p>${t.description}</p>
+                        <div class="ticket-meta">
+                            <span>📍 Info: ${t.student_details?.split('|')[1] || 'N/A'}</span>
+                            <span>📅 Reported: ${new Date(t.created_at).toLocaleString()}</span>
+                        </div>
+                    </div>
+                    <div class="ticket-actions">
+                        ${status === 'In Progress' ? `<button class="action-btn btn-resolve" onclick="window.updateTechStatus('${t.id}', 'Resolved')">Mark Resolved</button>` : ''}
+                        ${status === 'Resolved' ? `<span style="color: #10b981; font-weight: bold; padding: 10px 0; text-align: center; width: 100%;">Task Completed ✓</span>` : ''}
+                    </div>
+                </div>
+            `;
+        }).join('');
+    };
+
+    // Attach Event Listeners to UI Controls
+    if(techSearchInput) techSearchInput.addEventListener('input', window.renderTechTickets);
+    if(techSortSelect) techSortSelect.addEventListener('change', window.renderTechTickets);
+    if(techFilterSelect) techFilterSelect.addEventListener('change', window.renderTechTickets);
+
+    if (ticketContainer) {
+        ticketContainer.innerHTML = '<p style="color: #6366f1;">Fetching assigned tasks...</p>';
+        
+        onSnapshot(collection(db, "complaints"), (querySnapshot) => {
+            let tickets = [];
+            querySnapshot.forEach(doc => {
+                const data = doc.data();
+                
+                // 💥 IGNORE PENDING TICKETS & ARCHIVED ADMIN QUERIES 💥
+                // Tech only sees it after Admin marks it "In Progress"
+                if (data.admin_deleted !== true && data.status !== 'Pending') {
+                    tickets.push({ id: doc.id, ...data });
+                }
+            });
+            
+            // Save to global variable so the filter function can access it
+            window.allTechTickets = tickets;
+            
+            // Trigger the initial render
+            window.renderTechTickets();
+        });
+    }
 }
 
 document.addEventListener('DOMContentLoaded', () => {

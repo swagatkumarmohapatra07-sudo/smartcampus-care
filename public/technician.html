@@ -2,17 +2,283 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Technician Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Technician Dashboard - SmartCampus</title>
     <link rel="stylesheet" href="style.css">
+    <style>
+        /* --- Technician Specific Glassmorphism Styles --- */
+        :root {
+            --bg-color: #0f172a;
+            --text-main: #ffffff;
+            --text-muted: #94a3b8;
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Animated Background Orbs */
+        .orb {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(100px);
+            z-index: -1;
+            opacity: 0.5;
+        }
+        .orb-1 { top: 10%; left: 10%; width: 300px; height: 300px; background: #3b82f6; }
+        .orb-2 { bottom: 10%; right: 10%; width: 400px; height: 400px; background: #8b5cf6; }
+
+        /* Navigation */
+        .tech-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 40px;
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .tech-logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-main);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logout-btn {
+            padding: 8px 20px;
+            background: rgba(225, 29, 72, 0.15);
+            border: 1px solid rgba(225, 29, 72, 0.3);
+            color: #fda4af;
+            border-radius: 20px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .logout-btn:hover {
+            background: rgba(225, 29, 72, 0.3);
+        }
+
+        /* Dashboard Layout */
+        .dashboard-container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
+            width: 100%;
+            flex: 1;
+        }
+
+        .dashboard-header {
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .dashboard-header h2 {
+            font-size: 2rem;
+            margin: 0;
+            background: linear-gradient(to right, #ffffff, #a5b4fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* --- New Controls Area (Search & Sort) --- */
+        .controls-group {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            width: 100%;
+            margin-top: 15px;
+        }
+
+        .tech-input {
+            background: rgba(0, 0, 0, 0.3);
+            color: white;
+            border: 1px solid var(--glass-border);
+            padding: 10px 15px;
+            border-radius: 8px;
+            outline: none;
+            font-family: inherit;
+            transition: border-color 0.3s;
+        }
+
+        .tech-input:focus {
+            border-color: #6366f1;
+        }
+
+        .search-bar {
+            flex: 1;
+            min-width: 250px;
+        }
+
+        /* Ticket Grid */
+        .ticket-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 25px;
+        }
+
+        /* Glassmorphism Ticket Card */
+        .ticket-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 25px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .ticket-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            border-color: rgba(255,255,255,0.2);
+        }
+
+        .ticket-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            padding-bottom: 10px;
+        }
+
+        .ticket-id {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            font-family: monospace;
+        }
+
+        /* Status Badges */
+        .status-badge {
+            padding: 5px 12px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .status-pending { background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
+        .status-progress { background: rgba(59, 130, 246, 0.2); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3); }
+        .status-resolved { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
+
+        .ticket-body h3 {
+            margin: 0 0 10px 0;
+            font-size: 1.2rem;
+        }
+
+        .ticket-body p {
+            margin: 0;
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        .ticket-meta {
+            margin-top: 10px;
+            font-size: 0.85rem;
+            color: #a5b4fc;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        /* Action Buttons */
+        .ticket-actions {
+            margin-top: auto;
+            display: flex;
+            gap: 10px;
+            padding-top: 15px;
+        }
+
+        .action-btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+            background: rgba(255,255,255,0.1);
+            color: white;
+        }
+
+        .action-btn:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        
+        .btn-resolve {
+            background: rgba(16, 185, 129, 0.2);
+            color: #34d399;
+        }
+        .btn-resolve:hover {
+            background: rgba(16, 185, 129, 0.4);
+        }
+
+    </style>
 </head>
 <body>
-    <div class="container">
-        <button class="logout-btn" onclick="logout()">Logout</button>
-        <h2>Technician Dashboard</h2>
-        
-        <h3>My Assigned Tasks</h3>
-        <div id="techComplaintsList"></div>
-    </div>
-    <script src="app.js"></script>
+
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+
+    <nav class="tech-nav">
+        <a href="#" class="tech-logo">
+            <span style="filter: drop-shadow(0 0 8px rgba(59,130,246,0.8));">🔧</span>
+            Technician Portal
+        </a>
+        <div style="display: flex; gap: 20px; align-items: center;">
+            <span style="color: var(--text-muted); font-size: 0.9rem;" id="tech-name-display">Welcome, Tech</span>
+            <button id="logout-btn" class="logout-btn">Log Out</button>
+        </div>
+    </nav>
+
+    <main class="dashboard-container">
+        <div class="dashboard-header">
+            <div style="width: 100%;">
+                <h2>Assigned Maintenance Tasks</h2>
+                <p style="color: var(--text-muted); margin-top: 5px;">Manage and update your active campus queries.</p>
+                
+                <div class="controls-group">
+                    <input type="text" id="techSearch" class="tech-input search-bar" placeholder="🔍 Search by reg no, description, location...">
+                    
+                    <select id="techSort" class="tech-input">
+                        <option value="newest">Sort: Newest First</option>
+                        <option value="oldest">Sort: Oldest First</option>
+                    </select>
+
+                    <select id="techFilter" class="tech-input">
+                        <option value="all">Status: All Tasks</option>
+                        <option value="Pending">Status: Pending</option>
+                        <option value="In Progress">Status: In Progress</option>
+                        <option value="Resolved">Status: Resolved</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="ticket-grid" id="ticket-container"></div>
+    </main>
+
+    <script type="module" src="app.js"></script>
 </body>
 </html>
