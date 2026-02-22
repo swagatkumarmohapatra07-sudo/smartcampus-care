@@ -405,6 +405,7 @@ if (user?.role === 'Student') {
                         <p style="margin: 0; color: ${i===0 ? '#f8fafc' : '#cbd5e1'}; font-weight: ${i===0 ? 'bold' : 'normal'}; line-height: 1.4;">
                             ${n.message}
                         </p>
+                        ${n.imageUrl ? `<img src="${n.imageUrl}" class="notice-img" style="max-width: 100%; border-radius: 8px; margin-top: 10px; display: block; border: 1px solid rgba(255,255,255,0.1);">` : ''}
                     </div>
                 `).join('');
             }
@@ -1129,31 +1130,55 @@ if (user?.role === 'Admin') {
         noticeForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            if (noticeTargets.length === 0) {
-                noticeTargets.push({
-                    course: document.getElementById('noticeCourse').value,
-                    year: document.getElementById('noticeYear').value,
-                    semester: document.getElementById('noticeSemester').value,
-                    branch: document.getElementById('noticeBranch').value
-                });
-            }
+            const fileInput = document.getElementById('noticeImageInput');
+            const file = fileInput.files ? fileInput.files[0] : null;
+            let uploadedImageUrl = "";
 
             const btn = noticeForm.querySelector('button[type="submit"]');
-            btn.innerText = "Broadcasting...";
             btn.disabled = true;
 
             try {
+                // 💥 CLOUDINARY UPLOAD LOGIC 💥
+                if (file) {
+                    btn.innerText = "Uploading Attachment...";
+                    const CLOUD_NAME = "dmy74celx"; 
+                    const UPLOAD_PRESET = "rcyp6gvo"; 
+                    const formData = new FormData();
+                    formData.append('file', file);
+                    formData.append('upload_preset', UPLOAD_PRESET);
+
+                    const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, { method: 'POST', body: formData });
+                    const data = await res.json();
+                    if (data.secure_url) {
+                        uploadedImageUrl = data.secure_url;
+                    }
+                }
+
+                btn.innerText = "Broadcasting...";
+
+                if (noticeTargets.length === 0) {
+                    noticeTargets.push({
+                        course: document.getElementById('noticeCourse').value,
+                        year: document.getElementById('noticeYear').value,
+                        semester: document.getElementById('noticeSemester').value,
+                        branch: document.getElementById('noticeBranch').value
+                    });
+                }
+
                 await addDoc(collection(db, "notices"), {
                     targets: noticeTargets,
                     message: document.getElementById('noticeMessage').value,
+                    imageUrl: uploadedImageUrl, // 💥 Added Image URL to Firestore
                     timestamp: Date.now()
                 });
+
                 showToast("Broadcast pushed successfully!", "success");
                 noticeForm.reset();
                 noticeTargets = []; 
                 renderTargets();    
                 initAdminNoticeDropdowns(); 
             } catch (error) {
+                console.error("Broadcast Error:", error);
                 showToast("Failed to broadcast.", "error");
             } finally {
                 btn.innerText = "Push Broadcast";

@@ -41,23 +41,19 @@
         }
         @keyframes bannerShine { 0% { left: -100%; } 20% { left: 200%; } 100% { left: 200%; } }
 
-        /* LIVE NOTICEBOARD CSS */
+        /* --- LIVE NOTICEBOARD CSS --- */
         @keyframes scrollY {
             0% { top: 150px; }
             100% { top: -350px; } 
         }
         .notice-scroll {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
+            top: 0; left: 0; width: 100%;
             padding: 0 25px; 
             box-sizing: border-box; 
             animation: scrollY 18s linear infinite;
         }
-        .notice-scroll:hover {
-            animation-play-state: paused;
-        }
+        
         @keyframes pulseDot {
             0% { box-shadow: 0 0 0 0 rgba(244, 63, 94, 0.7); }
             70% { box-shadow: 0 0 0 10px rgba(244, 63, 94, 0); }
@@ -65,24 +61,50 @@
         }
         
         .notice-item {
-            width: 100%;
-            box-sizing: border-box;
-            word-wrap: break-word;
-            white-space: normal;
-            padding: 15px 20px; 
-            margin-bottom: 15px; 
-            border-radius: 16px; 
-            background: rgba(255,255,255,0.03); 
-            border: 1px solid rgba(255,255,255,0.05);
-            transition: 0.3s;
-            backdrop-filter: blur(5px);
+            width: 100%; box-sizing: border-box; word-wrap: break-word; white-space: normal;
+            padding: 15px 20px; margin-bottom: 15px; border-radius: 16px; 
+            background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05);
+            transition: 0.3s; backdrop-filter: blur(5px);
         }
         .notice-item.highlight {
             border-left: 4px solid #f43f5e;
             background: linear-gradient(90deg, rgba(244, 63, 94, 0.1), rgba(0,0,0,0));
-            border-top: 1px solid rgba(244, 63, 94, 0.2);
-            border-bottom: 1px solid rgba(244, 63, 94, 0.2);
+            border-top: 1px solid rgba(244, 63, 94, 0.2); border-bottom: 1px solid rgba(244, 63, 94, 0.2);
             box-shadow: 0 8px 20px rgba(225, 29, 72, 0.15);
+        }
+
+        /* 💥 EXPANDED NOTICE BOARD CLASSES 💥 */
+        #noticeContentArea { transition: all 0.4s ease; cursor: pointer; }
+        
+        #noticeContentArea.expanded {
+            height: 400px !important;
+            overflow-y: auto !important;
+            -webkit-mask-image: none !important;
+            mask-image: none !important;
+            cursor: default;
+        }
+
+        /* Stop the animation when expanded */
+        #noticeContentArea.expanded .notice-scroll {
+            animation: none !important;
+            position: relative !important;
+            top: 0 !important;
+            padding-top: 15px;
+        }
+
+        /* Custom scrollbar for the expanded notice area */
+        #noticeContentArea.expanded::-webkit-scrollbar { width: 6px; }
+        #noticeContentArea.expanded::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); border-radius: 10px;}
+        #noticeContentArea.expanded::-webkit-scrollbar-thumb { background: #f43f5e; border-radius: 10px; }
+
+        /* Image styling inside notices */
+        .notice-img {
+            max-width: 100%;
+            border-radius: 8px;
+            margin-top: 12px;
+            display: block;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+            border: 1px solid rgba(255,255,255,0.1);
         }
 
         /* Bento Grid */
@@ -94,29 +116,15 @@
         }
 
         .bento-card {
-            background: rgba(15, 23, 42, 0.8);
-            border-radius: 25px;
-            padding: 30px;
-            position: relative;
-            overflow: hidden;
-            cursor: pointer;
-            border: 1px solid rgba(255,255,255,0.05);
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            z-index: 1;
-            min-height: 250px;
-            display: flex;
-            flex-direction: column;
+            background: rgba(15, 23, 42, 0.8); border-radius: 25px; padding: 30px;
+            position: relative; overflow: hidden; cursor: pointer;
+            border: 1px solid rgba(255,255,255,0.05); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 1; min-height: 250px; display: flex; flex-direction: column;
         }
 
         .bento-card::before {
-            content: '';
-            position: absolute;
-            width: 150px; height: 150px;
-            border-radius: 50%;
-            filter: blur(45px);
-            z-index: -1;
-            opacity: 0.3;
-            transition: opacity 0.4s ease, transform 0.4s ease;
+            content: ''; position: absolute; width: 150px; height: 150px; border-radius: 50%;
+            filter: blur(45px); z-index: -1; opacity: 0.3; transition: opacity 0.4s ease, transform 0.4s ease;
         }
 
         .card-fees::before { background: #10b981; top: -50px; right: -50px; }
@@ -124,59 +132,20 @@
         .card-maint::before { background: #f59e0b; top: -50px; left: -50px; }
         .card-about::before { background: #ec4899; bottom: -50px; right: -50px; }
         .card-timetable::before { background: #a855f7; top: -50px; right: -50px; }
+        .card-bput::before { background: #f43f5e; top: -50px; left: -50px; } /* Glow for new card */
 
-        .bento-card:hover {
-            transform: translateY(-10px) scale(1.02);
-            border-color: rgba(255,255,255,0.2);
-            box-shadow: 0 15px 30px rgba(0,0,0,0.5);
-        }
+        .bento-card:hover { transform: translateY(-10px) scale(1.02); border-color: rgba(255,255,255,0.2); box-shadow: 0 15px 30px rgba(0,0,0,0.5); }
         .bento-card:hover::before { opacity: 0.8; transform: scale(1.2); }
 
-        .card-icon {
-            width: 60px; height: 60px;
-            border-radius: 18px;
-            display: flex; align-items: center; justify-content: center;
-            margin-bottom: 20px;
-            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
-            background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.1);
-        }
+        .card-icon { width: 60px; height: 60px; border-radius: 18px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; box-shadow: 0 8px 16px rgba(0,0,0,0.2); background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); }
 
-        /* Responsive Timetable Modal Styles (FIXED) */
-        .tt-modal {
-            display: none; position: fixed; z-index: 10000; left: 0; top: 0;
-            width: 100%; height: 100%; background-color: rgba(0,0,0,0.85);
-            backdrop-filter: blur(10px); align-items: center; justify-content: center;
-        }
-        .tt-modal-content {
-            position: relative; 
-            width: 90vw; 
-            max-width: 900px; 
-            max-height: 90vh; /* Prevents modal from exceeding screen height */
-            background: #0f172a; padding: 20px; border-radius: 16px;
-            border: 1px solid rgba(255,255,255,0.2); box-shadow: 0 20px 50px rgba(0,0,0,0.7);
-            display: flex; flex-direction: column; box-sizing: border-box;
-        }
-        #ttImageContainer {
-            text-align: center; width: 100%; display: flex; flex-direction: column; 
-            align-items: center; justify-content: center; overflow: hidden; /* Prevents overflow */
-        }
-        .tt-modal-content img {
-            max-width: 100%; 
-            max-height: 65vh; /* Forces image to scale down if it's too tall */
-            border-radius: 8px; display: block; object-fit: contain; /* Keeps aspect ratio perfect */
-            transition: transform 0.3s;
-        }
-        .tt-modal-content img:hover {
-            transform: scale(1.02);
-        }
-        .tt-close {
-            position: absolute; top: -15px; right: -15px; background: #e11d48;
-            color: white; width: 35px; height: 35px; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            font-weight: bold; cursor: pointer; border: 2px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-            transition: 0.3s; z-index: 10;
-        }
+        /* Modal Styles */
+        .tt-modal { display: none; position: fixed; z-index: 10000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.85); backdrop-filter: blur(10px); align-items: center; justify-content: center; }
+        .tt-modal-content { position: relative; width: 90vw; max-width: 900px; max-height: 90vh; background: #0f172a; padding: 20px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.2); box-shadow: 0 20px 50px rgba(0,0,0,0.7); display: flex; flex-direction: column; box-sizing: border-box; }
+        #ttImageContainer { text-align: center; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; }
+        .tt-modal-content img { max-width: 100%; max-height: 65vh; border-radius: 8px; display: block; object-fit: contain; transition: transform 0.3s; }
+        .tt-modal-content img:hover { transform: scale(1.02); }
+        .tt-close { position: absolute; top: -15px; right: -15px; background: #e11d48; color: white; width: 35px; height: 35px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; cursor: pointer; border: 2px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.3); transition: 0.3s; z-index: 10; }
         .tt-close:hover { transform: scale(1.1); background: #be123c; }
     </style>
 </head>
@@ -216,9 +185,10 @@
                     <div style="position: absolute; top: -2px; right: -2px; width: 10px; height: 10px; background: #fff; border-radius: 50%; animation: pulseDot 1.5s infinite;"></div>
                 </div>
                 <span style="color: white; font-weight: bold; letter-spacing: 1px; font-size: 0.9em;">NOTICES</span>
+                <span id="noticeHint" style="color: rgba(255,255,255,0.7); font-size: 0.65em; margin-top: 5px; text-align: center;">Click to Expand</span>
             </div>
             
-            <div style="flex: 1; position: relative; height: 150px; width: 100%; box-sizing: border-box; overflow: hidden; -webkit-mask-image: linear-gradient(to bottom, transparent, black 15%, black 85%, transparent); mask-image: linear-gradient(to bottom, transparent, black 15%, black 85%, transparent);">
+            <div id="noticeContentArea" onclick="toggleNoticeBoard()" style="flex: 1; position: relative; height: 150px; width: 100%; box-sizing: border-box; overflow: hidden; -webkit-mask-image: linear-gradient(to bottom, transparent, black 15%, black 85%, transparent); mask-image: linear-gradient(to bottom, transparent, black 15%, black 85%, transparent);">
                 <div id="studentNoticeBoard" class="notice-scroll">
                     <p style="color: #94a3b8; text-align: center; margin-top: 60px; font-style: italic;">Connecting to secure Noticeboard server...</p>
                 </div>
@@ -226,7 +196,6 @@
         </div>
 
         <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(99, 102, 241, 0.3); border-radius: 20px; margin-bottom: 35px; display: flex; flex-wrap: wrap; overflow: hidden; backdrop-filter: blur(16px); box-shadow: 0 15px 35px rgba(0,0,0,0.4);">
-            
             <div style="flex: 1 1 200px; max-width: 300px; background: linear-gradient(135deg, rgba(79, 70, 229, 0.85) 0%, rgba(192, 132, 252, 0.85) 100%); padding: 30px 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 2; box-shadow: 5px 0 15px rgba(0,0,0,0.3); border-right: 1px solid rgba(255,255,255,0.1);">
                 <h3 style="color: white; margin: 0 0 15px 0; font-size: 1.2em; text-transform: uppercase; letter-spacing: 1px;">Attendance</h3>
                 <div style="position: relative; width: 120px; height: 120px; display: flex; align-items: center; justify-content: center;">
@@ -236,7 +205,6 @@
                     </div>
                 </div>
             </div>
-            
             <div style="flex: 2 1 300px; padding: 20px 30px; position: relative; min-height: 200px; display: flex; flex-direction: column; justify-content: center;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
                     <h3 style="color: #cbd5e1; margin: 0; font-size: 1.1em;">Monthly Presence Trends</h3>
@@ -246,11 +214,9 @@
                     <canvas id="attendanceBarChart"></canvas>
                 </div>
             </div>
-
         </div>
 
         <div class="bento-grid">
-
             <div class="bento-card card-timetable" onclick="window.viewMyTimetable()">
                 <div class="card-icon" style="color: #c084fc;">
                     <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
@@ -259,7 +225,6 @@
                 <p style="color: #94a3b8; font-size: 0.95em; margin: 0; line-height: 1.6;">View your daily class schedule, faculty assignments, and subject timings.</p>
                 <div style="margin-top: 20px; color: #c084fc; font-weight: bold; font-size: 0.9em; display: flex; align-items: center; gap: 5px;">View Schedule <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg></div>
             </div>
-            
             <div class="bento-card card-fees" onclick="window.location.href='student-fees.html'">
                 <div class="card-icon" style="color: #34d399;">
                     <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"></rect><line x1="2" y1="10" x2="22" y2="10"></line></svg>
@@ -268,7 +233,6 @@
                 <p style="color: #94a3b8; font-size: 0.95em; margin: 0; line-height: 1.6;">Manage semester dues, view ledgers, and download digital receipts.</p>
                 <div style="margin-top: 20px; color: #34d399; font-weight: bold; font-size: 0.9em; display: flex; align-items: center; gap: 5px;">Pay Now <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg></div>
             </div>
-
             <div class="bento-card card-results" onclick="window.open('https://results.bput.ac.in/', '_blank')">
                 <div class="card-icon" style="color: #60a5fa;">
                     <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"></path><path d="M6 12v5c3 3 9 3 12 0v-5"></path></svg>
@@ -276,6 +240,15 @@
                 <h3 style="color: white; margin: 0 0 10px 0; font-size: 1.4em;">Check Results</h3>
                 <p style="color: #94a3b8; font-size: 0.95em; margin: 0; line-height: 1.6;">Access your latest academic performance directly on the BPUT portal.</p>
                 <div style="margin-top: 20px; color: #60a5fa; font-weight: bold; font-size: 0.9em; display: flex; align-items: center; gap: 5px;">View Portal <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg></div>
+            </div>
+
+            <div class="bento-card card-bput" onclick="window.open('https://www.bput.ac.in/academic-calendar.html', '_blank')">
+                <div class="card-icon" style="color: #f43f5e;">
+                    <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line><path d="M8 14h.01"></path><path d="M12 14h.01"></path><path d="M16 14h.01"></path><path d="M8 18h.01"></path><path d="M12 18h.01"></path><path d="M16 18h.01"></path></svg>
+                </div>
+                <h3 style="color: white; margin: 0 0 10px 0; font-size: 1.4em;">BPUT Calendar</h3>
+                <p style="color: #94a3b8; font-size: 0.95em; margin: 0; line-height: 1.6;">Track academic schedules, holiday lists, and university exam timelines.</p>
+                <div style="margin-top: 20px; color: #f43f5e; font-weight: bold; font-size: 0.9em; display: flex; align-items: center; gap: 5px;">Open Calendar <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg></div>
             </div>
 
             <div class="bento-card card-maint" onclick="window.location.href='student.html'">
@@ -286,7 +259,6 @@
                 <p style="color: #94a3b8; font-size: 0.95em; margin: 0; line-height: 1.6;">Report campus issues, lodge complaints, and track resolution status.</p>
                 <div style="margin-top: 20px; color: #fbbf24; font-weight: bold; font-size: 0.9em; display: flex; align-items: center; gap: 5px;">Raise Query <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg></div>
             </div>
-
             <div class="bento-card card-about" onclick="window.location.href='about-college.html'">
                 <div class="card-icon" style="color: #f472b6;">
                     <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
@@ -295,7 +267,6 @@
                 <p style="color: #94a3b8; font-size: 0.95em; margin: 0; line-height: 1.6;">Explore our beautiful campus vision, facilities, and academic accreditations.</p>
                 <div style="margin-top: 20px; color: #f472b6; font-weight: bold; font-size: 0.9em; display: flex; align-items: center; gap: 5px;">Discover <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg></div>
             </div>
-
         </div>
 
     </div>
@@ -309,6 +280,21 @@
             </div>
         </div>
     </div>
+
+    <script>
+        function toggleNoticeBoard() {
+            const noticeArea = document.getElementById('noticeContentArea');
+            const hint = document.getElementById('noticeHint');
+            
+            noticeArea.classList.toggle('expanded');
+            
+            if (noticeArea.classList.contains('expanded')) {
+                hint.innerText = "Click to Collapse";
+            } else {
+                hint.innerText = "Click to Expand";
+            }
+        }
+    </script>
 
     <script type="module" src="app.js"></script>
 </body>
