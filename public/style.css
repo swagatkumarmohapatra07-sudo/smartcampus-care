@@ -1093,253 +1093,98 @@ select {
     cursor: pointer;
 }
 /* ==========================================================================
-   📱 GLOBAL MOBILE RESPONSIVE LAYOUT (Mobiles & Tablets)
+   📱 MASTER MOBILE RESPONSIVE LAYOUT 
    ========================================================================== */
 
 @media screen and (max-width: 850px) {
     
-    /* --- 1. Global Typography & Spacing --- */
-    html, body {
-        font-size: 16px !important; /* Solid baseline for mobile */
-        padding: 10px; 
-        overflow-x: hidden; 
-    }
-
-    /* Boost standard text sizes */
-    p, span, div, a {
-        font-size: 1.05rem;
-        line-height: 1.6;
+    /* 1. Global Setup */
+    body {
+        padding: 10px;
+        overflow-x: hidden;
     }
 
     .container, .dashboard-container {
-        margin-top: 20px !important;
-        padding: 15px !important;
+        margin-top: 10px !important;
+        padding: 10px !important;
         width: 100% !important;
         max-width: 100% !important;
         box-sizing: border-box;
     }
 
-    /* --- 2. Navigations & Headers --- */
-    .index-nav, .tech-nav, nav {
-        flex-direction: column;
-        gap: 15px;
-        padding: 15px !important;
-        text-align: center;
-        border-radius: 15px;
-        height: auto !important;
+    /* 2. Fix the Landing Page (Next-Gen Campus Text) */
+    /* Forces the text on top and login box on the bottom */
+    div[style*="display: flex"], main {
+        flex-direction: column !important;
+        text-align: center !important;
     }
 
-    .index-nav-links {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: 10px;
+    h1 {
+        font-size: 2.2rem !important;
+        line-height: 1.2 !important;
+        word-wrap: break-word !important;
     }
 
-    .index-nav-links a {
-        font-size: 1.1rem !important; /* Bigger nav links */
-        padding: 8px 16px !important;
-    }
-
-    .dashboard-header {
-        flex-direction: column;
-        align-items: center !important;
-        text-align: center;
-        gap: 15px;
-    }
-
-    .dashboard-header h2 {
-        font-size: 2rem !important; /* Bigger headers */
-    }
-
-    /* --- 3. Login & Glass Cards --- */
     .index-glass-card, .card {
-        padding: 25px 15px !important;
-        margin: 15px auto !important;
         width: 100% !important;
         max-width: 100% !important;
-        box-sizing: border-box;
+        padding: 25px 15px !important;
+        margin: 15px 0 !important;
+        box-sizing: border-box !important;
     }
 
-    .index-glass-card h2 {
-        font-size: 2rem !important;
-    }
-
-    /* --- 4. Forms, Inputs, and Buttons --- */
-    input, select, textarea, button {
-        font-size: 1.1rem !important; /* Larger text for easier tapping/reading */
-        padding: 12px 15px !important;
-    }
-
-    /* --- 5. Admin Dashboard Fixes --- */
-    div[style*="justify-content: center; flex-wrap: wrap;"] {
-        flex-direction: column;
-        width: 100%;
-        gap: 10px;
-    }
-    
-    div[style*="justify-content: center; flex-wrap: wrap;"] button {
-        width: 100%;
-        margin: 0;
-        font-size: 1.1rem !important;
-    }
-
-    .card[style*="display: flex; gap: 15px; flex-wrap: wrap;"],
-    .controls-group,
-    div[style*="display: flex; gap: 15px; margin-bottom: 15px; flex-wrap: wrap;"] {
+    /* 3. Fix Student Dashboard Profile & Attendance */
+    .profile-banner {
         flex-direction: column !important;
-    }
-
-    .controls-group input, 
-    .controls-group select,
-    select[id^="admin"], 
-    input[id^="admin"],
-    select[id^="notice"],
-    select[id^="att"],
-    select[id^="tt"],
-    input[id^="att"] {
-        width: 100% !important;
-        min-width: 100% !important;
-        box-sizing: border-box;
-        font-size: 1.1rem !important;
-    }
-
-    .student-glass-card > div, 
-    .card > div[style*="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap;"] {
-        flex-direction: column !important;
+        text-align: center !important;
+        padding: 30px 15px !important;
         gap: 15px !important;
     }
 
-    .student-glass-card div[style*="display: flex; flex-direction: column; gap: 10px;"] {
-        width: 100%;
-    }
-
-    .student-glass-card div[style*="display: flex; gap: 10px; background: rgba(0,0,0,0.3);"] {
-        flex-wrap: wrap;
-        justify-content: space-between !important;
-        width: 100%;
-    }
-
-    /* --- 6. Student Dashboard Fixes --- */
-    .profile-banner {
-        flex-direction: column;
-        text-align: center;
-        padding: 30px 15px !important;
-        border-radius: 20px !important;
-    }
-
-    .profile-banner h1 {
-        font-size: 2.4rem !important;
-        line-height: 1.2;
-    }
-
     #academicInfo {
-        font-size: 1.05rem !important;
+        font-size: 0.9rem !important;
+        white-space: normal !important;
         line-height: 1.5;
-        white-space: normal;
-        padding: 10px 20px !important;
     }
 
-    .bento-grid {
-        grid-template-columns: 1fr !important;
-        gap: 20px !important;
-    }
-
-    .bento-card {
-        min-height: auto !important;
-        padding: 30px 20px !important;
-    }
-
-    .bento-card h3 {
-        font-size: 1.6rem !important;
-    }
-
-    .bento-card p {
-        font-size: 1.1rem !important;
-    }
-
-    /* --- 7. Technician Ticket Grid --- */
-    .ticket-grid {
-        grid-template-columns: 1fr !important;
-    }
-
-    .ticket-header {
-        flex-wrap: wrap;
-        gap: 10px;
-    }
-
-    .ticket-actions {
-        flex-direction: column;
-    }
-    
-    .ticket-actions button {
-        width: 100%;
-    }
-
-    /* --- 8. Attendance Charts & Forms --- */
-    div[style*="display: flex; flex-wrap: wrap; overflow: hidden; backdrop-filter: blur(16px);"] {
+    /* Force Notices and Attendance sections to stack vertically */
+    div[style*="display: flex; overflow: hidden"],
+    div[style*="display: flex; flex-wrap: wrap; overflow: hidden"] {
         flex-direction: column !important;
     }
 
-    div[style*="flex: 1 1 200px; max-width: 300px;"] {
+    div[style*="flex: 1 1 200px; max-width: 300px;"],
+    div[style*="min-width: 110px;"] {
         max-width: 100% !important;
+        width: 100% !important;
         border-right: none !important;
-        border-bottom: 1px solid rgba(255,255,255,0.1);
+        border-bottom: 1px solid rgba(255,255,255,0.1) !important;
     }
 
-    /* --- 9. Modals & Floating Buttons --- */
-    .tt-modal-content {
-        width: 95vw !important;
-        padding: 15px !important;
+    /* Fix Bento Grid sizing */
+    .bento-grid {
+        grid-template-columns: 1fr !important;
+        gap: 15px !important;
     }
-    
-    .tt-close {
-        top: -10px !important;
-        right: -10px !important;
-        width: 35px !important;
-        height: 35px !important;
-        font-size: 18px !important;
+    .bento-card {
+        padding: 25px 20px !important;
+        min-height: auto !important;
     }
 
+    /* 4. Increase Tap Sizes for Mobile */
+    input, select, textarea, button {
+        font-size: 1rem !important;
+        padding: 12px 15px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    /* Floating Logout Button fix */
     button[style*="position: fixed; bottom: 20px;"] {
-        bottom: 15px !important;
-        right: 15px !important;
-        font-size: 1.1rem !important; /* Make floating logout button readable */
-        padding: 10px 18px !important;
-    }
-
-    button[style*="position: absolute; top: 25px; right: 30px;"] {
-        position: relative !important;
-        top: 0 !important;
-        right: 0 !important;
-        margin: 0 auto 20px auto !important;
-        display: block;
-        font-size: 1.1rem !important;
-    }
-}
-
-/* ==========================================================================
-   📱 VERY SMALL PHONES (max 400px)
-   ========================================================================== */
-@media screen and (max-width: 400px) {
-    html, body {
-        font-size: 15px !important;
-    }
-
-    .profile-banner img, #headerAvatar {
-        width: 90px !important;
-        height: 90px !important;
-    }
-    
-    .index-logo, .tech-logo {
-        font-size: 1.4em !important;
-    }
-    
-    h1 {
-        font-size: 2rem !important;
-    }
-
-    h2 {
-        font-size: 1.7rem !important;
+        width: auto !important;
+        bottom: 10px !important;
+        right: 10px !important;
+        font-size: 0.85rem !important;
+        padding: 8px 16px !important;
     }
 }
