@@ -1092,3 +1092,223 @@ select optgroup {
 select {
     cursor: pointer;
 }
+/* ==========================================================================
+   📱 GLOBAL MOBILE RESPONSIVE LAYOUT (Mobiles & Tablets)
+   ========================================================================== */
+
+@media screen and (max-width: 850px) {
+    
+    /* --- 1. Global Spacing & Containers --- */
+    body {
+        padding: 10px; /* Gives breathing room on small screens */
+        overflow-x: hidden; /* Prevents horizontal scrolling bugs */
+    }
+
+    .container, .dashboard-container {
+        margin-top: 20px !important;
+        padding: 15px !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box;
+    }
+
+    /* --- 2. Navigations & Headers --- */
+    .index-nav, .tech-nav, nav {
+        flex-direction: column;
+        gap: 15px;
+        padding: 15px !important;
+        text-align: center;
+        border-radius: 15px;
+        height: auto !important;
+    }
+
+    .index-nav-links {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 10px;
+    }
+
+    .dashboard-header {
+        flex-direction: column;
+        align-items: center !important;
+        text-align: center;
+        gap: 15px;
+    }
+
+    /* --- 3. Login & Glass Cards --- */
+    .index-glass-card, .card {
+        padding: 25px 15px !important;
+        margin: 15px auto !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box;
+    }
+
+    .index-glass-card h2 {
+        font-size: 1.8em !important;
+    }
+
+    /* --- 4. Admin Dashboard Fixes --- */
+    /* Make the tab buttons stack neatly on mobile */
+    div[style*="justify-content: center; flex-wrap: wrap;"] {
+        flex-direction: column;
+        width: 100%;
+        gap: 10px;
+    }
+    
+    div[style*="justify-content: center; flex-wrap: wrap;"] button {
+        width: 100%;
+        margin: 0;
+    }
+
+    /* Search bars and filters side-by-side fix */
+    .card[style*="display: flex; gap: 15px; flex-wrap: wrap;"],
+    .controls-group,
+    div[style*="display: flex; gap: 15px; margin-bottom: 15px; flex-wrap: wrap;"] {
+        flex-direction: column !important;
+    }
+
+    .controls-group input, 
+    .controls-group select,
+    select[id^="admin"], 
+    input[id^="admin"],
+    select[id^="notice"],
+    select[id^="att"],
+    select[id^="tt"],
+    input[id^="att"] {
+        width: 100% !important;
+        min-width: 100% !important;
+        box-sizing: border-box;
+    }
+
+    /* Student List Cards inside Admin */
+    .student-glass-card > div, 
+    .card > div[style*="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap;"] {
+        flex-direction: column !important;
+        gap: 15px !important;
+    }
+
+    .student-glass-card div[style*="display: flex; flex-direction: column; gap: 10px;"] {
+        width: 100%;
+    }
+
+    .student-glass-card div[style*="display: flex; gap: 10px; background: rgba(0,0,0,0.3);"] {
+        flex-wrap: wrap;
+        justify-content: space-between !important;
+        width: 100%;
+    }
+
+    /* --- 5. Student Dashboard Fixes --- */
+    .profile-banner {
+        flex-direction: column;
+        text-align: center;
+        padding: 30px 15px !important;
+        border-radius: 20px !important;
+    }
+
+    .profile-banner h1 {
+        font-size: 2em !important;
+        line-height: 1.2;
+    }
+
+    #academicInfo {
+        font-size: 0.85em !important;
+        line-height: 1.5;
+        white-space: normal;
+    }
+
+    /* Bento Grid fixes to force 1 column on small phones */
+    .bento-grid {
+        grid-template-columns: 1fr !important;
+        gap: 15px !important;
+    }
+
+    .bento-card {
+        min-height: auto !important;
+        padding: 25px 20px !important;
+    }
+
+    /* --- 6. Technician Ticket Grid --- */
+    .ticket-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    .ticket-header {
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .ticket-actions {
+        flex-direction: column;
+    }
+    
+    .ticket-actions button {
+        width: 100%;
+    }
+
+    /* --- 7. Attendance Charts & Forms --- */
+    /* Force the side-by-side charts to stack */
+    div[style*="display: flex; flex-wrap: wrap; overflow: hidden; backdrop-filter: blur(16px);"] {
+        flex-direction: column !important;
+    }
+
+    div[style*="flex: 1 1 200px; max-width: 300px;"] {
+        max-width: 100% !important;
+        border-right: none !important;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+    /* --- 8. Modals & Floating Buttons --- */
+    .tt-modal-content {
+        width: 95vw !important;
+        padding: 15px !important;
+    }
+    
+    .tt-close {
+        top: -10px !important;
+        right: -10px !important;
+        width: 30px !important;
+        height: 30px !important;
+        font-size: 14px;
+    }
+
+    /* Make sure buttons floating at the bottom don't overlap content */
+    button[style*="position: fixed; bottom: 20px;"] {
+        bottom: 10px !important;
+        right: 10px !important;
+        font-size: 0.8em !important;
+        padding: 6px 12px !important;
+    }
+
+    /* Admin top absolute logout button */
+    button[style*="position: absolute; top: 25px; right: 30px;"] {
+        position: relative !important;
+        top: 0 !important;
+        right: 0 !important;
+        margin: 0 auto 20px auto !important;
+        display: block;
+    }
+}
+
+/* ==========================================================================
+   📱 VERY SMALL PHONES (iPhone SE, older Androids - max 400px)
+   ========================================================================== */
+@media screen and (max-width: 400px) {
+    .profile-banner img, #headerAvatar {
+        width: 80px !important;
+        height: 80px !important;
+    }
+    
+    .index-logo, .tech-logo {
+        font-size: 1.2em !important;
+    }
+    
+    h1 {
+        font-size: 1.8rem !important;
+    }
+
+    h2 {
+        font-size: 1.5em !important;
+    }
+}
