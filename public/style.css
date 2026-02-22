@@ -1097,199 +1097,156 @@ select {
    📱 MASTER MOBILE RESPONSIVE LAYOUT (FIXED SCROLL & LAYOUT)
    ========================================================================== */
 
+/* ==========================================================================
+   📱 MASTER MOBILE RESPONSIVE LAYOUT (FIXED UI BUGS)
+   ========================================================================== */
+
 @media screen and (max-width: 850px) {
     
-    /* --- 1. Unlock Height & Fix Scrolling --- */
-    html, body, .home-body, .index-body {
-        height: auto !important;
+    /* --- 1. DOUBLE SCROLLBAR FIX --- */
+    html, body {
+        height: auto !important; 
         min-height: 100vh;
         overflow-x: hidden !important;
-        overflow-y: auto !important; /* Restores vertical scrolling */
-        font-size: 16px !important;
-        padding: 10px;
+        overflow-y: auto !important; 
+        padding: 0 !important; 
+        margin: 0 !important;
     }
 
-    /* Wrap the main content properly */
-    main, .container, .dashboard-container, .index-wrapper, .index-hero {
-        height: auto !important; /* Removes the 100vh lock */
-        min-height: 100vh;
-        margin-top: 10px !important;
-        padding: 10px !important;
-        width: 100% !important;
-        max-width: 100% !important;
-        box-sizing: border-box;
-        flex-direction: column !important; /* Stacks Left Text & Right Login Box */
+    body.index-body {
+        overflow: visible !important;
+        overflow-x: hidden !important;
+    }
+
+    .index-wrapper { padding: 15px !important; }
+
+    /* --- 2. FIX NAV & HAMBURGER (ALIGN RIGHT) --- */
+    .index-nav {
+        display: flex !important;
+        flex-direction: row !important; /* Forces logo and menu side-by-side */
+        justify-content: space-between !important; 
         align-items: center !important;
-        text-align: center !important;
-    }
-    
-    .index-wrapper {
-        padding-bottom: 50px !important; /* Adds space at the very bottom */
+        padding: 15px 10px !important;
     }
 
-    /* --- 2. Fix the Navigation Bar --- */
-    .index-nav, .tech-nav, nav {
-        flex-direction: column;
-        gap: 12px;
-        padding: 15px 10px !important;
-        text-align: center;
-        height: auto !important;
-    }
+    .hamburger { display: flex !important; margin-left: auto; } 
 
     .index-nav-links {
-        display: flex !important;
-        flex-direction: row !important; /* Keeps links side-by-side */
-        flex-wrap: wrap !important;
-        justify-content: center;
-        gap: 8px !important;
+        position: absolute;
+        top: 75px;
+        right: 15px;
+        flex-direction: column;
+        background: rgba(15, 23, 42, 0.95);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        width: 220px;
+        padding: 20px;
+        border-radius: 16px;
+        border: 1px solid rgba(255,255,255,0.1);
+        box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+        gap: 15px;
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(-15px);
+        transition: all 0.3s ease;
+        z-index: 1000;
+    }
+
+    .index-nav-links.active {
+        opacity: 1; visibility: visible; transform: translateY(0);
     }
 
     .index-nav-links a {
-        font-size: 0.85rem !important; /* Smaller font so they fit neatly */
-        padding: 8px 12px !important;
-        flex: 1 1 auto; /* Allows them to wrap evenly */
+        width: 100%; text-align: center; padding: 12px !important;
+        font-size: 1.1rem !important; display: block;
     }
 
-    /* --- 3. Fix the Index Page Text & Pills --- */
-    h1, .hero-text h1 {
-        font-size: 2.3rem !important;
-        line-height: 1.2 !important;
-        margin-top: 20px !important;
+    /* --- 3. FIX MOBILE HERO & PILLS --- */
+    .index-hero {
+        flex-direction: column;
+        text-align: center;
+        margin-top: 20px;
+        gap: 30px;
+        padding: 15px;
     }
 
-    /* Target the Feature Pills Container specifically */
-    div[style*="gap: 15px; margin-top: 30px;"], 
-    .feature-pills,
-    .action-buttons {
+    .hero-text h1 { font-size: 3.5rem !important; line-height: 1.1 !important; }
+    .hero-text p { font-size: 1.1rem !important; }
+
+    /* Forces the pills into a neat row with backgrounds */
+    .feature-pills { 
         display: flex !important;
-        flex-direction: row !important; /* Force them to be side-by-side */
+        flex-direction: row !important;
         flex-wrap: wrap !important;
         justify-content: center !important;
         gap: 10px !important;
-        width: 100%;
+        margin-top: 20px !important;
     }
-
-    /* Target the individual pills */
-    div[style*="gap: 15px; margin-top: 30px;"] span, 
-    .feature-pills span,
-    .action-buttons span {
+    
+    .feature-pills span {
+        display: inline-block !important;
         width: auto !important; /* Stops them from stretching full width */
-        font-size: 0.85rem !important;
-        padding: 6px 12px !important;
-    }
-
-    /* --- 4. Fix Login Cards & Forms --- */
-    .index-glass-card, .card, .hero-card {
-        width: 100% !important;
-        max-width: 100% !important;
-        padding: 30px 20px !important;
-        margin: 40px 0 50px 0 !important; /* Pushes the login box down slightly */
-        box-sizing: border-box !important;
-    }
-
-    .index-glass-card h2, .hero-card h2 {
-        font-size: 1.8rem !important;
-    }
-
-    /* Expand input tap targets */
-    input, select, textarea, button {
-        font-size: 1rem !important;
-        padding: 12px 15px !important;
-        width: 100% !important;
-        box-sizing: border-box !important;
-    }
-
-    /* --- 5. Admin Dashboard Fixes --- */
-    div[style*="justify-content: center; flex-wrap: wrap;"] {
-        flex-direction: column;
-        width: 100%;
-        gap: 10px;
+        padding: 8px 16px !important;
+        border-radius: 20px !important;
+        font-size: 0.85em !important;
     }
     
-    div[style*="justify-content: center; flex-wrap: wrap;"] button {
-        width: 100%;
-        margin: 0;
+    /* Ensure colors render on mobile */
+    .pill-green { background: rgba(16, 185, 129, 0.15) !important; border: 1px solid rgba(16, 185, 129, 0.4) !important; color: #34d399 !important; }
+    .pill-blue { background: rgba(99, 102, 241, 0.15) !important; border: 1px solid rgba(99, 102, 241, 0.4) !important; color: #818cf8 !important; }
+    .pill-yellow { background: rgba(245, 158, 11, 0.15) !important; border: 1px solid rgba(245, 158, 11, 0.4) !important; color: #fcd34d !important; }
+
+    .hero-card {
+        width: 100% !important; max-width: 100% !important;
+        padding: 30px 20px !important; margin-bottom: 40px !important; 
     }
 
-    .controls-group input, 
-    .controls-group select,
-    select[id^="admin"], 
-    input[id^="admin"],
-    select[id^="notice"],
-    select[id^="att"],
-    select[id^="tt"],
-    input[id^="att"] {
-        width: 100% !important;
-        min-width: 100% !important;
-        box-sizing: border-box;
+    /* --- 4. FIX "OR" DIVIDER WHITE LINES --- */
+    .divider {
+        display: flex !important;
+        flex-direction: row !important; /* Forces it horizontal */
+        align-items: center !important;
+        justify-content: center !important;
+        margin: 20px 0 !important;
+    }
+    .divider hr {
+        flex: 1 !important;
+        border: none !important;
+        border-top: 1px solid #334155 !important;
+        margin: 0 !important;
+        height: 0 !important; /* Removes the thick white block bug */
     }
 
-    .student-glass-card > div, 
-    .card > div[style*="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap;"] {
-        flex-direction: column !important;
-        gap: 15px !important;
+    /* --- 5. DASHBOARD COMPONENT FIXES --- */
+    .container, .dashboard-container {
+        padding: 15px !important; margin: 15px auto !important;
+        width: 100% !important; max-width: 95vw !important; box-sizing: border-box;
     }
 
-    .student-glass-card div[style*="display: flex; flex-direction: column; gap: 10px;"] {
-        width: 100%;
-    }
-
-    .student-glass-card div[style*="display: flex; gap: 10px; background: rgba(0,0,0,0.3);"] {
-        flex-wrap: wrap;
-        justify-content: space-between !important;
-        width: 100%;
-    }
-
-    /* --- 6. Student Dashboard Fixes --- */
-    .profile-banner {
-        flex-direction: column !important;
-        text-align: center !important;
-        padding: 30px 15px !important;
-        gap: 15px !important;
-    }
-
-    #academicInfo {
-        font-size: 0.9rem !important;
-        white-space: normal !important;
-        line-height: 1.5;
-    }
-
-    div[style*="display: flex; overflow: hidden"],
-    div[style*="display: flex; flex-wrap: wrap; overflow: hidden"] {
-        flex-direction: column !important;
-    }
-
-    div[style*="flex: 1 1 200px; max-width: 300px;"],
-    div[style*="min-width: 110px;"] {
-        max-width: 100% !important;
-        width: 100% !important;
-        border-right: none !important;
-        border-bottom: 1px solid rgba(255,255,255,0.1) !important;
-    }
-
-    .bento-grid {
-        grid-template-columns: 1fr !important;
-        gap: 15px !important;
-    }
+    .card, .student-glass-card { padding: 20px 15px !important; }
+    input, select, textarea, button { font-size: 1.1rem !important; padding: 14px !important; width: 100% !important; box-sizing: border-box !important; }
     
-    .bento-card {
-        padding: 25px 20px !important;
-        min-height: auto !important;
-    }
+    .bento-grid { grid-template-columns: 1fr !important; }
+    .profile-banner { flex-direction: column !important; text-align: center !important; padding: 30px 15px !important; }
+    
+    div[style*="display: flex; flex-wrap: wrap; overflow: hidden"] { flex-direction: column !important; }
+    div[style*="flex: 1 1 200px; max-width: 300px;"] { max-width: 100% !important; border-right: none !important; }
 
-    /* --- 7. Modals & Floating Buttons --- */
-    .tt-modal-content {
-        width: 95vw !important;
-        padding: 15px !important;
-    }
+    .tt-modal-content { width: 95vw !important; }
 
     button[style*="position: fixed; bottom: 20px;"] {
-        width: auto !important;
-        bottom: 10px !important;
-        right: 10px !important;
-        font-size: 0.85rem !important;
-        padding: 8px 16px !important;
+        width: auto !important; bottom: 10px !important; right: 10px !important;
+        font-size: 0.9rem !important; padding: 8px 16px !important;
     }
+
+    div[style*="justify-content: center; flex-wrap: wrap;"] { flex-direction: column; gap: 10px; width: 100%; }
+    div[style*="justify-content: center; flex-wrap: wrap;"] button { width: 100%; margin: 0; }
+}
+
+@media screen and (max-width: 400px) {
+    .hero-text h1 { font-size: 2.8rem !important; }
+    .index-logo { font-size: 1.3em !important; }
+    .profile-banner h1 { font-size: 2rem !important; }
 }
 
 /* ==========================================================================
