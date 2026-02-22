@@ -2,61 +2,78 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Student Registration - SmartCampus</title>
     <link rel="stylesheet" href="style.css">
 </head>
-<body class="index-body" style="display: flex; min-height: 100vh; margin: 0; position: relative; overflow-x: hidden; overflow-y: auto; padding: 60px 15px; box-sizing: border-box;">
+<body style="display: flex; justify-content: center; align-items: center; min-height: 100vh; flex-direction: column;">
 
     <div class="orb orb-1"></div>
     <div class="orb orb-2"></div>
 
-    <button class="back-circle-btn" onclick="window.location.href='index.html'" title="Back to Home" style="position: absolute; top: 25px; left: 30px; z-index: 100;">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="19" y1="12" x2="5" y2="12"></line>
-            <polyline points="12 19 5 12 12 5"></polyline>
-        </svg>
-    </button>
+    <a href="index.html" class="back-circle-btn" style="position: absolute; top: 25px; left: 30px; text-decoration: none; font-size: 1.5em; z-index: 100;">
+        &larr;
+    </a>
 
-    <div class="container index-glass-card slide-in" style="max-width: 550px; width: 100%; padding: 40px; margin: auto;">
-        <div style="text-align: center; margin-bottom: 25px;">
-            <h2 style="color: #6366f1; margin-bottom: 5px;">Create Account</h2>
-            <p style="color: #94a3b8; font-size: 0.9em;">Register for the SmartCampus Hub</p>
+    <div class="card index-glass-card" style="max-width: 650px; width: 100%; margin-top: 60px; position: relative; z-index: 10;">
+        
+        <div style="text-align: center; margin-bottom: 30px;">
+            <div style="font-size: 3em; margin-bottom: 10px; filter: drop-shadow(0 0 10px rgba(99,102,241,0.5));">📝</div>
+            <h2 style="color: #818cf8; margin-bottom: 5px;">Create Account</h2>
+            <p style="color: #94a3b8; font-size: 0.95em;">Register for your Student Hub access</p>
         </div>
 
         <form id="registerForm">
-            <label>Full Name</label>
-            <input type="text" id="fullName" placeholder="John Doe" required>
-            
-            <div style="display: flex; gap: 15px; flex-wrap: wrap;">
-                <div style="flex: 1; min-width: 200px;">
-                    <label>Course</label>
-                    <select id="course" required>
-                        <option value="B.Tech">B.Tech (4 Years)</option>
-                        <option value="MBA">MBA (2 Years)</option>
-                        <option value="MCA">MCA (2 Years)</option>
-                    </select>
+            <div style="display: flex; flex-wrap: wrap; gap: 15px;">
+                <div style="flex: 1; min-width: 250px;">
+                    <label style="color: #cbd5e1; font-size: 0.85em; margin-bottom: 5px; display: block; font-weight: 500;">Full Name</label>
+                    <input type="text" id="fullName" placeholder="Enter your full name" required>
                 </div>
-                <div style="flex: 1; min-width: 200px;">
-                    <label>Academic Year</label>
-                    <select id="year" required></select> </div>
+                <div style="flex: 1; min-width: 250px;">
+                    <label style="color: #cbd5e1; font-size: 0.85em; margin-bottom: 5px; display: block; font-weight: 500;">Registration Number</label>
+                    <input type="text" id="regNumber" placeholder="e.g. 2401322527" required>
+                </div>
             </div>
 
-            <label>Current Semester</label>
-            <select id="semester" required></select> <label>Branch / Specialization</label>
-            <select id="branch" required></select> <label>Registration Number</label>
-            <input type="text" id="regNumber" placeholder="e.g. 123456" required>
-            
-            <label>Password</label>
-            <input type="password" id="password" placeholder="Create a strong password" required minlength="6">
-            
-            <button type="submit" class="primary-btn-large" style="width: 100%; margin-top: 15px; border: none; cursor: pointer;">Register Account</button>
-        </form>
+            <div style="display: flex; flex-wrap: wrap; gap: 15px;">
+                <div style="flex: 1; min-width: 250px;">
+                    <label style="color: #cbd5e1; font-size: 0.85em; margin-bottom: 5px; display: block; font-weight: 500;">Course</label>
+                    <select id="course" required>
+                        <option value="B.Tech">B.Tech</option>
+                        <option value="MBA">MBA</option>
+                        <option value="MCA">MCA</option>
+                    </select>
+                </div>
+                <div style="flex: 1; min-width: 250px;">
+                    <label style="color: #cbd5e1; font-size: 0.85em; margin-bottom: 5px; display: block; font-weight: 500;">Branch / Specialization</label>
+                    <select id="branch" required></select>
+                </div>
+            </div>
 
-        <p style="text-align: center; margin-top: 25px; font-size: 0.9em; color: #94a3b8;">
-            Already have an account? <a href="student-login.html" style="color: #818cf8; text-decoration: none; font-weight: bold;">Login here</a>
-        </p>
+            <div style="display: flex; flex-wrap: wrap; gap: 15px;">
+                <div style="flex: 1; min-width: 250px;">
+                    <label style="color: #cbd5e1; font-size: 0.85em; margin-bottom: 5px; display: block; font-weight: 500;">Academic Year</label>
+                    <select id="year" required></select>
+                </div>
+                <div style="flex: 1; min-width: 250px;">
+                    <label style="color: #cbd5e1; font-size: 0.85em; margin-bottom: 5px; display: block; font-weight: 500;">Current Semester</label>
+                    <select id="semester" required></select>
+                </div>
+            </div>
+
+            <div style="margin-top: 5px;">
+                <label style="color: #cbd5e1; font-size: 0.85em; margin-bottom: 5px; display: block; font-weight: 500;">Password</label>
+                <input type="password" id="password" placeholder="Create a secure password" required>
+            </div>
+
+            <button type="submit" class="primary-btn-large" style="width: 100%; margin-top: 20px;">Register Securely</button>
+            
+            <div style="text-align: center; margin-top: 20px; font-size: 0.95em; color: #94a3b8;">
+                Already have an account? <a href="student-login.html" style="color: #818cf8; text-decoration: none; font-weight: bold; transition: 0.3s;" onmouseover="this.style.color='#6366f1'" onmouseout="this.style.color='#818cf8'">Login here</a>
+            </div>
+        </form>
     </div>
-    
+
     <script type="module" src="app.js"></script>
 </body>
 </html>
