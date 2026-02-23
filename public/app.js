@@ -340,14 +340,12 @@ if (user?.role === 'Student') {
                     academicInfo.innerText = `${freshUser.course} in ${freshUser.branch} | ${freshUser.year || '1st Year'} (${freshUser.semester || 'Semester 1'}) | Sec: ${freshUser.section || 'Unassigned'}`;
                 }
 
-                // Update profile header
                 const profileAvatarLarge = document.getElementById('profileAvatarLarge');
                 const profileNameDisplay = document.getElementById('profileNameDisplay');
                 
                 if (profileAvatarLarge) profileAvatarLarge.src = avatarUrl;
                 if (profileNameDisplay) profileNameDisplay.innerText = freshUser.full_name;
                 
-                // 💥 Auto-Fill Profile Form Inputs 💥
                 const profileFullName = document.getElementById('profileFullName');
                 if (profileFullName) profileFullName.value = freshUser.full_name || '';
 
@@ -369,10 +367,13 @@ if (user?.role === 'Student') {
             }
         });
 
-        // 💥 TRIGGER THE STUDENT ATTENDANCE GRAPHS 💥
+        // 💥 TRIGGER THE STUDENT ATTENDANCE & MARKS GRAPHS 💥
         setTimeout(() => {
             if(document.getElementById('attendanceDoughnut')) {
                 initAttendanceGraphs(user.id);
+            }
+            if(document.getElementById('marksLineChart')) {
+                initMarksGraphs(user.id);
             }
         }, 500); // Small delay ensures HTML canvas is ready
     }
@@ -419,14 +420,14 @@ if (user?.role === 'Student') {
                         <p style="margin: 0; color: ${i===0 ? '#f8fafc' : '#cbd5e1'}; font-weight: ${i===0 ? 'bold' : 'normal'}; line-height: 1.4;">
                             ${n.message}
                         </p>
-                        ${n.imageUrl ? `<img src="${n.imageUrl}" class="notice-img" style="max-width: 100%; border-radius: 8px; margin-top: 10px; display: block; border: 1px solid rgba(255,255,255,0.1);">` : ''}
+                        ${n.imageUrl ? `<img src="${n.imageUrl}" class="notice-img">` : ''}
                     </div>
                 `).join('');
             }
         });
     }
 
-    // 💥 VIEW TIMETABLE LOGIC FOR STUDENT DASHBOARD 💥
+    // VIEW TIMETABLE LOGIC
     window.viewMyTimetable = async () => {
         const modal = document.getElementById('timetableModal');
         const container = document.getElementById('ttImageContainer');
@@ -473,7 +474,100 @@ if (user?.role === 'Student') {
     };
 }
 
-// 💥 DRAW CHART.JS GRAPHS ON STUDENT DASHBOARD 💥
+// 💥 STUDENT PERFORMANCE MARKS CHART LOGIC 💥
+function initMarksGraphs(studentId) {
+    const marksCtx = document.getElementById('marksLineChart');
+    if(!marksCtx) return;
+
+    const q = query(collection(db, "marks"), where("student_id", "==", studentId));
+    
+    onSnapshot(q, (snapshot) => {
+        let marksData = [];
+
+        snapshot.forEach(doc => {
+            marksData.push(doc.data());
+        });
+
+        // Sort marks by timestamp to plot sequentially
+        marksData.sort((a, b) => a.timestamp - b.timestamp);
+
+        if(marksData.length === 0) {
+            document.getElementById('performanceTrendText').innerText = "N/A";
+            document.getElementById('performanceSubText').innerText = "No exam marks recorded yet.";
+            document.getElementById('latestExamName').innerText = "Awaiting First Exam";
+            return;
+        }
+
+        const labels = marksData.map(m => m.exam_name);
+        const dataPoints = marksData.map(m => {
+            return parseFloat(((m.secured_marks / m.total_marks) * 100).toFixed(1));
+        });
+
+        // Calculate Trend (Compare last exam to second-to-last)
+        const latestPercent = dataPoints[dataPoints.length - 1];
+        document.getElementById('performanceTrendText').innerText = latestPercent + "%";
+        document.getElementById('latestExamName').innerText = `Latest: ${marksData[marksData.length - 1].exam_name} (${marksData[marksData.length - 1].secured_marks}/${marksData[marksData.length - 1].total_marks})`;
+
+        if (marksData.length >= 2) {
+            const previousPercent = dataPoints[dataPoints.length - 2];
+            const diff = (latestPercent - previousPercent).toFixed(1);
+            
+            const subText = document.getElementById('performanceSubText');
+            if (diff > 0) {
+                subText.innerText = `📈 Improved by ${diff}% from last exam`;
+                subText.style.color = "#064e3b";
+                subText.style.background = "rgba(255,255,255,0.8)";
+            } else if (diff < 0) {
+                subText.innerText = `📉 Dropped by ${Math.abs(diff)}% from last exam`;
+                subText.style.color = "#fef2f2";
+                subText.style.background = "rgba(225, 29, 72, 0.8)";
+            } else {
+                subText.innerText = `➖ Consistent with last exam`;
+                subText.style.color = "#064e3b";
+                subText.style.background = "rgba(255,255,255,0.8)";
+            }
+        } else {
+            document.getElementById('performanceSubText').innerText = "Good start! Keep it up.";
+            document.getElementById('performanceSubText').style.color = "#064e3b";
+            document.getElementById('performanceSubText').style.background = "rgba(255,255,255,0.8)";
+        }
+
+        // Destroy old chart
+        if(window.perfLineChart) window.perfLineChart.destroy();
+
+        window.perfLineChart = new Chart(marksCtx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Score Percentage',
+                    data: dataPoints,
+                    borderColor: '#10b981',
+                    backgroundColor: 'rgba(16, 185, 129, 0.2)',
+                    pointBackgroundColor: '#fff',
+                    pointBorderColor: '#10b981',
+                    pointBorderWidth: 2,
+                    pointRadius: 5,
+                    fill: true,
+                    tension: 0.3 // Smooth curves
+                }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { 
+                        beginAtZero: true, max: 100, 
+                        grid: { color: 'rgba(255,255,255,0.05)' }, 
+                        ticks: { stepSize: 20, color: '#94a3b8' } 
+                    },
+                    x: { grid: { display: false }, ticks: { color: '#cbd5e1', font: {weight: 'bold'} } }
+                }
+            }
+        });
+    });
+}
+
 function initAttendanceGraphs(studentId) {
     const doughnutCtx = document.getElementById('attendanceDoughnut');
     const barCtx = document.getElementById('attendanceBarChart');
@@ -490,7 +584,6 @@ function initAttendanceGraphs(studentId) {
             const data = doc.data();
             totalDays++;
             
-            // Group by Month (e.g., "2026-02")
             const monthStr = data.date ? data.date.substring(0, 7) : "Unknown"; 
             if(!monthlyData[monthStr]) monthlyData[monthStr] = { present: 0, total: 0 };
             monthlyData[monthStr].total++;
@@ -528,11 +621,9 @@ function initAttendanceGraphs(studentId) {
         document.getElementById('attendanceStatusText').innerText = statusMsg;
         document.getElementById('attendanceStatusText').style.color = textColor;
 
-        // Destroy old charts to prevent glitching
         if(window.attDoughnutChart) window.attDoughnutChart.destroy();
         if(window.attBarChart) window.attBarChart.destroy();
 
-        // Doughnut Chart
         window.attDoughnutChart = new Chart(doughnutCtx, {
             type: 'doughnut',
             data: {
@@ -551,7 +642,6 @@ function initAttendanceGraphs(studentId) {
             }
         });
 
-        // Bar Chart
         const sortedMonths = Object.keys(monthlyData).sort();
         const barLabels = sortedMonths.map(m => {
             if(m === "Unknown") return m;
@@ -567,7 +657,7 @@ function initAttendanceGraphs(studentId) {
                 datasets: [{
                     label: 'Days Present',
                     data: barValues,
-                    backgroundColor: 'rgba(236, 72, 153, 0.8)', // Neon Pink
+                    backgroundColor: 'rgba(236, 72, 153, 0.8)',
                     borderRadius: 6,
                     barPercentage: 0.5
                 }]
@@ -581,15 +671,11 @@ function initAttendanceGraphs(studentId) {
                 }
             }
         });
-    }, (error) => {
-        console.error("Error drawing charts:", error);
     });
 }
 
 function initProfileSystem(avatarUrl) {
     const profileImageInput = document.getElementById('profileImageInput');
-    
-    // --- PROFILE PHOTO UPLOAD LOGIC ---
     if(profileImageInput) {
         profileImageInput.addEventListener('change', async (e) => {
             const file = e.target.files[0];
@@ -612,7 +698,6 @@ function initProfileSystem(avatarUrl) {
         });
     }
 
-    // --- 💥 NEW: ONLY SAVE PASSWORD LOGIC 💥 ---
     const saveProfileBtn = document.getElementById('saveProfileBtn');
     if (saveProfileBtn) {
         saveProfileBtn.addEventListener('click', async () => {
@@ -628,12 +713,8 @@ function initProfileSystem(avatarUrl) {
 
             try {
                 const userRef = doc(db, "users", user.id);
-                // Push ONLY the new password to Firebase
-                await updateDoc(userRef, {
-                    password: newPass
-                });
+                await updateDoc(userRef, { password: newPass });
                 
-                // Update local storage so the browser remembers the change immediately
                 const activeUser = JSON.parse(localStorage.getItem('user'));
                 activeUser.password = newPass;
                 localStorage.setItem('user', JSON.stringify(activeUser));
@@ -713,7 +794,6 @@ function initQueriesSystem() {
         let complaints = [];
         querySnapshot.forEach((doc) => {
             const data = doc.data();
-            // 💥 HIDE IF STUDENT DELETED IT 💥
             if (data.student_deleted !== true) {
                 complaints.push({ id: doc.id, ...data });
             }
@@ -943,7 +1023,6 @@ window.viewReceipt = (paymentId) => {
 // --- 7. ADMIN DASHBOARD LOGIC ---
 if (user?.role === 'Admin') {
     
-    // 💥 DB STATE FOR STUDENT DRILL-DOWN 💥
     window.dbState = { course: null, branch: null, year: null, semester: null };
 
     window.setDbState = (c, b, y, s) => {
@@ -1189,7 +1268,6 @@ if (user?.role === 'Admin') {
             btn.disabled = true;
 
             try {
-                // 💥 CLOUDINARY UPLOAD LOGIC 💥
                 if (file) {
                     btn.innerText = "Uploading Attachment...";
                     const CLOUD_NAME = "dmy74celx"; 
@@ -1238,7 +1316,7 @@ if (user?.role === 'Admin') {
         });
     }
 
-    // 💥 SMART ATTENDANCE (ROLL CALL) LOGIC 💥
+    // 💥 SMART ATTENDANCE LOGIC 💥
     function initAdminAttendanceDropdowns() {
         const aCourse = document.getElementById('attCourse');
         const aYear = document.getElementById('attYear');
@@ -1520,7 +1598,162 @@ if (user?.role === 'Admin') {
         });
     }
 
-    // 💥 NEW: STAFF MANAGEMENT SUBMISSION LOGIC 💥
+    // 💥 EXAM MARKS ADMIN LOGIC 💥
+    function initAdminMarksDropdowns() {
+        const mCourse = document.getElementById('markCourse');
+        const mYear = document.getElementById('markYear');
+        if (!mCourse || !mYear) return;
+
+        const renderMarksDropdowns = () => {
+            const course = mCourse.value;
+            const currentYear = mYear.value || "All";
+            const currentSem = document.getElementById('markSemester').value || "All";
+            const currentBranch = document.getElementById('markBranch').value || "All";
+            
+            let years = [{label: 'All Years', value: 'All'}, {label: '1st Year', value: '1st Year'}, {label: '2nd Year', value: '2nd Year'}];
+            if (course === 'B.Tech') { years.push({label: '3rd Year', value: '3rd Year'}, {label: '4th Year', value: '4th Year'}); }
+            safelyPopulateDropdown('markYear', years, currentYear);
+
+            const selectedYear = mYear.value;
+            let sems = [{label: 'All Semesters', value: 'All'}];
+            if (selectedYear === '1st Year') sems.push({label: 'Semester 1', value: 'Semester 1'}, {label: 'Semester 2', value: 'Semester 2'});
+            else if (selectedYear === '2nd Year') sems.push({label: 'Semester 3', value: 'Semester 3'}, {label: 'Semester 4', value: 'Semester 4'});
+            else if (selectedYear === '3rd Year') sems.push({label: 'Semester 5', value: 'Semester 5'}, {label: 'Semester 6', value: 'Semester 6'});
+            else if (selectedYear === '4th Year') sems.push({label: 'Semester 7', value: 'Semester 7'}, {label: 'Semester 8', value: 'Semester 8'});
+            safelyPopulateDropdown('markSemester', sems, currentSem);
+
+            let branches = [{label: 'All Branches', value: 'All'}];
+            if (course === 'B.Tech') {
+                if (selectedYear === '1st Year') branches.push({label: 'Common 1st Year', value: 'Common 1st Year'});
+                else branches.push( {label: 'Computer Science and Engineering', value: 'Computer Science and Engineering'}, {label: 'Data Science', value: 'Data Science'}, {label: 'Electrical Communication Engineering', value: 'Electrical Communication Engineering'}, {label: 'EE', value: 'EE'}, {label: 'EEE', value: 'EEE'}, {label: 'Civil', value: 'Civil'}, {label: 'Mechanical', value: 'Mechanical'} );
+            } else if (course === 'MBA') {
+                branches.push( {label: 'Human Resources (HR)', value: 'Human Resources (HR)'}, {label: 'Finance', value: 'Finance'}, {label: 'Marketing', value: 'Marketing'}, {label: 'IT & Systems', value: 'IT & Systems'}, {label: 'Operations', value: 'Operations'} );
+            } else if (course === 'MCA') {
+                branches.push({label: 'Master of Computer Applications', value: 'Master of Computer Applications'});
+            }
+            safelyPopulateDropdown('markBranch', branches, currentBranch);
+        };
+
+        mCourse.addEventListener('change', renderMarksDropdowns);
+        mYear.addEventListener('change', renderMarksDropdowns);
+        renderMarksDropdowns();
+        
+        const markDateInput = document.getElementById('markDate');
+        if(markDateInput) markDateInput.value = new Date().toISOString().split('T')[0];
+    }
+    
+    initAdminMarksDropdowns();
+
+    window.loadMarksList = async () => {
+        const examName = document.getElementById('markExamName').value.trim();
+        const totalMarks = document.getElementById('markTotalPoints').value;
+
+        if (!examName || !totalMarks) {
+            return showToast("Please enter Exam Name and Total Marks first.", "warning");
+        }
+        if(!window.allStudents) return showToast("Student data is still loading...", "warning");
+
+        const listContainer = document.getElementById('marksListContainer');
+        const submitBtn = document.getElementById('submitMarksBtn');
+        
+        listContainer.innerHTML = `<p style="color: #6366f1; text-align: center; padding: 20px;">Fetching Students...</p>`;
+
+        const course = document.getElementById('markCourse').value;
+        const year = document.getElementById('markYear').value;
+        const sem = document.getElementById('markSemester').value;
+        const branch = document.getElementById('markBranch').value;
+        const section = document.getElementById('markSection').value;
+        
+        let targetStudents = window.allStudents.filter(s => {
+            const matchesCourse = (course === "All" || s.course === course);
+            const matchesYear = (year === "All" || s.year === year);
+            const matchesSem = (sem === "All" || s.semester === sem);
+            let sBranch = s.branch || "Common 1st Year";
+            if (sBranch.trim().toUpperCase() === "CSE") sBranch = "Computer Science and Engineering";
+            const matchesBranch = (branch === "All" || sBranch === branch || (branch === 'Common 1st Year' && s.year === '1st Year'));
+            const matchesSec = (section === "All" || (s.section || "Unassigned") === section);
+            
+            return matchesCourse && matchesYear && matchesSem && matchesBranch && matchesSec;
+        });
+
+        if(targetStudents.length === 0) {
+            listContainer.innerHTML = `<p style="color: #fca5a5; text-align: center; padding: 20px; background: rgba(225, 29, 72, 0.1); border-radius: 8px;">No students found for this selection.</p>`;
+            submitBtn.style.display = 'none';
+            return;
+        }
+
+        targetStudents.sort((a,b) => (a.full_name || "").localeCompare(b.full_name || ""));
+
+        listContainer.innerHTML = targetStudents.map((s, index) => `
+            <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.05); padding: 15px 20px; border-radius: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                <div style="flex: 1; min-width: 200px;">
+                    <h4 style="color: #f8fafc; margin: 0 0 5px 0;">${index + 1}. ${s.full_name}</h4>
+                    <p style="color: #94a3b8; font-size: 0.85em; margin: 0;">Reg: <strong>${s.registration_number || 'N/A'}</strong></p>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <label style="color: #cbd5e1; font-size: 0.85em;">Secured:</label>
+                    <input type="number" class="mark-input student-mark-entry" 
+                           data-sid="${s.id}" data-sname="${s.full_name}" 
+                           placeholder="0" min="0" max="${totalMarks}">
+                    <span style="color: #94a3b8; font-size: 1.1em; font-weight: bold;">/ ${totalMarks}</span>
+                </div>
+            </div>
+        `).join('');
+        
+        submitBtn.style.display = 'block';
+    };
+
+    window.saveMarks = async () => {
+        const examName = document.getElementById('markExamName').value.trim();
+        const totalMarks = parseFloat(document.getElementById('markTotalPoints').value);
+        const dateVal = document.getElementById('markDate').value;
+        
+        if(!examName || isNaN(totalMarks)) return showToast("Exam Name and Total Marks are required.", "warning");
+
+        const markInputs = document.querySelectorAll('.student-mark-entry');
+        if(markInputs.length === 0) return;
+
+        const btn = document.getElementById('submitMarksBtn');
+        btn.innerText = "Saving to Database...";
+        btn.disabled = true;
+
+        try {
+            for(let input of markInputs) {
+                const sId = input.dataset.sid;
+                const secured = input.value !== "" ? parseFloat(input.value) : null;
+                
+                // Only save if admin actually typed a mark
+                if (secured !== null && !isNaN(secured)) {
+                    const docId = `${sId}_${examName.replace(/\s+/g, '_')}_${dateVal}`; 
+                    
+                    await setDoc(doc(db, "marks", docId), {
+                        student_id: sId,
+                        student_name: input.dataset.sname,
+                        exam_name: examName,
+                        secured_marks: secured,
+                        total_marks: totalMarks,
+                        date: dateVal,
+                        timestamp: Date.now()
+                    });
+                }
+            }
+            showToast("Exam marks saved successfully!", "success");
+            
+            // Clear inputs visually
+            document.getElementById('markExamName').value = '';
+            document.getElementById('marksListContainer').innerHTML = `<p style="color: #10b981; text-align: center; font-weight: bold; background: rgba(16, 185, 129, 0.1); padding: 20px; border-radius: 8px;">✔️ Marks processed securely. Enter a new exam to continue.</p>`;
+            btn.style.display = 'none';
+
+        } catch(error) {
+            console.error("Save Marks Error", error);
+            showToast("Failed to save marks. Check connection.", "error");
+        } finally {
+            btn.innerText = "Save Exam Marks";
+            btn.disabled = false;
+        }
+    };
+
+
     const addStaffForm = document.getElementById('addStaffForm');
     if (addStaffForm) {
         addStaffForm.addEventListener('submit', async (e) => {
@@ -1535,7 +1768,6 @@ if (user?.role === 'Admin') {
             btn.innerText = "Checking Details...";
 
             try {
-                // Check if username already exists
                 const q = query(collection(db, "users"), where("username", "==", username));
                 const snapshot = await getDocs(q);
 
@@ -1546,7 +1778,6 @@ if (user?.role === 'Admin') {
                     return;
                 }
 
-                // Add new staff
                 await addDoc(collection(db, "users"), {
                     role: role,
                     full_name: fullName,
@@ -1646,8 +1877,6 @@ function loadAdminData() {
                 let resolvedCount = 0;
                 querySnapshot.forEach((doc) => {
                     const data = doc.data();
-                    
-                    // 💥 FILTER OUT ARCHIVED QUERIES 💥
                     if (data.admin_deleted !== true) {
                         complaints.push({ id: doc.id, ...data });
                         if (data.status === 'Resolved') resolvedCount++;
@@ -1682,8 +1911,6 @@ function loadAdminData() {
             let students = [];
             querySnapshot.forEach((doc) => students.push({ id: doc.id, ...doc.data() }));
             window.allStudents = students; 
-            
-            // 💥 TRIGGER THE NEW BREADCRUMB RENDERER 💥
             if (window.renderDatabaseLevel) window.renderDatabaseLevel();
         }, (error) => {
             console.error("FIREBASE STUDENT DB ERROR:", error);
@@ -1717,7 +1944,6 @@ if (user?.role === 'Technician' && window.location.pathname.includes('technician
         }
     };
 
-    // Client-side render function so search/sort happens instantly
     window.renderTechTickets = () => {
         if (!ticketContainer || !window.allTechTickets) return;
 
@@ -1725,19 +1951,13 @@ if (user?.role === 'Technician' && window.location.pathname.includes('technician
         const sortVal = techSortSelect ? techSortSelect.value : 'newest';
         const filterVal = techFilterSelect ? techFilterSelect.value : 'all';
 
-        // Filter Phase
         let filteredTickets = window.allTechTickets.filter(t => {
-            // Check status filter
             const statusMatch = filterVal === 'all' || t.status === filterVal;
-            
-            // Search everything: reg number, details, description
             const searchString = `${t.reg_number || ''} ${t.student_details || ''} ${t.description || ''}`.toLowerCase();
             const searchMatch = searchString.includes(searchTerm);
-            
             return statusMatch && searchMatch;
         });
 
-        // Sort Phase
         if (sortVal === 'newest') {
             filteredTickets.sort((a, b) => b.created_at - a.created_at);
         } else if (sortVal === 'oldest') {
@@ -1749,9 +1969,8 @@ if (user?.role === 'Technician' && window.location.pathname.includes('technician
             return;
         }
 
-        // Render Phase
         ticketContainer.innerHTML = filteredTickets.map(t => {
-            const status = t.status || 'In Progress'; // Fallback
+            const status = t.status || 'In Progress';
             let statusClass = 'status-progress';
             if(status === 'Resolved') statusClass = 'status-resolved';
 
@@ -1778,7 +1997,6 @@ if (user?.role === 'Technician' && window.location.pathname.includes('technician
         }).join('');
     };
 
-    // Attach Event Listeners to UI Controls
     if(techSearchInput) techSearchInput.addEventListener('input', window.renderTechTickets);
     if(techSortSelect) techSortSelect.addEventListener('change', window.renderTechTickets);
     if(techFilterSelect) techFilterSelect.addEventListener('change', window.renderTechTickets);
@@ -1790,18 +2008,11 @@ if (user?.role === 'Technician' && window.location.pathname.includes('technician
             let tickets = [];
             querySnapshot.forEach(doc => {
                 const data = doc.data();
-                
-                // 💥 IGNORE PENDING TICKETS & ARCHIVED ADMIN QUERIES 💥
-                // Tech only sees it after Admin marks it "In Progress"
                 if (data.admin_deleted !== true && data.status !== 'Pending') {
                     tickets.push({ id: doc.id, ...data });
                 }
             });
-            
-            // Save to global variable so the filter function can access it
             window.allTechTickets = tickets;
-            
-            // Trigger the initial render
             window.renderTechTickets();
         });
     }
