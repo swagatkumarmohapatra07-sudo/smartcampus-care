@@ -23,8 +23,19 @@ window.logout = () => {
     window.location.href = 'index.html';
 };
 
-// Route Protection (Includes student-marks-history.html)
-if (!user && (window.location.pathname.includes('admin.html') || window.location.pathname.includes('technician.html') || window.location.pathname.includes('student.html') || window.location.pathname.includes('student-fees.html') || window.location.pathname.includes('student-profile.html') || window.location.pathname.includes('net-banking.html') || window.location.pathname.includes('student-home.html') || window.location.pathname.includes('about-college.html') || window.location.pathname.includes('student-marks-history.html'))) {
+// Route Protection
+if (!user && (
+    window.location.pathname.includes('admin.html') || 
+    window.location.pathname.includes('technician.html') || 
+    window.location.pathname.includes('student.html') || 
+    window.location.pathname.includes('student-fees.html') || 
+    window.location.pathname.includes('student-profile.html') || 
+    window.location.pathname.includes('net-banking.html') || 
+    window.location.pathname.includes('student-home.html') || 
+    window.location.pathname.includes('about-college.html') || 
+    window.location.pathname.includes('student-marks-history.html') || 
+    window.location.pathname.includes('student-lost-found.html')
+)) {
     window.location.href = 'index.html';
 }
 
@@ -76,7 +87,10 @@ function initDynamicDropdowns(courseRef, yearId, semId, branchId, currentData = 
         const semSelect = document.getElementById(semId);
         const branchSelect = document.getElementById(branchId);
         
-        let years = [{label: '1st Year', value: '1st Year'}, {label: '2nd Year', value: '2nd Year'}];
+        let years = [
+            {label: '1st Year', value: '1st Year'}, 
+            {label: '2nd Year', value: '2nd Year'}
+        ];
         if (course === 'B.Tech') {
             years.push({label: '3rd Year', value: '3rd Year'}, {label: '4th Year', value: '4th Year'});
         }
@@ -131,8 +145,12 @@ function initDynamicDropdowns(courseRef, yearId, semId, branchId, currentData = 
     if (currentData.year) {
         yearSelect.value = currentData.year;
         render(); 
-        if (currentData.semester && document.getElementById(semId)) document.getElementById(semId).value = currentData.semester;
-        if (currentData.branch && document.getElementById(branchId)) document.getElementById(branchId).value = currentData.branch;
+        if (currentData.semester && document.getElementById(semId)) {
+            document.getElementById(semId).value = currentData.semester;
+        }
+        if (currentData.branch && document.getElementById(branchId)) {
+            document.getElementById(branchId).value = currentData.branch;
+        }
     }
 }
 
@@ -148,7 +166,11 @@ function initAdminNoticeDropdowns() {
         const currentSem = document.getElementById('noticeSemester').value || "All";
         const currentBranch = document.getElementById('noticeBranch').value || "All";
         
-        let years = [{label: 'All Years', value: 'All'}, {label: '1st Year', value: '1st Year'}, {label: '2nd Year', value: '2nd Year'}];
+        let years = [
+            {label: 'All Years', value: 'All'}, 
+            {label: '1st Year', value: '1st Year'}, 
+            {label: '2nd Year', value: '2nd Year'}
+        ];
         if (course === 'B.Tech') {
             years.push({label: '3rd Year', value: '3rd Year'}, {label: '4th Year', value: '4th Year'});
         }
@@ -171,14 +193,19 @@ function initAdminNoticeDropdowns() {
                     {label: 'Computer Science and Engineering', value: 'Computer Science and Engineering'},
                     {label: 'Data Science', value: 'Data Science'},
                     {label: 'Electrical Communication Engineering', value: 'Electrical Communication Engineering'},
-                    {label: 'EE', value: 'EE'}, {label: 'EEE', value: 'EEE'}, {label: 'Civil', value: 'Civil'}, {label: 'Mechanical', value: 'Mechanical'}
+                    {label: 'EE', value: 'EE'}, 
+                    {label: 'EEE', value: 'EEE'}, 
+                    {label: 'Civil', value: 'Civil'}, 
+                    {label: 'Mechanical', value: 'Mechanical'}
                 );
             }
         } else if (course === 'MBA') {
             branches.push(
                 {label: 'Human Resources (HR)', value: 'Human Resources (HR)'},
-                {label: 'Finance', value: 'Finance'}, {label: 'Marketing', value: 'Marketing'},
-                {label: 'IT & Systems', value: 'IT & Systems'}, {label: 'Operations', value: 'Operations'}
+                {label: 'Finance', value: 'Finance'}, 
+                {label: 'Marketing', value: 'Marketing'},
+                {label: 'IT & Systems', value: 'IT & Systems'}, 
+                {label: 'Operations', value: 'Operations'}
             );
         } else if (course === 'MCA') {
             branches.push({label: 'Master of Computer Applications', value: 'Master of Computer Applications'});
@@ -228,7 +255,8 @@ if (registerForm) {
             setTimeout(() => window.location.href = 'student-login.html', 1500);
         } catch (error) {
             showToast('Error registering account.', 'error');
-            submitBtn.disabled = false; submitBtn.innerText = "Register Account";
+            submitBtn.disabled = false; 
+            submitBtn.innerText = "Register Account";
         }
     });
 }
@@ -264,7 +292,8 @@ if (adminLoginForm) {
         const pass = document.getElementById('password').value.trim();
         const submitBtn = adminLoginForm.querySelector('button');
         
-        submitBtn.innerText = "Authenticating..."; submitBtn.disabled = true;
+        submitBtn.innerText = "Authenticating..."; 
+        submitBtn.disabled = true;
         try {
             const q = query(collection(db, "users"), where("username", "==", username), where("password", "==", pass));
             const querySnapshot = await getDocs(q);
@@ -292,7 +321,8 @@ if (adminLoginForm) {
             document.getElementById('errorMsg').style.display = 'block';
             document.getElementById('errorMsg').innerText = "Database Error.";
         } finally {
-            submitBtn.innerText = "Access System"; submitBtn.disabled = false;
+            submitBtn.innerText = "Access System"; 
+            submitBtn.disabled = false;
         }
     });
 }
@@ -300,15 +330,30 @@ if (adminLoginForm) {
 async function ensureAdminExists() {
     try {
         const q = query(collection(db, "users"), where("username", "==", "admin1"));
-        if ((await getDocs(q)).empty) {
-            await addDoc(collection(db, "users"), { role: "Admin", username: "admin1", password: "admin123", full_name: "System Admin" });
+        const docs = await getDocs(q);
+        if (docs.empty) {
+            await addDoc(collection(db, "users"), { 
+                role: "Admin", 
+                username: "admin1", 
+                password: "admin123", 
+                full_name: "System Admin" 
+            });
         }
         
         const qTech = query(collection(db, "users"), where("username", "==", "tech1"));
-        if ((await getDocs(qTech)).empty) {
-            await addDoc(collection(db, "users"), { role: "Technician", username: "tech1", password: "tech123", full_name: "Campus Tech Support", tech_type: "IT Support" });
+        const docsTech = await getDocs(qTech);
+        if (docsTech.empty) {
+            await addDoc(collection(db, "users"), { 
+                role: "Technician", 
+                username: "tech1", 
+                password: "tech123", 
+                full_name: "Campus Tech Support", 
+                tech_type: "IT Support" 
+            });
         }
-    } catch (e) { }
+    } catch (e) { 
+        console.error(e);
+    }
 }
 
 // --- 6. STUDENT DASHBOARD MASTER LOGIC ---
@@ -343,6 +388,7 @@ if (user?.role === 'Student') {
                 
                 if (headerAvatar) headerAvatar.src = avatarUrl;
                 if (welcomeName) welcomeName.innerText = freshUser.full_name;
+                
                 if (academicInfo) {
                     academicInfo.innerText = `${freshUser.course} in ${freshUser.branch} | ${freshUser.year || '1st Year'} (${freshUser.semester || 'Semester 1'}) | Sec: ${freshUser.section || 'Unassigned'}`;
                 }
@@ -367,7 +413,9 @@ if (user?.role === 'Student') {
                 const profileYear = document.getElementById('profileYear');
                 if (profileYear) {
                     initDynamicDropdowns(freshUser.course || 'B.Tech', 'profileYear', 'profileSemester', 'profileBranch', { 
-                        year: freshUser.year, semester: freshUser.semester, branch: freshUser.branch 
+                        year: freshUser.year, 
+                        semester: freshUser.semester, 
+                        branch: freshUser.branch 
                     });
                 }
             }
@@ -375,15 +423,32 @@ if (user?.role === 'Student') {
 
         // 💥 TRIGGER THE STUDENT ATTENDANCE & MARKS GRAPHS 💥
         setTimeout(() => {
-            if(document.getElementById('attendanceDoughnut')) initAttendanceGraphs(user.id);
-            if(document.getElementById('marksLineChart')) initMarksGraphs(user.id);
+            if(document.getElementById('attendanceDoughnut')) {
+                initAttendanceGraphs(user.id);
+            }
+            if(document.getElementById('marksLineChart')) {
+                initMarksGraphs(user.id);
+            }
         }, 500); 
     }
 
-    if (document.getElementById('complaintForm')) initQueriesSystem();
-    if (document.getElementById('paymentForm')) initFeeSystem();
-    if (document.getElementById('profileYear')) initProfileSystem(user.profile_pic || 'https://cdn-icons-png.flaticon.com/512/149/149071.png');
-    if (document.getElementById('marksHistoryList')) initMarksHistorySystem(user.id); 
+    if (document.getElementById('complaintForm')) {
+        initQueriesSystem();
+    }
+    if (document.getElementById('paymentForm')) {
+        initFeeSystem();
+    }
+    if (document.getElementById('profileYear')) {
+        initProfileSystem(user.profile_pic || 'https://cdn-icons-png.flaticon.com/512/149/149071.png');
+    }
+    if (document.getElementById('marksHistoryList')) {
+        initMarksHistorySystem(user.id); 
+    }
+    
+    // 💥 TRIGGER LOST & FOUND SYSTEM IF ON THAT PAGE 💥
+    if (document.getElementById('lostFoundForm') || document.getElementById('lostFoundFeed')) {
+        initLostFoundSystem();
+    }
 
     // LIVE NOTICEBOARD RECEIVER
     const noticeBoard = document.getElementById('studentNoticeBoard');
@@ -391,7 +456,10 @@ if (user?.role === 'Student') {
         onSnapshot(collection(db, "notices"), (snapshot) => {
             const activeUser = JSON.parse(localStorage.getItem('user'));
             let notices = [];
-            snapshot.forEach(doc => notices.push({id: doc.id, ...doc.data()}));
+            
+            snapshot.forEach(doc => {
+                notices.push({id: doc.id, ...doc.data()});
+            });
             
             notices = notices.filter(n => {
                 if (n.targets && Array.isArray(n.targets)) {
@@ -475,36 +543,166 @@ if (user?.role === 'Student') {
     };
 }
 
-// 💥 NEW: MARKS HISTORY LIST LOGIC 💥
-function initMarksHistorySystem(studentId) {
-    const listDiv = document.getElementById('marksHistoryList');
-    if (!listDiv) return;
+// 💥 NEW: LOST AND FOUND SYSTEM LOGIC (STUDENT SIDE) 💥
+function initLostFoundSystem() {
+    const lfForm = document.getElementById('lostFoundForm');
+    const lfFeed = document.getElementById('lostFoundFeed');
+    const activeUser = JSON.parse(localStorage.getItem('user')) || user;
 
+    if (lfForm) {
+        lfForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const type = document.getElementById('lfType').value;
+            const itemName = document.getElementById('lfItemName').value.trim();
+            const location = document.getElementById('lfLocation').value.trim();
+            const desc = document.getElementById('lfDescription').value.trim();
+            
+            // 💥 CAPTURE REAL CONTACT NUMBER 💥
+            const contactNum = document.getElementById('lfContact').value.trim();
+            
+            const fileInput = document.getElementById('lfImageInput');
+            const file = fileInput.files ? fileInput.files[0] : null;
+
+            const btn = lfForm.querySelector('button');
+            btn.disabled = true;
+            btn.innerText = "Processing submission...";
+
+            let uploadedImageUrl = "";
+
+            try {
+                if (file) {
+                    btn.innerText = "Uploading Image...";
+                    const CLOUD_NAME = "dmy74celx"; 
+                    const UPLOAD_PRESET = "rcyp6gvo"; 
+                    const formData = new FormData();
+                    formData.append('file', file);
+                    formData.append('upload_preset', UPLOAD_PRESET);
+
+                    const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, { method: 'POST', body: formData });
+                    const data = await res.json();
+                    if (data.secure_url) {
+                        uploadedImageUrl = data.secure_url;
+                    }
+                }
+
+                btn.innerText = "Posting to Campus Feed...";
+                
+                await addDoc(collection(db, "lost_and_found"), {
+                    type: type,
+                    item_name: itemName,
+                    location: location,
+                    description: desc,
+                    image_url: uploadedImageUrl,
+                    student_id: activeUser.id,
+                    student_name: activeUser.full_name,
+                    contact_info: contactNum, // 💥 SAVE REAL CONTACT NUMBER 💥
+                    status: "Active", 
+                    timestamp: Date.now()
+                });
+
+                showToast(`Your ${type} item was posted successfully!`, "success");
+                lfForm.reset();
+            } catch (error) {
+                console.error("LF Error:", error);
+                showToast("Failed to post item.", "error");
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "Post to Campus Feed";
+            }
+        });
+    }
+
+    if (lfFeed) {
+        lfFeed.innerHTML = '<p style="color: #6366f1; text-align: center;">Fetching latest items...</p>';
+        
+        onSnapshot(collection(db, "lost_and_found"), (snapshot) => {
+            let items = [];
+            snapshot.forEach(doc => items.push({ id: doc.id, ...doc.data() }));
+            
+            items.sort((a, b) => b.timestamp - a.timestamp);
+
+            if (items.length === 0) {
+                lfFeed.innerHTML = '<p style="color: #94a3b8; text-align: center; padding: 20px; background: rgba(0,0,0,0.2); border-radius: 8px;">No active lost or found items.</p>';
+                return;
+            }
+
+            lfFeed.innerHTML = items.map(item => {
+                const isLost = item.type === 'Lost';
+                const badgeColor = isLost ? '#f43f5e' : '#10b981';
+                const badgeBg = isLost ? 'rgba(244, 63, 94, 0.2)' : 'rgba(16, 185, 129, 0.2)';
+                const borderColor = isLost ? '#f43f5e' : '#10b981';
+
+                return `
+                    <div class="card" style="border-left: 4px solid ${borderColor}; margin-bottom: 20px; background: rgba(15, 23, 42, 0.6); position: relative; display: flex; flex-direction: column; gap: 15px;">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                            <div>
+                                <span class="badge" style="background: ${badgeBg}; color: ${badgeColor}; border: 1px solid ${badgeColor}; margin-bottom: 8px; display: inline-block;">${item.type} Item</span>
+                                <h3 style="color: #f8fafc; margin: 0 0 5px 0; font-size: 1.3em;">${item.item_name}</h3>
+                                <p style="color: #94a3b8; font-size: 0.85em; margin: 0;">📍 ${item.location} &nbsp;|&nbsp; 🗓️ ${new Date(item.timestamp).toLocaleString()}</p>
+                            </div>
+                        </div>
+                        
+                        <p style="color: #cbd5e1; font-size: 0.95em; line-height: 1.5; margin: 0;">${item.description}</p>
+                        
+                        ${item.image_url ? `<img src="${item.image_url}" style="width: 100%; max-height: 250px; object-fit: cover; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);">` : ''}
+                        
+                        <div style="background: rgba(0,0,0,0.3); padding: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+                            <span style="color: #a5b4fc; font-size: 0.85em;">👤 Posted by: <strong>${item.student_name}</strong></span>
+                            ${item.student_id === activeUser.id ? 
+                                `<button onclick="window.resolveLostFound('${item.id}')" style="background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); padding: 5px 15px; border-radius: 6px; cursor: pointer; transition: 0.3s; font-size: 0.85em; font-weight: bold;">Mark Resolved (Delete)</button>` 
+                                : 
+                                `<span style="color: #cbd5e1; font-size: 0.85em;">📞 Contact: <strong>${item.contact_info}</strong></span>`
+                            }
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        });
+    }
+
+    window.resolveLostFound = async (docId) => {
+        if(confirm("Are you sure this item has been resolved? It will be removed from the feed.")) {
+            try {
+                await deleteDoc(doc(db, "lost_and_found", docId));
+                showToast("Item resolved and removed.", "success");
+            } catch (err) {
+                showToast("Failed to delete post.", "error");
+            }
+        }
+    };
+}
+
+// 💥 MARKS HISTORY LIST LOGIC 💥
+function initMarksHistorySystem(studentId) {
+    const listDiv = document.getElementById('marksHistoryList'); 
+    if (!listDiv) return;
+    
     const q = query(collection(db, "marks"), where("student_id", "==", studentId));
 
     onSnapshot(q, (snapshot) => {
-        let marksData = [];
-        snapshot.forEach(doc => { marksData.push({ id: doc.id, ...doc.data() }); });
+        let marksData = []; 
+        snapshot.forEach(doc => { 
+            marksData.push({ id: doc.id, ...doc.data() }); 
+        });
         
-        // Sort newest first for history
         marksData.sort((a, b) => b.timestamp - a.timestamp);
 
-        if (marksData.length === 0) {
-            listDiv.innerHTML = '<p style="color: #94a3b8; background: rgba(0,0,0,0.3); padding: 20px; border-radius: 8px; text-align: center;">No exam marks recorded yet.</p>';
-            return;
+        if (marksData.length === 0) { 
+            listDiv.innerHTML = '<p style="color: #94a3b8; background: rgba(0,0,0,0.3); padding: 20px; border-radius: 8px; text-align: center;">No exam marks recorded yet.</p>'; 
+            return; 
         }
 
         listDiv.innerHTML = marksData.map(m => {
             const percent = ((m.secured_marks / m.total_marks) * 100).toFixed(1);
-            let bColor = '#10b981'; // Green
+            let bColor = '#10b981'; 
             let bgBadge = 'rgba(16, 185, 129, 0.1)';
             
-            if (percent < 40) {
-                bColor = '#f43f5e'; // Red
-                bgBadge = 'rgba(244, 63, 94, 0.1)';
-            } else if (percent < 60) {
-                bColor = '#f59e0b'; // Yellow
-                bgBadge = 'rgba(245, 158, 11, 0.1)';
+            if (percent < 40) { 
+                bColor = '#f43f5e'; 
+                bgBadge = 'rgba(244, 63, 94, 0.1)'; 
+            } else if (percent < 60) { 
+                bColor = '#f59e0b'; 
+                bgBadge = 'rgba(245, 158, 11, 0.1)'; 
             }
 
             return `
@@ -522,208 +720,205 @@ function initMarksHistorySystem(studentId) {
                             </div>
                         </div>
                     </div>
-                </div>
-            `;
+                </div>`;
         }).join('');
     });
 }
 
 // 💥 STUDENT PERFORMANCE MARKS CHART LOGIC 💥
 function initMarksGraphs(studentId) {
-    const marksCtx = document.getElementById('marksLineChart');
+    const marksCtx = document.getElementById('marksLineChart'); 
     if(!marksCtx) return;
 
     const q = query(collection(db, "marks"), where("student_id", "==", studentId));
     
     onSnapshot(q, (snapshot) => {
-        let marksData = [];
-
-        snapshot.forEach(doc => {
-            marksData.push(doc.data());
-        });
-
-        // Sort marks by timestamp to plot sequentially
+        let marksData = []; 
+        snapshot.forEach(doc => { 
+            marksData.push(doc.data()); 
+        }); 
+        
         marksData.sort((a, b) => a.timestamp - b.timestamp);
 
-        if(marksData.length === 0) {
-            document.getElementById('performanceTrendText').innerText = "N/A";
-            document.getElementById('performanceSubText').innerText = "No exam marks recorded yet.";
-            document.getElementById('latestExamName').innerText = "Awaiting First Exam";
-            return;
+        if(marksData.length === 0) { 
+            document.getElementById('performanceTrendText').innerText = "N/A"; 
+            document.getElementById('performanceSubText').innerText = "No exam marks recorded yet."; 
+            document.getElementById('latestExamName').innerText = "Awaiting First Exam"; 
+            return; 
         }
 
-        const labels = marksData.map(m => m.exam_name);
-        const dataPoints = marksData.map(m => {
-            return parseFloat(((m.secured_marks / m.total_marks) * 100).toFixed(1));
+        const labels = marksData.map(m => m.exam_name); 
+        const dataPoints = marksData.map(m => { 
+            return parseFloat(((m.secured_marks / m.total_marks) * 100).toFixed(1)); 
         });
 
-        // Calculate Trend (Compare last exam to second-to-last)
-        const latestPercent = dataPoints[dataPoints.length - 1];
-        document.getElementById('performanceTrendText').innerText = latestPercent + "%";
+        const latestPercent = dataPoints[dataPoints.length - 1]; 
+        document.getElementById('performanceTrendText').innerText = latestPercent + "%"; 
         document.getElementById('latestExamName').innerText = `Latest: ${marksData[marksData.length - 1].exam_name} (${marksData[marksData.length - 1].secured_marks}/${marksData[marksData.length - 1].total_marks})`;
 
         if (marksData.length >= 2) {
-            const previousPercent = dataPoints[dataPoints.length - 2];
-            const diff = (latestPercent - previousPercent).toFixed(1);
-            
+            const previousPercent = dataPoints[dataPoints.length - 2]; 
+            const diff = (latestPercent - previousPercent).toFixed(1); 
             const subText = document.getElementById('performanceSubText');
-            if (diff > 0) {
-                subText.innerText = `📈 Improved by ${diff}% from last exam`;
-                subText.style.color = "#064e3b";
-                subText.style.background = "rgba(255,255,255,0.8)";
-            } else if (diff < 0) {
-                subText.innerText = `📉 Dropped by ${Math.abs(diff)}% from last exam`;
-                subText.style.color = "#fef2f2";
-                subText.style.background = "rgba(225, 29, 72, 0.8)";
-            } else {
-                subText.innerText = `➖ Consistent with last exam`;
-                subText.style.color = "#064e3b";
-                subText.style.background = "rgba(255,255,255,0.8)";
+
+            if (diff > 0) { 
+                subText.innerText = `📈 Improved by ${diff}% from last exam`; 
+                subText.style.color = "#064e3b"; 
+                subText.style.background = "rgba(255,255,255,0.8)"; 
+            } else if (diff < 0) { 
+                subText.innerText = `📉 Dropped by ${Math.abs(diff)}% from last exam`; 
+                subText.style.color = "#fef2f2"; 
+                subText.style.background = "rgba(225, 29, 72, 0.8)"; 
+            } else { 
+                subText.innerText = `➖ Consistent with last exam`; 
+                subText.style.color = "#064e3b"; 
+                subText.style.background = "rgba(255,255,255,0.8)"; 
             }
-        } else {
-            document.getElementById('performanceSubText').innerText = "Good start! Keep it up.";
-            document.getElementById('performanceSubText').style.color = "#064e3b";
-            document.getElementById('performanceSubText').style.background = "rgba(255,255,255,0.8)";
+        } else { 
+            document.getElementById('performanceSubText').innerText = "Good start! Keep it up."; 
+            document.getElementById('performanceSubText').style.color = "#064e3b"; 
+            document.getElementById('performanceSubText').style.background = "rgba(255,255,255,0.8)"; 
         }
 
-        // Destroy old chart
         if(window.perfLineChart) window.perfLineChart.destroy();
 
         window.perfLineChart = new Chart(marksCtx, {
             type: 'line',
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: 'Score Percentage',
-                    data: dataPoints,
-                    borderColor: '#10b981',
-                    backgroundColor: 'rgba(16, 185, 129, 0.2)',
-                    pointBackgroundColor: '#fff',
-                    pointBorderColor: '#10b981',
-                    pointBorderWidth: 2,
-                    pointRadius: 5,
-                    fill: true,
-                    tension: 0.3 // Smooth curves
-                }]
+            data: { 
+                labels: labels, 
+                datasets: [{ 
+                    label: 'Score Percentage', 
+                    data: dataPoints, 
+                    borderColor: '#10b981', 
+                    backgroundColor: 'rgba(16, 185, 129, 0.2)', 
+                    pointBackgroundColor: '#fff', 
+                    pointBorderColor: '#10b981', 
+                    pointBorderWidth: 2, 
+                    pointRadius: 5, 
+                    fill: true, 
+                    tension: 0.3 
+                }] 
             },
-            options: {
-                responsive: true, maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
-                scales: {
-                    y: { 
-                        beginAtZero: true, max: 100, 
-                        grid: { color: 'rgba(255,255,255,0.05)' }, 
-                        ticks: { stepSize: 20, color: '#94a3b8' } 
-                    },
-                    x: { grid: { display: false }, ticks: { color: '#cbd5e1', font: {weight: 'bold'} } }
-                }
+            options: { 
+                responsive: true, 
+                maintainAspectRatio: false, 
+                plugins: { legend: { display: false } }, 
+                scales: { 
+                    y: { beginAtZero: true, max: 100, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { stepSize: 20, color: '#94a3b8' } }, 
+                    x: { grid: { display: false }, ticks: { color: '#cbd5e1', font: {weight: 'bold'} } } 
+                } 
             }
         });
     });
 }
 
 function initAttendanceGraphs(studentId) {
-    const doughnutCtx = document.getElementById('attendanceDoughnut');
-    const barCtx = document.getElementById('attendanceBarChart');
+    const doughnutCtx = document.getElementById('attendanceDoughnut'); 
+    const barCtx = document.getElementById('attendanceBarChart'); 
     if(!doughnutCtx || !barCtx) return;
 
     const q = query(collection(db, "attendance"), where("student_id", "==", studentId));
     
     onSnapshot(q, (snapshot) => {
-        let totalDays = 0;
-        let presentDays = 0;
+        let totalDays = 0; 
+        let presentDays = 0; 
         let monthlyData = {};
 
         snapshot.forEach(doc => {
-            const data = doc.data();
-            totalDays++;
-            
+            const data = doc.data(); 
+            totalDays++; 
             const monthStr = data.date ? data.date.substring(0, 7) : "Unknown"; 
-            if(!monthlyData[monthStr]) monthlyData[monthStr] = { present: 0, total: 0 };
-            monthlyData[monthStr].total++;
-
-            if(data.status === "Present") {
-                presentDays++;
-                monthlyData[monthStr].present++;
+            
+            if(!monthlyData[monthStr]) {
+                monthlyData[monthStr] = { present: 0, total: 0 };
+            }
+            monthlyData[monthStr].total++; 
+            
+            if(data.status === "Present") { 
+                presentDays++; 
+                monthlyData[monthStr].present++; 
             }
         });
 
-        if(totalDays === 0) {
-            document.getElementById('attendancePercentageDisplay').innerText = "N/A";
-            document.getElementById('attendanceStatusText').innerText = "No classes recorded yet.";
-            document.getElementById('attendanceStatusText').style.color = "#94a3b8";
-            return;
+        if(totalDays === 0) { 
+            document.getElementById('attendancePercentageDisplay').innerText = "N/A"; 
+            document.getElementById('attendanceStatusText').innerText = "No classes recorded yet."; 
+            document.getElementById('attendanceStatusText').style.color = "#94a3b8"; 
+            return; 
         }
 
-        const percentage = Math.round((presentDays / totalDays) * 100);
+        const percentage = Math.round((presentDays / totalDays) * 100); 
         document.getElementById('attendancePercentageDisplay').innerText = percentage + "%";
         
-        let ringColor = '#10b981'; // Green
-        let statusMsg = "Great attendance!";
+        let ringColor = '#10b981'; 
+        let statusMsg = "Great attendance!"; 
         let textColor = "#34d399";
         
-        if (percentage < 75 && percentage >= 60) {
-            ringColor = '#f59e0b'; // Yellow
-            statusMsg = "Warning: Approaching Limit";
-            textColor = "#fbbf24";
-        } else if (percentage < 60) {
-            ringColor = '#f43f5e'; // Red
-            statusMsg = "Critical: Low Attendance!";
-            textColor = "#fca5a5";
+        if (percentage < 75 && percentage >= 60) { 
+            ringColor = '#f59e0b'; 
+            statusMsg = "Warning: Approaching Limit"; 
+            textColor = "#fbbf24"; 
+        } else if (percentage < 60) { 
+            ringColor = '#f43f5e'; 
+            statusMsg = "Critical: Low Attendance!"; 
+            textColor = "#fca5a5"; 
         }
 
-        document.getElementById('attendanceStatusText').innerText = statusMsg;
+        document.getElementById('attendanceStatusText').innerText = statusMsg; 
         document.getElementById('attendanceStatusText').style.color = textColor;
 
-        if(window.attDoughnutChart) window.attDoughnutChart.destroy();
+        if(window.attDoughnutChart) window.attDoughnutChart.destroy(); 
         if(window.attBarChart) window.attBarChart.destroy();
 
-        window.attDoughnutChart = new Chart(doughnutCtx, {
-            type: 'doughnut',
-            data: {
-                labels: ['Present', 'Absent'],
-                datasets: [{
-                    data: [presentDays, totalDays - presentDays],
-                    backgroundColor: [ringColor, 'rgba(255, 255, 255, 0.1)'],
-                    borderWidth: 0,
-                    hoverOffset: 4
-                }]
-            },
-            options: {
-                cutout: '78%', responsive: true, maintainAspectRatio: false,
-                plugins: { legend: { display: false }, tooltip: { enabled: true } },
-                animation: { animateScale: true, animateRotate: true }
-            }
+        window.attDoughnutChart = new Chart(doughnutCtx, { 
+            type: 'doughnut', 
+            data: { 
+                labels: ['Present', 'Absent'], 
+                datasets: [{ 
+                    data: [presentDays, totalDays - presentDays], 
+                    backgroundColor: [ringColor, 'rgba(255, 255, 255, 0.1)'], 
+                    borderWidth: 0, 
+                    hoverOffset: 4 
+                }] 
+            }, 
+            options: { 
+                cutout: '78%', 
+                responsive: true, 
+                maintainAspectRatio: false, 
+                plugins: { legend: { display: false }, tooltip: { enabled: true } }, 
+                animation: { animateScale: true, animateRotate: true } 
+            } 
         });
 
-        const sortedMonths = Object.keys(monthlyData).sort();
-        const barLabels = sortedMonths.map(m => {
-            if(m === "Unknown") return m;
-            const d = new Date(m + "-01");
+        const sortedMonths = Object.keys(monthlyData).sort(); 
+        const barLabels = sortedMonths.map(m => { 
+            if(m === "Unknown") return m; 
+            const d = new Date(m + "-01"); 
             return d.toLocaleString('default', { month: 'short' }); 
-        });
+        }); 
         const barValues = sortedMonths.map(m => monthlyData[m].present);
 
-        window.attBarChart = new Chart(barCtx, {
-            type: 'bar',
-            data: {
-                labels: barLabels,
-                datasets: [{
-                    label: 'Days Present',
-                    data: barValues,
-                    backgroundColor: 'rgba(236, 72, 153, 0.8)', // Neon Pink
-                    borderRadius: 6,
-                    barPercentage: 0.5
-                }]
-            },
-            options: {
-                responsive: true, maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
-                scales: {
-                    y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { stepSize: 5, color: '#94a3b8' } },
-                    x: { grid: { display: false }, ticks: { color: '#cbd5e1', font: {weight: 'bold'} } }
-                }
-            }
+        window.attBarChart = new Chart(barCtx, { 
+            type: 'bar', 
+            data: { 
+                labels: barLabels, 
+                datasets: [{ 
+                    label: 'Days Present', 
+                    data: barValues, 
+                    backgroundColor: 'rgba(236, 72, 153, 0.8)', 
+                    borderRadius: 6, 
+                    barPercentage: 0.5 
+                }] 
+            }, 
+            options: { 
+                responsive: true, 
+                maintainAspectRatio: false, 
+                plugins: { legend: { display: false } }, 
+                scales: { 
+                    y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { stepSize: 5, color: '#94a3b8' } }, 
+                    x: { grid: { display: false }, ticks: { color: '#cbd5e1', font: {weight: 'bold'} } } 
+                } 
+            } 
         });
     });
 }
@@ -732,23 +927,29 @@ function initProfileSystem(avatarUrl) {
     const profileImageInput = document.getElementById('profileImageInput');
     if(profileImageInput) {
         profileImageInput.addEventListener('change', async (e) => {
-            const file = e.target.files[0];
-            if (!file) return;
+            const file = e.target.files[0]; 
+            if (!file) return; 
+            
             showToast('Uploading image...', 'warning');
+            
             const CLOUD_NAME = "dmy74celx"; 
             const UPLOAD_PRESET = "rcyp6gvo"; 
             const formData = new FormData();
-            formData.append('file', file);
+            formData.append('file', file); 
             formData.append('upload_preset', UPLOAD_PRESET);
+            
             try {
                 const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, { method: 'POST', body: formData });
                 const data = await res.json();
-                if (data.secure_url) {
-                    const userRef = doc(db, "users", user.id);
-                    await updateDoc(userRef, { profile_pic: data.secure_url });
-                    showToast('Profile picture updated!', 'success');
+                
+                if (data.secure_url) { 
+                    const userRef = doc(db, "users", user.id); 
+                    await updateDoc(userRef, { profile_pic: data.secure_url }); 
+                    showToast('Profile picture updated!', 'success'); 
                 }
-            } catch(err) { showToast('Failed to upload image.', 'error'); }
+            } catch(err) { 
+                showToast('Failed to upload image.', 'error'); 
+            }
         });
     }
 
@@ -756,71 +957,71 @@ function initProfileSystem(avatarUrl) {
     if (saveProfileBtn) {
         saveProfileBtn.addEventListener('click', async () => {
             const newPass = document.getElementById('profilePassword').value.trim();
-
-            if (!newPass) {
-                showToast('Password cannot be empty.', 'warning');
-                return;
+            
+            if (!newPass) { 
+                showToast('Password cannot be empty.', 'warning'); 
+                return; 
             }
-
-            saveProfileBtn.innerText = 'Saving...';
+            
+            saveProfileBtn.innerText = 'Saving...'; 
             saveProfileBtn.disabled = true;
 
             try {
-                const userRef = doc(db, "users", user.id);
+                const userRef = doc(db, "users", user.id); 
                 await updateDoc(userRef, { password: newPass });
                 
-                const activeUser = JSON.parse(localStorage.getItem('user'));
-                activeUser.password = newPass;
-                localStorage.setItem('user', JSON.stringify(activeUser));
+                const activeUser = JSON.parse(localStorage.getItem('user')); 
+                activeUser.password = newPass; 
+                localStorage.setItem('user', JSON.stringify(activeUser)); 
                 
                 showToast('Password updated successfully!', 'success');
-            } catch (error) {
-                showToast('Failed to update password.', 'error');
-            } finally {
-                saveProfileBtn.innerText = 'Update Password';
-                saveProfileBtn.disabled = false;
+            } catch (error) { 
+                showToast('Failed to update password.', 'error'); 
+            } finally { 
+                saveProfileBtn.innerText = 'Update Password'; 
+                saveProfileBtn.disabled = false; 
             }
         });
     }
 }
 
 function initQueriesSystem() {
-    const complaintForm = document.getElementById('complaintForm');
-    const activeList = document.getElementById('activeComplaintsList');
+    const complaintForm = document.getElementById('complaintForm'); 
+    const activeList = document.getElementById('activeComplaintsList'); 
     const resolvedList = document.getElementById('resolvedComplaintsList');
 
     if (!complaintForm) return;
 
-    const activeUser = JSON.parse(localStorage.getItem('user')) || user;
+    const activeUser = JSON.parse(localStorage.getItem('user')) || user; 
     const safeQueryId = activeUser.id || activeUser.registration_number || "UNKNOWN_USER";
 
     complaintForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const descInput = document.getElementById('description');
+        e.preventDefault(); 
+        const descInput = document.getElementById('description'); 
         const submitBtn = complaintForm.querySelector('button');
 
         if (!descInput || !descInput.value.trim()) return;
 
-        submitBtn.disabled = true;
-        const originalText = submitBtn.innerText;
+        submitBtn.disabled = true; 
+        const originalText = submitBtn.innerText; 
         submitBtn.innerText = "Submitting securely...";
 
         try {
-            await addDoc(collection(db, "complaints"), {
-                student_id: safeQueryId,
-                student_details: `${activeUser.full_name || 'Unknown'} | ${activeUser.course || 'Course'} (${activeUser.branch || 'Branch'}) - Sec: ${activeUser.section || 'Unassigned'}`,
-                reg_number: activeUser.registration_number || "Unknown",
-                description: descInput.value.trim(),
-                status: "Pending",
-                created_at: Date.now()
+            await addDoc(collection(db, "complaints"), { 
+                student_id: safeQueryId, 
+                student_details: `${activeUser.full_name || 'Unknown'} | ${activeUser.course || 'Course'} (${activeUser.branch || 'Branch'}) - Sec: ${activeUser.section || 'Unassigned'}`, 
+                reg_number: activeUser.registration_number || "Unknown", 
+                description: descInput.value.trim(), 
+                status: "Pending", 
+                created_at: Date.now() 
             });
-            showToast('Query submitted successfully!', 'success');
+            showToast('Query submitted successfully!', 'success'); 
             complaintForm.reset(); 
-        } catch (error) {
-            showToast('Failed to submit query. Check internet connection.', 'error');
-        } finally {
-            submitBtn.disabled = false;
-            submitBtn.innerText = originalText;
+        } catch (error) { 
+            showToast('Failed to submit query.', 'error'); 
+        } finally { 
+            submitBtn.disabled = false; 
+            submitBtn.innerText = originalText; 
         }
     });
 
@@ -828,8 +1029,10 @@ function initQueriesSystem() {
         if(confirm("Remove this query from your view? (Admin/Tech will still see it)")) {
             try { 
                 await updateDoc(doc(db, "complaints", queryId), { student_deleted: true }); 
-                showToast("Query removed from your view.", "success");
-            } catch(error) { showToast("Failed to remove query.", "error"); }
+                showToast("Query removed from your view.", "success"); 
+            } catch(error) { 
+                showToast("Failed to remove query.", "error"); 
+            }
         }
     };
 
@@ -837,8 +1040,10 @@ function initQueriesSystem() {
         if(confirm("Are you sure you want to permanently delete this query for everyone (including Admin and Tech)?")) {
             try { 
                 await deleteDoc(doc(db, "complaints", queryId)); 
-                showToast("Query deleted permanently for everyone!", "success");
-            } catch(error) { showToast("Failed to delete query.", "error"); }
+                showToast("Query deleted permanently for everyone!", "success"); 
+            } catch(error) { 
+                showToast("Failed to delete query.", "error"); 
+            }
         }
     };
 
@@ -846,15 +1051,16 @@ function initQueriesSystem() {
     
     onSnapshot(q, (querySnapshot) => {
         let complaints = [];
-        querySnapshot.forEach((doc) => {
-            const data = doc.data();
+        querySnapshot.forEach((doc) => { 
+            const data = doc.data(); 
             if (data.student_deleted !== true) {
                 complaints.push({ id: doc.id, ...data });
-            }
+            } 
         });
+        
         complaints.sort((a, b) => b.created_at - a.created_at);
 
-        const activeComplaints = complaints.filter(c => c.status !== 'Resolved');
+        const activeComplaints = complaints.filter(c => c.status !== 'Resolved'); 
         const resolvedComplaints = complaints.filter(c => c.status === 'Resolved');
 
         if (activeList) {
@@ -862,7 +1068,6 @@ function initQueriesSystem() {
                 ? '<p style="color: #64748b; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px; text-align: center;">No active queries at the moment.</p>' 
                 : activeComplaints.map((c) => `
                     <div class="card" style="background: rgba(15, 23, 42, 0.6); position: relative; margin-bottom: 15px; border-left: 4px solid #f59e0b;">
-                        
                         <div style="position: absolute; top: 15px; right: 15px; display: flex; gap: 8px; z-index: 10;">
                             <button onclick="window.deleteQueryForMe('${c.id}')" style="background: rgba(100, 116, 139, 0.2); color: #cbd5e1; border: 1px solid rgba(100, 116, 139, 0.4); padding: 5px 10px; border-radius: 6px; cursor: pointer; font-size: 0.75em; transition: 0.3s;" onmouseover="this.style.background='rgba(100, 116, 139, 0.4)'" onmouseout="this.style.background='rgba(100, 116, 139, 0.2)'" title="Hide this from my screen">🗑️ Delete for Me</button>
                             ${c.status === 'Pending' ? `<button onclick="window.deleteQueryForEveryone('${c.id}')" style="background: rgba(225, 29, 72, 0.1); color: #fda4af; border: 1px solid rgba(225, 29, 72, 0.3); padding: 5px 10px; border-radius: 6px; cursor: pointer; font-size: 0.75em; transition: 0.3s;" onmouseover="this.style.background='rgba(225, 29, 72, 0.3)'" onmouseout="this.style.background='rgba(225, 29, 72, 0.1)'" title="Delete completely from the server">🗑️ Delete for Everyone</button>` : ''}
@@ -870,6 +1075,7 @@ function initQueriesSystem() {
 
                         <p style="padding-right: 220px; color: #f8fafc; margin: 0 0 15px 0; font-size: 1.05em;"><strong>Query:</strong> ${c.description}</p>
                         ${c.assigned_to ? `<p style="margin-top: 5px; color: #a855f7; font-size: 0.85em;"><strong>👷 Technician:</strong> ${c.assigned_to}</p>` : ''}
+                        
                         <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 12px;">
                             <small style="color: #94a3b8;">Status: <span class="badge ${c.status.replace(' ', '-')}">${c.status}</span></small>
                             <small style="color: #64748b;">${new Date(c.created_at).toLocaleDateString()}</small>
@@ -883,7 +1089,6 @@ function initQueriesSystem() {
                 ? '<p style="color: #64748b; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px; text-align: center;">No resolved queries yet.</p>' 
                 : resolvedComplaints.map((c) => `
                     <div class="card" style="background: rgba(16, 185, 129, 0.05); border-left: 4px solid #10b981; margin-bottom: 15px; position: relative;">
-                        
                         <div style="position: absolute; top: 15px; right: 15px; display: flex; gap: 8px; z-index: 10;">
                             <button onclick="window.deleteQueryForMe('${c.id}')" style="background: rgba(100, 116, 139, 0.2); color: #cbd5e1; border: 1px solid rgba(100, 116, 139, 0.4); padding: 5px 10px; border-radius: 6px; cursor: pointer; font-size: 0.75em; transition: 0.3s;" onmouseover="this.style.background='rgba(100, 116, 139, 0.4)'" onmouseout="this.style.background='rgba(100, 116, 139, 0.2)'" title="Hide this from my screen">🗑️ Delete for Me</button>
                             <button onclick="window.deleteQueryForEveryone('${c.id}')" style="background: rgba(225, 29, 72, 0.1); color: #fda4af; border: 1px solid rgba(225, 29, 72, 0.3); padding: 5px 10px; border-radius: 6px; cursor: pointer; font-size: 0.75em; transition: 0.3s;" onmouseover="this.style.background='rgba(225, 29, 72, 0.3)'" onmouseout="this.style.background='rgba(225, 29, 72, 0.1)'" title="Delete completely from the server">🗑️ Delete for Everyone</button>
@@ -891,6 +1096,7 @@ function initQueriesSystem() {
 
                         <p style="padding-right: 220px; color: #f8fafc; margin: 0 0 15px 0;"><strong>Query:</strong> ${c.description}</p>
                         ${c.assigned_to ? `<p style="margin-top: 5px; color: #a855f7; font-size: 0.85em;"><strong>👷 Technician:</strong> ${c.assigned_to}</p>` : ''}
+                        
                         <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 12px;">
                             <small style="color: #94a3b8;">Status: <span class="badge ${c.status.replace(' ', '-')}">${c.status}</span></small>
                             <small style="color: #64748b;">${new Date(c.created_at).toLocaleDateString()}</small>
@@ -902,86 +1108,93 @@ function initQueriesSystem() {
 }
 
 function initFeeSystem() {
-    const paymentForm = document.getElementById('paymentForm');
+    const paymentForm = document.getElementById('paymentForm'); 
     const historyList = document.getElementById('paymentHistoryList');
-    
     const activeUser = JSON.parse(localStorage.getItem('user')) || user;
-    let semString = activeUser.semester || "Semester 1";
-    let semNumber = parseInt(semString.replace("Semester ", "")) || 1;
+    let semString = activeUser.semester || "Semester 1"; 
+    let semNumber = parseInt(semString.replace("Semester ", "")) || 1; 
     const totalFeeAmount = semNumber * 50000; 
     let remainingBalance = totalFeeAmount;
 
-    const payMethodSelect = document.getElementById('payMethod');
-    const upiUI = document.getElementById('upiUI');
+    const payMethodSelect = document.getElementById('payMethod'); 
+    const upiUI = document.getElementById('upiUI'); 
     const cardUI = document.getElementById('cardUI');
     
     if (payMethodSelect) {
         payMethodSelect.addEventListener('change', (e) => {
-            const val = e.target.value;
-            upiUI.style.display = (val === 'UPI / QR') ? 'block' : 'none';
+            const val = e.target.value; 
+            upiUI.style.display = (val === 'UPI / QR') ? 'block' : 'none'; 
             cardUI.style.display = (val === 'Credit/Debit Card') ? 'block' : 'none';
         });
     }
 
     if (paymentForm) {
         paymentForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const amount = Number(document.getElementById('payAmount').value);
-            const gateway = document.getElementById('payGateway').value;
-            const method = document.getElementById('payMethod').value;
-            
+            e.preventDefault(); 
+            const amount = Number(document.getElementById('payAmount').value); 
+            const gateway = document.getElementById('payGateway').value; 
+            const method = document.getElementById('payMethod').value; 
             const freshUser = JSON.parse(localStorage.getItem('user')) || user;
 
-            if (amount > remainingBalance) {
-                showToast(`Error: You only owe ₹${remainingBalance.toLocaleString()}.`, 'warning');
-                return;
-            }
-
-            if (method === 'Net Banking') {
-                const pendingTxn = { amount, gateway, method };
-                localStorage.setItem('pendingTxn', JSON.stringify(pendingTxn));
-                window.location.href = 'net-banking.html';
+            if (amount > remainingBalance) { 
+                showToast(`Error: You only owe ₹${remainingBalance.toLocaleString()}.`, 'warning'); 
                 return; 
             }
 
-            const btn = document.getElementById('payFeeBtn');
-            btn.innerText = `Processing via ${gateway}...`;
+            if (method === 'Net Banking') {
+                const pendingTxn = { amount, gateway, method }; 
+                localStorage.setItem('pendingTxn', JSON.stringify(pendingTxn)); 
+                window.location.href = 'net-banking.html'; 
+                return; 
+            }
+
+            const btn = document.getElementById('payFeeBtn'); 
+            btn.innerText = `Processing via ${gateway}...`; 
             btn.disabled = true;
 
             setTimeout(async () => {
                 try {
                     const txnId = 'TXN-' + Math.floor(10000000 + Math.random() * 90000000);
-                    await addDoc(collection(db, "payments"), {
-                        student_id: freshUser.id,
-                        full_name: freshUser.full_name,
-                        registration_number: freshUser.registration_number,
-                        course: freshUser.course,
-                        branch: freshUser.branch,
-                        section: freshUser.section || "Unassigned",
+                    await addDoc(collection(db, "payments"), { 
+                        student_id: freshUser.id, 
+                        full_name: freshUser.full_name, 
+                        registration_number: freshUser.registration_number, 
+                        course: freshUser.course, 
+                        branch: freshUser.branch, 
+                        section: freshUser.section || "Unassigned", 
                         year: freshUser.year || "N/A",           
                         semester: freshUser.semester || "N/A",   
-                        amount: amount,
-                        gateway: gateway,
-                        method: method,
-                        transaction_id: txnId,
-                        date: Date.now()
+                        amount: amount, 
+                        gateway: gateway, 
+                        method: method, 
+                        transaction_id: txnId, 
+                        date: Date.now() 
                     });
-                    showToast(`Successfully paid ₹${amount.toLocaleString()}!`, 'success');
+                    showToast(`Successfully paid ₹${amount.toLocaleString()}!`, 'success'); 
                     paymentForm.reset();
-                } catch (error) { showToast("Payment failed.", "error"); } 
-                finally { btn.innerText = "Process Secure Payment"; btn.disabled = false; }
+                } catch (error) { 
+                    showToast("Payment failed.", "error"); 
+                } finally { 
+                    btn.innerText = "Process Secure Payment"; 
+                    btn.disabled = false; 
+                }
             }, 2000);
         });
     }
 
     const historySemesterFilter = document.getElementById('historySemesterFilter');
-    if (historySemesterFilter) historySemesterFilter.addEventListener('change', renderPaymentHistory);
+    if (historySemesterFilter) {
+        historySemesterFilter.addEventListener('change', renderPaymentHistory);
+    }
 
     function renderPaymentHistory() {
         if (!window.userPaymentHistory) return;
         const filterVal = document.getElementById('historySemesterFilter') ? document.getElementById('historySemesterFilter').value : "All";
         let filteredPayments = window.userPaymentHistory;
-        if (filterVal !== "All") filteredPayments = window.userPaymentHistory.filter(p => p.semester === filterVal);
+        
+        if (filterVal !== "All") {
+            filteredPayments = window.userPaymentHistory.filter(p => p.semester === filterVal);
+        }
 
         if (historyList) {
             if (filteredPayments.length === 0) {
@@ -1011,17 +1224,25 @@ function initFeeSystem() {
     onSnapshot(q, (querySnapshot) => {
         let payments = [];
         let totalPaid = 0;
+        
         querySnapshot.forEach((doc) => {
             const data = doc.data();
             payments.push({ id: doc.id, ...data });
             totalPaid += data.amount; 
         });
+        
         remainingBalance = totalFeeAmount - totalPaid;
         window.userPaymentHistory = payments.sort((a, b) => b.date - a.date); 
         
-        if (document.getElementById('totalOwedDisplay')) document.getElementById('totalOwedDisplay').innerText = `₹${totalFeeAmount.toLocaleString()}`;
-        if (document.getElementById('totalPaidDisplay')) document.getElementById('totalPaidDisplay').innerText = `₹${totalPaid.toLocaleString()}`;
-        if (document.getElementById('remainingBalanceDisplay')) document.getElementById('remainingBalanceDisplay').innerText = `₹${remainingBalance.toLocaleString()}`;
+        if (document.getElementById('totalOwedDisplay')) {
+            document.getElementById('totalOwedDisplay').innerText = `₹${totalFeeAmount.toLocaleString()}`;
+        }
+        if (document.getElementById('totalPaidDisplay')) {
+            document.getElementById('totalPaidDisplay').innerText = `₹${totalPaid.toLocaleString()}`;
+        }
+        if (document.getElementById('remainingBalanceDisplay')) {
+            document.getElementById('remainingBalanceDisplay').innerText = `₹${remainingBalance.toLocaleString()}`;
+        }
         
         const payAmountInput = document.getElementById('payAmount');
         const payFeeBtn = document.getElementById('payFeeBtn');
@@ -1042,12 +1263,15 @@ function initFeeSystem() {
 function buildReceiptPDF(txn) {
     const { jsPDF } = window.jspdf;
     const pdf = new jsPDF();
+    
     pdf.setFontSize(24);
     pdf.setTextColor(99, 102, 241); 
     pdf.text("SmartCampus Hub", 105, 20, null, null, "center");
+    
     pdf.setFontSize(14);
     pdf.setTextColor(100, 100, 100);
     pdf.text("Official Payment Receipt", 105, 30, null, null, "center");
+    
     pdf.setFontSize(11);
     pdf.setTextColor(0, 0, 0);
     pdf.text(`Transaction ID: ${txn.transaction_id}`, 20, 50);
@@ -1055,17 +1279,21 @@ function buildReceiptPDF(txn) {
     pdf.text(`Payment Gateway: ${txn.gateway}`, 20, 66);
     pdf.text(`Payment Method: ${txn.method}`, 20, 74);
     pdf.text("--------------------------------------------------------------------------------------", 20, 85);
+    
     pdf.setFontSize(12);
     pdf.text(`Received From: ${txn.full_name}`, 20, 95);
     pdf.text(`Registration No: ${txn.registration_number}`, 20, 103);
     pdf.text(`Course Details: ${txn.course} (${txn.branch}) | Sec: ${txn.section || 'N/A'} | ${txn.year} (${txn.semester})`, 20, 111);
     pdf.text("--------------------------------------------------------------------------------------", 20, 120);
+    
     pdf.setFontSize(16);
     pdf.setTextColor(16, 185, 129); 
     pdf.text(`Amount Paid: INR ${txn.amount.toLocaleString()}`, 20, 135);
+    
     pdf.setFontSize(12);
     pdf.setTextColor(0, 0, 0);
     pdf.text("Status: SUCCESSFUL", 20, 145);
+    
     return pdf;
 }
 
@@ -1103,10 +1331,19 @@ if (user?.role === 'Admin') {
         if (!listDiv || !bcDiv || !window.allStudents) return;
 
         let bcHtml = `<span style="cursor:pointer; color: #818cf8; font-weight: bold; transition: 0.3s;" onclick="window.setDbState(null, null, null, null)">🏠 Home</span>`;
-        if (window.dbState.course) bcHtml += ` <span style="color: #64748b;">/</span> <span style="cursor:pointer; color: #818cf8; font-weight: bold;" onclick="window.setDbState('${window.dbState.course}', null, null, null)">${window.dbState.course}</span>`;
-        if (window.dbState.branch) bcHtml += ` <span style="color: #64748b;">/</span> <span style="cursor:pointer; color: #818cf8; font-weight: bold;" onclick="window.setDbState('${window.dbState.course}', '${window.dbState.branch}', null, null)">${window.dbState.branch}</span>`;
-        if (window.dbState.year) bcHtml += ` <span style="color: #64748b;">/</span> <span style="cursor:pointer; color: #818cf8; font-weight: bold;" onclick="window.setDbState('${window.dbState.course}', '${window.dbState.branch}', '${window.dbState.year}', null)">${window.dbState.year}</span>`;
-        if (window.dbState.semester) bcHtml += ` <span style="color: #64748b;">/</span> <span style="color: #cbd5e1;">${window.dbState.semester}</span>`;
+        
+        if (window.dbState.course) {
+            bcHtml += ` <span style="color: #64748b;">/</span> <span style="cursor:pointer; color: #818cf8; font-weight: bold;" onclick="window.setDbState('${window.dbState.course}', null, null, null)">${window.dbState.course}</span>`;
+        }
+        if (window.dbState.branch) {
+            bcHtml += ` <span style="color: #64748b;">/</span> <span style="cursor:pointer; color: #818cf8; font-weight: bold;" onclick="window.setDbState('${window.dbState.course}', '${window.dbState.branch}', null, null)">${window.dbState.branch}</span>`;
+        }
+        if (window.dbState.year) {
+            bcHtml += ` <span style="color: #64748b;">/</span> <span style="cursor:pointer; color: #818cf8; font-weight: bold;" onclick="window.setDbState('${window.dbState.course}', '${window.dbState.branch}', '${window.dbState.year}', null)">${window.dbState.year}</span>`;
+        }
+        if (window.dbState.semester) {
+            bcHtml += ` <span style="color: #64748b;">/</span> <span style="color: #cbd5e1;">${window.dbState.semester}</span>`;
+        }
         
         bcDiv.innerHTML = bcHtml;
 
@@ -1120,7 +1357,8 @@ if (user?.role === 'Admin') {
                     <div style="font-size: 3em; margin-bottom: 10px; filter: drop-shadow(0 0 10px rgba(99,102,241,0.8));">🎓</div>
                     <h3 style="font-size: 1.6em; color: white; margin: 0; z-index: 1;">${c}</h3>
                     <p style="color: #a5b4fc; margin: 5px 0 0 0; z-index: 1; font-weight: bold;">Select Course &rarr;</p>
-                </div>`).join('');
+                </div>
+            `).join('');
                 
         } else if (!window.dbState.branch) {
             let branches = [];
@@ -1138,7 +1376,8 @@ if (user?.role === 'Admin') {
                     <div style="font-size: 3em; margin-bottom: 10px; filter: drop-shadow(0 0 10px rgba(16,185,129,0.8));">🏛️</div>
                     <h3 style="font-size: 1.3em; color: white; margin: 0; text-align: center; z-index: 1;">${b}</h3>
                     <p style="color: #6ee7b7; margin: 5px 0 0 0; z-index: 1; font-weight: bold;">Select Branch &rarr;</p>
-                </div>`).join('');
+                </div>
+            `).join('');
                 
         } else if (!window.dbState.year) {
             let years = ['1st Year', '2nd Year'];
@@ -1152,7 +1391,8 @@ if (user?.role === 'Admin') {
                     <div style="font-size: 3em; margin-bottom: 10px; filter: drop-shadow(0 0 10px rgba(245,158,11,0.8));">📅</div>
                     <h3 style="font-size: 1.6em; color: white; margin: 0; z-index: 1;">${y}</h3>
                     <p style="color: #fcd34d; margin: 5px 0 0 0; z-index: 1; font-weight: bold;">Select Year &rarr;</p>
-                </div>`).join('');
+                </div>
+            `).join('');
                 
         } else if (!window.dbState.semester) {
             let sems = [];
@@ -1167,7 +1407,8 @@ if (user?.role === 'Admin') {
                     <div style="font-size: 3em; margin-bottom: 10px; filter: drop-shadow(0 0 10px rgba(236,72,153,0.8));">📚</div>
                     <h3 style="font-size: 1.6em; color: white; margin: 0; z-index: 1;">${sem}</h3>
                     <p style="color: #f9a8d4; margin: 5px 0 0 0; z-index: 1; font-weight: bold;">View Students &rarr;</p>
-                </div>`).join('');
+                </div>
+            `).join('');
                 
         } else {
             students = students.filter(s => s.course === window.dbState.course && s.branch === window.dbState.branch && s.year === window.dbState.year && s.semester === window.dbState.semester);
@@ -1355,6 +1596,7 @@ if (user?.role === 'Admin') {
 
                     const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, { method: 'POST', body: formData });
                     const data = await res.json();
+                    
                     if (data.secure_url) {
                         uploadedImageUrl = data.secure_url;
                     }
@@ -1405,24 +1647,53 @@ if (user?.role === 'Admin') {
             const currentSem = document.getElementById('attSemester').value || "All";
             const currentBranch = document.getElementById('attBranch').value || "All";
             
-            let years = [{label: 'All Years', value: 'All'}, {label: '1st Year', value: '1st Year'}, {label: '2nd Year', value: '2nd Year'}];
-            if (course === 'B.Tech') { years.push({label: '3rd Year', value: '3rd Year'}, {label: '4th Year', value: '4th Year'}); }
+            let years = [
+                {label: 'All Years', value: 'All'}, 
+                {label: '1st Year', value: '1st Year'}, 
+                {label: '2nd Year', value: '2nd Year'}
+            ];
+            
+            if (course === 'B.Tech') {
+                years.push({label: '3rd Year', value: '3rd Year'}, {label: '4th Year', value: '4th Year'});
+            }
             safelyPopulateDropdown('attYear', years, currentYear);
 
             const selectedYear = aYear.value;
             let sems = [{label: 'All Semesters', value: 'All'}];
-            if (selectedYear === '1st Year') sems.push({label: 'Semester 1', value: 'Semester 1'}, {label: 'Semester 2', value: 'Semester 2'});
-            else if (selectedYear === '2nd Year') sems.push({label: 'Semester 3', value: 'Semester 3'}, {label: 'Semester 4', value: 'Semester 4'});
-            else if (selectedYear === '3rd Year') sems.push({label: 'Semester 5', value: 'Semester 5'}, {label: 'Semester 6', value: 'Semester 6'});
-            else if (selectedYear === '4th Year') sems.push({label: 'Semester 7', value: 'Semester 7'}, {label: 'Semester 8', value: 'Semester 8'});
+            if (selectedYear === '1st Year') {
+                sems.push({label: 'Semester 1', value: 'Semester 1'}, {label: 'Semester 2', value: 'Semester 2'});
+            } else if (selectedYear === '2nd Year') {
+                sems.push({label: 'Semester 3', value: 'Semester 3'}, {label: 'Semester 4', value: 'Semester 4'});
+            } else if (selectedYear === '3rd Year') {
+                sems.push({label: 'Semester 5', value: 'Semester 5'}, {label: 'Semester 6', value: 'Semester 6'});
+            } else if (selectedYear === '4th Year') {
+                sems.push({label: 'Semester 7', value: 'Semester 7'}, {label: 'Semester 8', value: 'Semester 8'});
+            }
             safelyPopulateDropdown('attSemester', sems, currentSem);
 
             let branches = [{label: 'All Branches', value: 'All'}];
             if (course === 'B.Tech') {
-                if (selectedYear === '1st Year') branches.push({label: 'Common 1st Year', value: 'Common 1st Year'});
-                else branches.push( {label: 'Computer Science and Engineering', value: 'Computer Science and Engineering'}, {label: 'Data Science', value: 'Data Science'}, {label: 'Electrical Communication Engineering', value: 'Electrical Communication Engineering'}, {label: 'EE', value: 'EE'}, {label: 'EEE', value: 'EEE'}, {label: 'Civil', value: 'Civil'}, {label: 'Mechanical', value: 'Mechanical'} );
+                if (selectedYear === '1st Year') {
+                    branches.push({label: 'Common 1st Year', value: 'Common 1st Year'});
+                } else {
+                    branches.push( 
+                        {label: 'Computer Science and Engineering', value: 'Computer Science and Engineering'}, 
+                        {label: 'Data Science', value: 'Data Science'}, 
+                        {label: 'Electrical Communication Engineering', value: 'Electrical Communication Engineering'}, 
+                        {label: 'EE', value: 'EE'}, 
+                        {label: 'EEE', value: 'EEE'}, 
+                        {label: 'Civil', value: 'Civil'}, 
+                        {label: 'Mechanical', value: 'Mechanical'} 
+                    );
+                }
             } else if (course === 'MBA') {
-                branches.push( {label: 'Human Resources (HR)', value: 'Human Resources (HR)'}, {label: 'Finance', value: 'Finance'}, {label: 'Marketing', value: 'Marketing'}, {label: 'IT & Systems', value: 'IT & Systems'}, {label: 'Operations', value: 'Operations'} );
+                branches.push( 
+                    {label: 'Human Resources (HR)', value: 'Human Resources (HR)'}, 
+                    {label: 'Finance', value: 'Finance'}, 
+                    {label: 'Marketing', value: 'Marketing'}, 
+                    {label: 'IT & Systems', value: 'IT & Systems'}, 
+                    {label: 'Operations', value: 'Operations'} 
+                );
             } else if (course === 'MCA') {
                 branches.push({label: 'Master of Computer Applications', value: 'Master of Computer Applications'});
             }
@@ -1434,7 +1705,9 @@ if (user?.role === 'Admin') {
         renderAtt();
         
         const dateInput = document.getElementById('attDate');
-        if(dateInput) dateInput.value = new Date().toISOString().split('T')[0];
+        if(dateInput) {
+            dateInput.value = new Date().toISOString().split('T')[0];
+        }
     }
     
     initAdminAttendanceDropdowns();
@@ -1442,7 +1715,7 @@ if (user?.role === 'Admin') {
     window.toggleAttendanceText = (studentId) => {
         const checkbox = document.getElementById(`att_${studentId}`);
         const textLabel = document.getElementById(`att_text_${studentId}`);
-        if(checkbox.checked) {
+        if (checkbox.checked) {
             textLabel.innerText = "Present";
             textLabel.className = "att-status-text status-present";
         } else {
@@ -1452,10 +1725,14 @@ if (user?.role === 'Admin') {
     };
 
     window.loadAttendanceList = async () => {
-        if(!window.allStudents) return showToast("Student data is still loading...", "warning");
+        if (!window.allStudents) {
+            return showToast("Student data is still loading...", "warning");
+        }
         
         const dateVal = document.getElementById('attDate').value;
-        if(!dateVal) return showToast("Please select a date.", "warning");
+        if (!dateVal) {
+            return showToast("Please select a date.", "warning");
+        }
 
         const listContainer = document.getElementById('attendanceListContainer');
         const submitBtn = document.getElementById('submitAttendanceBtn');
@@ -1474,7 +1751,9 @@ if (user?.role === 'Admin') {
             const matchesSem = (sem === "All" || s.semester === sem);
             
             let sBranch = s.branch || "Common 1st Year";
-            if (sBranch.trim().toUpperCase() === "CSE") sBranch = "Computer Science and Engineering";
+            if (sBranch.trim().toUpperCase() === "CSE") {
+                sBranch = "Computer Science and Engineering";
+            }
             const matchesBranch = (branch === "All" || sBranch === branch || (branch === 'Common 1st Year' && s.year === '1st Year'));
             
             const matchesSec = (section === "All" || (s.section || "Unassigned") === section);
@@ -1482,7 +1761,7 @@ if (user?.role === 'Admin') {
             return matchesCourse && matchesYear && matchesSem && matchesBranch && matchesSec;
         });
 
-        if(targetStudents.length === 0) {
+        if (targetStudents.length === 0) {
             listContainer.innerHTML = `<p style="color: #fca5a5; text-align: center; padding: 20px; background: rgba(225, 29, 72, 0.1); border-radius: 8px;">No students found in this class combination.</p>`;
             submitBtn.style.display = 'none';
             return;
@@ -1497,7 +1776,7 @@ if (user?.role === 'Admin') {
                     existingDataMap[s.id] = docSnap.data().status;
                 }
             }));
-        } catch(err) {
+        } catch (err) {
             console.error("Failed to read old attendance", err);
         }
 
@@ -1536,10 +1815,12 @@ if (user?.role === 'Admin') {
 
     window.saveAttendance = async () => {
         const dateVal = document.getElementById('attDate').value;
-        if(!dateVal) return showToast("Please select a date for roll call.", "warning");
+        if (!dateVal) {
+            return showToast("Please select a date for roll call.", "warning");
+        }
 
         const checkboxes = document.querySelectorAll('.att-toggle');
-        if(checkboxes.length === 0) return;
+        if (checkboxes.length === 0) return;
 
         const btn = document.getElementById('submitAttendanceBtn');
         btn.innerText = "Saving to Database...";
@@ -1566,7 +1847,7 @@ if (user?.role === 'Admin') {
             document.getElementById('attendanceListContainer').innerHTML = `<p style="color: #10b981; text-align: center; font-weight: bold; background: rgba(16, 185, 129, 0.1); padding: 20px; border-radius: 8px;">✔️ Attendance saved for ${dateVal}. Select a new class to continue.</p>`;
             btn.style.display = 'none';
 
-        } catch(error) {
+        } catch (error) {
             console.error("Save Error", error);
             showToast("Failed to save attendance. Check connection.", "error");
         } finally {
@@ -1587,24 +1868,51 @@ if (user?.role === 'Admin') {
                 const course = tCourse.value;
                 const currentYear = tYear.value;
                 
-                let years = [{label: '1st Year', value: '1st Year'}, {label: '2nd Year', value: '2nd Year'}];
-                if (course === 'B.Tech') { years.push({label: '3rd Year', value: '3rd Year'}, {label: '4th Year', value: '4th Year'}); }
+                let years = [
+                    {label: '1st Year', value: '1st Year'}, 
+                    {label: '2nd Year', value: '2nd Year'}
+                ];
+                if (course === 'B.Tech') {
+                    years.push({label: '3rd Year', value: '3rd Year'}, {label: '4th Year', value: '4th Year'});
+                }
                 safelyPopulateDropdown('ttYear', years, currentYear || years[0].value);
 
                 const selectedYear = tYear.value;
                 let sems = [];
-                if (selectedYear === '1st Year') sems.push({label: 'Semester 1', value: 'Semester 1'}, {label: 'Semester 2', value: 'Semester 2'});
-                else if (selectedYear === '2nd Year') sems.push({label: 'Semester 3', value: 'Semester 3'}, {label: 'Semester 4', value: 'Semester 4'});
-                else if (selectedYear === '3rd Year') sems.push({label: 'Semester 5', value: 'Semester 5'}, {label: 'Semester 6', value: 'Semester 6'});
-                else if (selectedYear === '4th Year') sems.push({label: 'Semester 7', value: 'Semester 7'}, {label: 'Semester 8', value: 'Semester 8'});
+                if (selectedYear === '1st Year') {
+                    sems.push({label: 'Semester 1', value: 'Semester 1'}, {label: 'Semester 2', value: 'Semester 2'});
+                } else if (selectedYear === '2nd Year') {
+                    sems.push({label: 'Semester 3', value: 'Semester 3'}, {label: 'Semester 4', value: 'Semester 4'});
+                } else if (selectedYear === '3rd Year') {
+                    sems.push({label: 'Semester 5', value: 'Semester 5'}, {label: 'Semester 6', value: 'Semester 6'});
+                } else if (selectedYear === '4th Year') {
+                    sems.push({label: 'Semester 7', value: 'Semester 7'}, {label: 'Semester 8', value: 'Semester 8'});
+                }
                 safelyPopulateDropdown('ttSemester', sems, document.getElementById('ttSemester').value || sems[0].value);
 
                 let branches = [];
                 if (course === 'B.Tech') {
-                    if (selectedYear === '1st Year') branches.push({label: 'Common 1st Year', value: 'Common 1st Year'});
-                    else branches.push( {label: 'Computer Science and Engineering', value: 'Computer Science and Engineering'}, {label: 'Data Science', value: 'Data Science'}, {label: 'Electrical Communication Engineering', value: 'Electrical Communication Engineering'}, {label: 'EE', value: 'EE'}, {label: 'EEE', value: 'EEE'}, {label: 'Civil', value: 'Civil'}, {label: 'Mechanical', value: 'Mechanical'} );
+                    if (selectedYear === '1st Year') {
+                        branches.push({label: 'Common 1st Year', value: 'Common 1st Year'});
+                    } else {
+                        branches.push( 
+                            {label: 'Computer Science and Engineering', value: 'Computer Science and Engineering'}, 
+                            {label: 'Data Science', value: 'Data Science'}, 
+                            {label: 'Electrical Communication Engineering', value: 'Electrical Communication Engineering'}, 
+                            {label: 'EE', value: 'EE'}, 
+                            {label: 'EEE', value: 'EEE'}, 
+                            {label: 'Civil', value: 'Civil'}, 
+                            {label: 'Mechanical', value: 'Mechanical'} 
+                        );
+                    }
                 } else if (course === 'MBA') {
-                    branches.push( {label: 'Human Resources (HR)', value: 'Human Resources (HR)'}, {label: 'Finance', value: 'Finance'}, {label: 'Marketing', value: 'Marketing'}, {label: 'IT & Systems', value: 'IT & Systems'}, {label: 'Operations', value: 'Operations'} );
+                    branches.push( 
+                        {label: 'Human Resources (HR)', value: 'Human Resources (HR)'}, 
+                        {label: 'Finance', value: 'Finance'}, 
+                        {label: 'Marketing', value: 'Marketing'}, 
+                        {label: 'IT & Systems', value: 'IT & Systems'}, 
+                        {label: 'Operations', value: 'Operations'} 
+                    );
                 } else if (course === 'MCA') {
                     branches.push({label: 'Master of Computer Applications', value: 'Master of Computer Applications'});
                 }
@@ -1622,7 +1930,9 @@ if (user?.role === 'Admin') {
             e.preventDefault();
             const fileInput = document.getElementById('ttImageInput');
             const file = fileInput.files[0];
-            if (!file) return showToast("Please select an image file.", "warning");
+            if (!file) {
+                return showToast("Please select an image file.", "warning");
+            }
 
             const btn = document.getElementById('ttSubmitBtn');
             btn.innerText = "Uploading Image to Secure Cloud...";
@@ -1687,24 +1997,53 @@ if (user?.role === 'Admin') {
             const currentSem = document.getElementById('markSemester').value || "All";
             const currentBranch = document.getElementById('markBranch').value || "All";
             
-            let years = [{label: 'All Years', value: 'All'}, {label: '1st Year', value: '1st Year'}, {label: '2nd Year', value: '2nd Year'}];
-            if (course === 'B.Tech') { years.push({label: '3rd Year', value: '3rd Year'}, {label: '4th Year', value: '4th Year'}); }
+            let years = [
+                {label: 'All Years', value: 'All'}, 
+                {label: '1st Year', value: '1st Year'}, 
+                {label: '2nd Year', value: '2nd Year'}
+            ];
+            
+            if (course === 'B.Tech') {
+                years.push({label: '3rd Year', value: '3rd Year'}, {label: '4th Year', value: '4th Year'});
+            }
             safelyPopulateDropdown('markYear', years, currentYear);
 
             const selectedYear = mYear.value;
             let sems = [{label: 'All Semesters', value: 'All'}];
-            if (selectedYear === '1st Year') sems.push({label: 'Semester 1', value: 'Semester 1'}, {label: 'Semester 2', value: 'Semester 2'});
-            else if (selectedYear === '2nd Year') sems.push({label: 'Semester 3', value: 'Semester 3'}, {label: 'Semester 4', value: 'Semester 4'});
-            else if (selectedYear === '3rd Year') sems.push({label: 'Semester 5', value: 'Semester 5'}, {label: 'Semester 6', value: 'Semester 6'});
-            else if (selectedYear === '4th Year') sems.push({label: 'Semester 7', value: 'Semester 7'}, {label: 'Semester 8', value: 'Semester 8'});
+            if (selectedYear === '1st Year') {
+                sems.push({label: 'Semester 1', value: 'Semester 1'}, {label: 'Semester 2', value: 'Semester 2'});
+            } else if (selectedYear === '2nd Year') {
+                sems.push({label: 'Semester 3', value: 'Semester 3'}, {label: 'Semester 4', value: 'Semester 4'});
+            } else if (selectedYear === '3rd Year') {
+                sems.push({label: 'Semester 5', value: 'Semester 5'}, {label: 'Semester 6', value: 'Semester 6'});
+            } else if (selectedYear === '4th Year') {
+                sems.push({label: 'Semester 7', value: 'Semester 7'}, {label: 'Semester 8', value: 'Semester 8'});
+            }
             safelyPopulateDropdown('markSemester', sems, currentSem);
 
             let branches = [{label: 'All Branches', value: 'All'}];
             if (course === 'B.Tech') {
-                if (selectedYear === '1st Year') branches.push({label: 'Common 1st Year', value: 'Common 1st Year'});
-                else branches.push( {label: 'Computer Science and Engineering', value: 'Computer Science and Engineering'}, {label: 'Data Science', value: 'Data Science'}, {label: 'Electrical Communication Engineering', value: 'Electrical Communication Engineering'}, {label: 'EE', value: 'EE'}, {label: 'EEE', value: 'EEE'}, {label: 'Civil', value: 'Civil'}, {label: 'Mechanical', value: 'Mechanical'} );
+                if (selectedYear === '1st Year') {
+                    branches.push({label: 'Common 1st Year', value: 'Common 1st Year'});
+                } else {
+                    branches.push( 
+                        {label: 'Computer Science and Engineering', value: 'Computer Science and Engineering'}, 
+                        {label: 'Data Science', value: 'Data Science'}, 
+                        {label: 'Electrical Communication Engineering', value: 'Electrical Communication Engineering'}, 
+                        {label: 'EE', value: 'EE'}, 
+                        {label: 'EEE', value: 'EEE'}, 
+                        {label: 'Civil', value: 'Civil'}, 
+                        {label: 'Mechanical', value: 'Mechanical'} 
+                    );
+                }
             } else if (course === 'MBA') {
-                branches.push( {label: 'Human Resources (HR)', value: 'Human Resources (HR)'}, {label: 'Finance', value: 'Finance'}, {label: 'Marketing', value: 'Marketing'}, {label: 'IT & Systems', value: 'IT & Systems'}, {label: 'Operations', value: 'Operations'} );
+                branches.push( 
+                    {label: 'Human Resources (HR)', value: 'Human Resources (HR)'}, 
+                    {label: 'Finance', value: 'Finance'}, 
+                    {label: 'Marketing', value: 'Marketing'}, 
+                    {label: 'IT & Systems', value: 'IT & Systems'}, 
+                    {label: 'Operations', value: 'Operations'} 
+                );
             } else if (course === 'MCA') {
                 branches.push({label: 'Master of Computer Applications', value: 'Master of Computer Applications'});
             }
@@ -1716,7 +2055,9 @@ if (user?.role === 'Admin') {
         renderMarksDropdowns();
         
         const markDateInput = document.getElementById('markDate');
-        if(markDateInput) markDateInput.value = new Date().toISOString().split('T')[0];
+        if(markDateInput) {
+            markDateInput.value = new Date().toISOString().split('T')[0];
+        }
     }
     
     initAdminMarksDropdowns();
@@ -1728,7 +2069,9 @@ if (user?.role === 'Admin') {
         if (!examName || !totalMarks) {
             return showToast("Please enter Exam Name and Total Marks first.", "warning");
         }
-        if(!window.allStudents) return showToast("Student data is still loading...", "warning");
+        if (!window.allStudents) {
+            return showToast("Student data is still loading...", "warning");
+        }
 
         const listContainer = document.getElementById('marksListContainer');
         const submitBtn = document.getElementById('submitMarksBtn');
@@ -1746,14 +2089,16 @@ if (user?.role === 'Admin') {
             const matchesYear = (year === "All" || s.year === year);
             const matchesSem = (sem === "All" || s.semester === sem);
             let sBranch = s.branch || "Common 1st Year";
-            if (sBranch.trim().toUpperCase() === "CSE") sBranch = "Computer Science and Engineering";
+            if (sBranch.trim().toUpperCase() === "CSE") {
+                sBranch = "Computer Science and Engineering";
+            }
             const matchesBranch = (branch === "All" || sBranch === branch || (branch === 'Common 1st Year' && s.year === '1st Year'));
             const matchesSec = (section === "All" || (s.section || "Unassigned") === section);
             
             return matchesCourse && matchesYear && matchesSem && matchesBranch && matchesSec;
         });
 
-        if(targetStudents.length === 0) {
+        if (targetStudents.length === 0) {
             listContainer.innerHTML = `<p style="color: #fca5a5; text-align: center; padding: 20px; background: rgba(225, 29, 72, 0.1); border-radius: 8px;">No students found for this selection.</p>`;
             submitBtn.style.display = 'none';
             return;
@@ -1785,17 +2130,19 @@ if (user?.role === 'Admin') {
         const totalMarks = parseFloat(document.getElementById('markTotalPoints').value);
         const dateVal = document.getElementById('markDate').value;
         
-        if(!examName || isNaN(totalMarks)) return showToast("Exam Name and Total Marks are required.", "warning");
+        if (!examName || isNaN(totalMarks)) {
+            return showToast("Exam Name and Total Marks are required.", "warning");
+        }
 
         const markInputs = document.querySelectorAll('.student-mark-entry');
-        if(markInputs.length === 0) return;
+        if (markInputs.length === 0) return;
 
         const btn = document.getElementById('submitMarksBtn');
         btn.innerText = "Saving to Database...";
         btn.disabled = true;
 
         try {
-            for(let input of markInputs) {
+            for (let input of markInputs) {
                 const sId = input.dataset.sid;
                 const secured = input.value !== "" ? parseFloat(input.value) : null;
                 
@@ -1884,6 +2231,56 @@ if (user?.role === 'Admin') {
         });
     }
 
+    // 💥 ADMIN LOST & FOUND MODERATION 💥
+    window.deleteLostFoundItem = async (docId) => {
+        if(confirm("Are you sure you want to permanently delete this post?")) {
+            try {
+                await deleteDoc(doc(db, "lost_and_found", docId));
+                showToast("Post deleted successfully.", "success");
+            } catch (error) {
+                showToast("Failed to delete post.", "error");
+            }
+        }
+    };
+
+    window.renderAdminLostFound = function() {
+        const listDiv = document.getElementById('adminLostFoundList');
+        if (!listDiv) return;
+        
+        if (!window.allLostFoundItems || window.allLostFoundItems.length === 0) {
+            listDiv.innerHTML = '<p style="color: #94a3b8; text-align: center; padding: 20px; background: rgba(0,0,0,0.2); border-radius: 8px;">No active lost or found items.</p>';
+            return;
+        }
+
+        listDiv.innerHTML = window.allLostFoundItems.map(item => {
+            const isLost = item.type === 'Lost';
+            const badgeColor = isLost ? '#f43f5e' : '#10b981';
+            const badgeBg = isLost ? 'rgba(244, 63, 94, 0.2)' : 'rgba(16, 185, 129, 0.2)';
+            
+            return `
+                <div class="card" style="border-left: 4px solid ${badgeColor}; margin-bottom: 15px; background: rgba(15, 23, 42, 0.6); position: relative; display: flex; flex-direction: column; gap: 10px;">
+                    <div style="position: absolute; top: 15px; right: 15px; z-index: 10;">
+                        <button onclick="window.deleteLostFoundItem('${item.id}')" style="background: rgba(225, 29, 72, 0.1); color: #fda4af; border: 1px solid rgba(225, 29, 72, 0.3); padding: 5px 10px; border-radius: 6px; cursor: pointer; font-size: 0.75em; transition: 0.3s; font-weight: bold;" onmouseover="this.style.background='rgba(225, 29, 72, 0.3)'" onmouseout="this.style.background='rgba(225, 29, 72, 0.1)'" title="Delete post permanently">🗑️ Delete Post</button>
+                    </div>
+
+                    <div>
+                        <span class="badge" style="background: ${badgeBg}; color: ${badgeColor}; border: 1px solid ${badgeColor}; margin-bottom: 8px; display: inline-block;">${item.type}</span>
+                        <h3 style="color: #f8fafc; margin: 0 0 5px 0; font-size: 1.1em; padding-right: 100px;">${item.item_name}</h3>
+                        <p style="color: #94a3b8; font-size: 0.85em; margin: 0;">📍 ${item.location} &nbsp;|&nbsp; 🗓️ ${new Date(item.timestamp).toLocaleString()}</p>
+                    </div>
+                    
+                    <p style="color: #cbd5e1; font-size: 0.9em; line-height: 1.4; margin: 0; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);">${item.description}</p>
+                    
+                    ${item.image_url ? `<img src="${item.image_url}" style="width: 100%; max-height: 200px; object-fit: cover; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); margin-top: 5px;">` : ''}
+                    
+                    <div style="margin-top: 5px; color: #a5b4fc; font-size: 0.85em;">
+                        👤 Posted by: <strong>${item.student_name}</strong> (Contact: ${item.contact_info})
+                    </div>
+                </div>
+            `;
+        }).join('');
+    };
+
     loadAdminData();
 }
 
@@ -1926,9 +2323,13 @@ window.renderAdminQueries = function() {
             let textBadge = '#fbbf24';
             
             if (status === 'Resolved') {
-                bColor = '#10b981'; bgBadge = 'rgba(16, 185, 129, 0.2)'; textBadge = '#34d399';
+                bColor = '#10b981'; 
+                bgBadge = 'rgba(16, 185, 129, 0.2)'; 
+                textBadge = '#34d399';
             } else if (status === 'In Progress') {
-                bColor = '#3b82f6'; bgBadge = 'rgba(59, 130, 246, 0.2)'; textBadge = '#60a5fa';
+                bColor = '#3b82f6'; 
+                bgBadge = 'rgba(59, 130, 246, 0.2)'; 
+                textBadge = '#60a5fa';
             }
 
             let actionButtons = '';
@@ -1979,12 +2380,14 @@ window.renderAdminQueries = function() {
 function loadAdminData() {
     const adminComplaintsList = document.getElementById('adminComplaintsList');
     
-    if(adminComplaintsList) {
+    if (adminComplaintsList) {
         adminComplaintsList.innerHTML = '<p style="color: #6366f1; text-align: center; padding: 20px;">Fetching live queries from Firebase...</p>';
+        
         try {
             onSnapshot(collection(db, "complaints"), (querySnapshot) => {
                 let complaints = [];
                 let resolvedCount = 0;
+                
                 querySnapshot.forEach((doc) => {
                     const data = doc.data();
                     
@@ -1997,35 +2400,54 @@ function loadAdminData() {
                 complaints.sort((a, b) => b.created_at - a.created_at);
                 window.allComplaints = complaints; 
                 
-                if(document.getElementById('totalCount')) document.getElementById('totalCount').innerText = complaints.length;
-                if(document.getElementById('resolvedCount')) document.getElementById('resolvedCount').innerText = resolvedCount;
+                if (document.getElementById('totalCount')) {
+                    document.getElementById('totalCount').innerText = complaints.length;
+                }
+                if (document.getElementById('resolvedCount')) {
+                    document.getElementById('resolvedCount').innerText = resolvedCount;
+                }
 
                 window.renderAdminQueries(); 
             }, (error) => {
                 console.error("FIREBASE ERROR:", error);
                 alert("🚨 FIREBASE DATABASE ERROR 🚨\n\nYour database is blocking access! This usually means your 30-day Test Mode Rules have expired.\n\nPlease go to Firebase Console -> Firestore Database -> Rules -> set 'allow read, write: if true;'");
-                adminComplaintsList.innerHTML = `
-                    <div style="background: rgba(225,29,72,0.1); border: 1px solid rgba(225,29,72,0.3); padding: 20px; border-radius: 8px; color: #fda4af;">
-                        <h3 style="margin-top: 0;">⚠️ Database Connection Blocked!</h3>
-                        <p>Firebase returned an error: <em>${error.message}</em></p>
-                        <p><strong>How to fix:</strong> Log into your Firebase Console -> Go to Firestore Database -> Click the "Rules" tab -> Change your rules to allow read/write.</p>
-                    </div>
-                `;
             });
         } catch(e) {
             adminComplaintsList.innerHTML = `<p style="color: #fca5a5;">Script Error: ${e.message}</p>`;
         }
     }
 
-    if(document.getElementById('adminStudentDatabaseList')) {
+    if (document.getElementById('adminStudentDatabaseList')) {
         onSnapshot(query(collection(db, "users"), where("role", "!=", "Admin")), (querySnapshot) => {
             let students = [];
-            querySnapshot.forEach((doc) => students.push({ id: doc.id, ...doc.data() }));
+            
+            querySnapshot.forEach((doc) => {
+                students.push({ id: doc.id, ...doc.data() });
+            });
             window.allStudents = students; 
-            if (window.renderDatabaseLevel) window.renderDatabaseLevel();
+            
+            if (window.renderDatabaseLevel) {
+                window.renderDatabaseLevel();
+            }
         }, (error) => {
             console.error("FIREBASE STUDENT DB ERROR:", error);
             document.getElementById('adminStudentDatabaseList').innerHTML = `<p style="color: #fda4af; padding: 20px; border: 1px solid #e11d48; border-radius: 8px; text-align: center;">Failed to load students. Database rules might be blocking access.</p>`;
+        });
+    }
+
+    // 💥 LOAD ADMIN LOST & FOUND MODERATION DATA 💥
+    if (document.getElementById('adminLostFoundList')) {
+        onSnapshot(collection(db, "lost_and_found"), (querySnapshot) => {
+            let items = [];
+            querySnapshot.forEach((doc) => {
+                items.push({ id: doc.id, ...doc.data() });
+            });
+            items.sort((a, b) => b.timestamp - a.timestamp);
+            window.allLostFoundItems = items;
+            
+            if (window.renderAdminLostFound) {
+                window.renderAdminLostFound();
+            }
         });
     }
 }
@@ -2047,7 +2469,9 @@ if (user?.role === 'Technician' && window.location.pathname.includes('technician
     const techSortSelect = document.getElementById('techSort');
     const techFilterSelect = document.getElementById('techFilter');
     
-    if (logoutBtn) logoutBtn.addEventListener('click', window.logout);
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', window.logout);
+    }
 
     window.updateTechStatus = async (ticketId, newStatus) => {
         try {
@@ -2087,7 +2511,9 @@ if (user?.role === 'Technician' && window.location.pathname.includes('technician
         ticketContainer.innerHTML = filteredTickets.map(t => {
             const status = t.status || 'In Progress';
             let statusClass = 'status-progress';
-            if(status === 'Resolved') statusClass = 'status-resolved';
+            if (status === 'Resolved') {
+                statusClass = 'status-resolved';
+            }
 
             return `
                 <div class="ticket-card">
@@ -2112,15 +2538,16 @@ if (user?.role === 'Technician' && window.location.pathname.includes('technician
         }).join('');
     };
 
-    if(techSearchInput) techSearchInput.addEventListener('input', window.renderTechTickets);
-    if(techSortSelect) techSortSelect.addEventListener('change', window.renderTechTickets);
-    if(techFilterSelect) techFilterSelect.addEventListener('change', window.renderTechTickets);
+    if (techSearchInput) techSearchInput.addEventListener('input', window.renderTechTickets);
+    if (techSortSelect) techSortSelect.addEventListener('change', window.renderTechTickets);
+    if (techFilterSelect) techFilterSelect.addEventListener('change', window.renderTechTickets);
 
     if (ticketContainer) {
         ticketContainer.innerHTML = '<p style="color: #6366f1;">Fetching assigned tasks...</p>';
         
         onSnapshot(collection(db, "complaints"), (querySnapshot) => {
             let tickets = [];
+            
             querySnapshot.forEach(doc => {
                 const data = doc.data();
                 
@@ -2131,6 +2558,7 @@ if (user?.role === 'Technician' && window.location.pathname.includes('technician
                     tickets.push({ id: doc.id, ...data });
                 }
             });
+            
             window.allTechTickets = tickets;
             window.renderTechTickets();
         });
@@ -2142,22 +2570,27 @@ document.addEventListener('DOMContentLoaded', () => {
     const eyeClosedSVG = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>`;
 
     const passwordInputs = document.querySelectorAll('input[type="password"]');
+    
     passwordInputs.forEach(input => {
         const computedStyle = window.getComputedStyle(input);
         const marginB = computedStyle.marginBottom;
         const marginT = computedStyle.marginTop;
+        
         const wrapper = document.createElement('div');
         wrapper.style.position = 'relative';
         wrapper.style.width = '100%';
         wrapper.style.display = 'block';
         wrapper.style.marginBottom = marginB;
         wrapper.style.marginTop = marginT;
+        
         input.parentNode.insertBefore(wrapper, input);
         wrapper.appendChild(input);
+        
         input.style.paddingRight = '45px';
         input.style.width = '100%';
         input.style.marginBottom = '0'; 
         input.style.marginTop = '0'; 
+        
         const toggleBtn = document.createElement('span');
         toggleBtn.innerHTML = eyeOpenSVG;
         toggleBtn.style.position = 'absolute';
@@ -2167,10 +2600,17 @@ document.addEventListener('DOMContentLoaded', () => {
         toggleBtn.style.cursor = 'pointer';
         toggleBtn.style.display = 'flex';
         toggleBtn.style.zIndex = '5';
+        
         toggleBtn.addEventListener('click', () => {
-            if (input.type === 'password') { input.type = 'text'; toggleBtn.innerHTML = eyeClosedSVG; } 
-            else { input.type = 'password'; toggleBtn.innerHTML = eyeOpenSVG; }
+            if (input.type === 'password') { 
+                input.type = 'text'; 
+                toggleBtn.innerHTML = eyeClosedSVG; 
+            } else { 
+                input.type = 'password'; 
+                toggleBtn.innerHTML = eyeOpenSVG; 
+            }
         });
+        
         wrapper.appendChild(toggleBtn);
     });
 });

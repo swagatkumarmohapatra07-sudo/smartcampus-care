@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lost & Found - SmartCampus</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .lf-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        .lf-form-container {
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(20, 184, 166, 0.3);
+            border-radius: 16px;
+            padding: 25px;
+            margin-bottom: 40px;
+        }
+    </style>
+</head>
+<body style="position: relative; min-height: 100vh; overflow-y: auto;">
+
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+
+    <button class="back-circle-btn" onclick="window.location.href='student-home.html'" title="Back to Dashboard" style="position: absolute; top: 25px; left: 25px; z-index: 100000;">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="19" y1="12" x2="5" y2="12"></line>
+            <polyline points="12 19 5 12 12 5"></polyline>
+        </svg>
+    </button>
+
+    <div class="container slide-in" style="margin-top: 80px; max-width: 900px; position: relative; z-index: 10;">
+        
+        <div class="lf-header">
+            <div style="font-size: 3.5em; filter: drop-shadow(0 0 15px rgba(20, 184, 166, 0.6));">🎒</div>
+            <div>
+                <h1 style="color: #14b8a6; margin: 0; font-size: 2.2em;">Campus Lost & Found</h1>
+                <p style="color: #94a3b8; font-size: 1em; margin: 5px 0 0 0;">Help your peers by reporting lost items or returning found belongings.</p>
+            </div>
+        </div>
+        
+        <div class="lf-form-container">
+            <h3 style="color: #f8fafc; margin-top: 0; margin-bottom: 20px; font-size: 1.3em;">Report an Item</h3>
+            <form id="lostFoundForm">
+                <div style="display: flex; gap: 15px; margin-bottom: 15px; flex-wrap: wrap;">
+                    <div style="flex: 1; min-width: 150px;">
+                        <label style="color: #cbd5e1; font-size: 0.85em; margin-bottom: 5px; display: block;">Report Type</label>
+                        <select id="lfType" required style="width: 100%; padding: 12px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); color: white; border-radius: 8px; outline: none;">
+                            <option value="Lost">I Lost Something</option>
+                            <option value="Found">I Found Something</option>
+                        </select>
+                    </div>
+                    <div style="flex: 2; min-width: 250px;">
+                        <label style="color: #cbd5e1; font-size: 0.85em; margin-bottom: 5px; display: block;">Item Name</label>
+                        <input type="text" id="lfItemName" required placeholder="e.g. Blue Casio Watch" style="width: 100%; padding: 12px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); color: white; border-radius: 8px; outline: none;">
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 15px;">
+                    <label style="color: #cbd5e1; font-size: 0.85em; margin-bottom: 5px; display: block;">Location (Where did you lose/find it?)</label>
+                    <input type="text" id="lfLocation" required placeholder="e.g. Near Library, 2nd Floor" style="width: 100%; padding: 12px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); color: white; border-radius: 8px; outline: none;">
+                </div>
+
+                <div style="margin-bottom: 15px;">
+                    <label style="color: #cbd5e1; font-size: 0.85em; margin-bottom: 5px; display: block;">Description & Details</label>
+                    <textarea id="lfDescription" required rows="3" placeholder="Provide any identifying marks or details..." style="width: 100%; padding: 12px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); color: white; border-radius: 8px; outline: none; resize: vertical;"></textarea>
+                </div>
+
+                <div style="margin-bottom: 15px;">
+                    <label style="color: #cbd5e1; font-size: 0.85em; margin-bottom: 5px; display: block;">Your Contact Number (WhatsApp/Phone)</label>
+                    <input type="tel" id="lfContact" required placeholder="e.g. +91 9876543210" style="width: 100%; padding: 12px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); color: white; border-radius: 8px; outline: none;">
+                </div>
+
+                <div style="margin-bottom: 25px;">
+                    <label style="color: #cbd5e1; font-size: 0.85em; margin-bottom: 5px; display: block;">Upload Image (Highly Recommended)</label>
+                    <input type="file" id="lfImageInput" accept="image/*" style="width: 100%; padding: 12px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); color: white; border-radius: 8px; outline: none;">
+                </div>
+
+                <button type="submit" style="width: 100%; padding: 15px; background: #14b8a6; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1.1em; transition: 0.3s; box-shadow: 0 4px 15px rgba(20, 184, 166, 0.3);">
+                    Post to Campus Feed
+                </button>
+            </form>
+        </div>
+
+        <h2 style="color: #cbd5e1; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; margin-bottom: 20px;">Active Campus Feed</h2>
+        
+        <div id="lostFoundFeed">
+            <p style="color: #64748b; text-align: center; font-style: italic; background: rgba(0,0,0,0.2); padding: 20px; border-radius: 8px;">Fetching latest items...</p>
+        </div>
+
+    </div>
+    
+    <script type="module" src="app.js"></script>
+</body>
+</html>
