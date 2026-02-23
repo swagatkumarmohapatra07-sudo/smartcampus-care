@@ -347,7 +347,7 @@ if (user?.role === 'Student') {
                 if (profileAvatarLarge) profileAvatarLarge.src = avatarUrl;
                 if (profileNameDisplay) profileNameDisplay.innerText = freshUser.full_name;
                 
-                // 💥 NEW: Auto-Fill Profile Form Inputs 💥
+                // 💥 Auto-Fill Profile Form Inputs 💥
                 const profileFullName = document.getElementById('profileFullName');
                 if (profileFullName) profileFullName.value = freshUser.full_name || '';
 
@@ -612,7 +612,7 @@ function initProfileSystem(avatarUrl) {
         });
     }
 
-    // --- 💥 UPDATED: ONLY SAVE PASSWORD LOGIC 💥 ---
+    // --- 💥 NEW: ONLY SAVE PASSWORD LOGIC 💥 ---
     const saveProfileBtn = document.getElementById('saveProfileBtn');
     if (saveProfileBtn) {
         saveProfileBtn.addEventListener('click', async () => {
@@ -1048,7 +1048,6 @@ if (user?.role === 'Admin') {
                     semOptionsHTML += `<option value="Semester ${i}">Sem ${i} (${semesterToYearMap[i] || 'N/A'})</option>`;
                 }
 
-                // 💥 ADDED SEC E TO ASSIGNMENT DROPDOWN 💥
                 return `
                     <div class="student-glass-card">
                         <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 15px;">
@@ -1220,7 +1219,7 @@ if (user?.role === 'Admin') {
                 await addDoc(collection(db, "notices"), {
                     targets: noticeTargets,
                     message: document.getElementById('noticeMessage').value,
-                    imageUrl: uploadedImageUrl, // 💥 Added Image URL to Firestore
+                    imageUrl: uploadedImageUrl,
                     timestamp: Date.now()
                 });
 
@@ -1517,6 +1516,52 @@ if (user?.role === 'Admin') {
             } finally {
                 btn.innerText = "Publish Timetable";
                 btn.disabled = false;
+            }
+        });
+    }
+
+    // 💥 NEW: STAFF MANAGEMENT SUBMISSION LOGIC 💥
+    const addStaffForm = document.getElementById('addStaffForm');
+    if (addStaffForm) {
+        addStaffForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const role = document.getElementById('staffRole').value;
+            const fullName = document.getElementById('staffFullName').value.trim();
+            const username = document.getElementById('staffUsername').value.trim();
+            const password = document.getElementById('staffPassword').value.trim();
+
+            const btn = addStaffForm.querySelector('button');
+            btn.disabled = true;
+            btn.innerText = "Checking Details...";
+
+            try {
+                // Check if username already exists
+                const q = query(collection(db, "users"), where("username", "==", username));
+                const snapshot = await getDocs(q);
+
+                if (!snapshot.empty) {
+                    showToast(`Error: Username '${username}' is already taken!`, 'error');
+                    btn.disabled = false;
+                    btn.innerText = "Create Staff Account";
+                    return;
+                }
+
+                // Add new staff
+                await addDoc(collection(db, "users"), {
+                    role: role,
+                    full_name: fullName,
+                    username: username,
+                    password: password
+                });
+
+                showToast(`${role} account created successfully!`, 'success');
+                addStaffForm.reset();
+            } catch (err) {
+                console.error(err);
+                showToast("Failed to create account. Check connection.", "error");
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "Create Staff Account";
             }
         });
     }

@@ -132,10 +132,13 @@
                 Noticeboard
             </button>
             <button onclick="switchAdminTab('attendance')" id="tab-attendance" style="padding: 12px 25px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(30,41,59,0.6); color: #cbd5e1; cursor: pointer; font-weight: bold; transition: 0.3s;">
-                Attendance
+                Roll Call
             </button>
             <button onclick="switchAdminTab('timetables')" id="tab-timetables" style="padding: 12px 25px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(30,41,59,0.6); color: #cbd5e1; cursor: pointer; font-weight: bold; transition: 0.3s;">
                 Timetables
+            </button>
+            <button onclick="switchAdminTab('staff')" id="tab-staff" style="padding: 12px 25px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(30,41,59,0.6); color: #cbd5e1; cursor: pointer; font-weight: bold; transition: 0.3s;">
+                Staff Mgmt
             </button>
         </div>
 
@@ -342,6 +345,45 @@
             </div>
         </div>
 
+        <div id="admin-staff-section" style="display: none;">
+            <div class="card" style="background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(59, 130, 246, 0.3);">
+                <h3 style="color: #60a5fa; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+                    <span>👨‍💻</span> Register New Staff
+                </h3>
+                
+                <form id="addStaffForm">
+                    <div style="display: flex; gap: 15px; margin-bottom: 15px; flex-wrap: wrap;">
+                        <div style="flex: 1; min-width: 200px;">
+                            <label style="color: #cbd5e1; font-size: 0.85em; margin-bottom: 5px; display: block;">Staff Role</label>
+                            <select id="staffRole" required style="width: 100%; padding: 12px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); color: white; border-radius: 8px; outline: none; cursor: pointer;">
+                                <option value="Admin">Administrator</option>
+                                <option value="Technician">Technician</option>
+                            </select>
+                        </div>
+                        <div style="flex: 1; min-width: 200px;">
+                            <label style="color: #cbd5e1; font-size: 0.85em; margin-bottom: 5px; display: block;">Full Name</label>
+                            <input type="text" id="staffFullName" required placeholder="e.g. John Doe" style="width: 100%; padding: 12px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); color: white; border-radius: 8px; outline: none;">
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap;">
+                        <div style="flex: 1; min-width: 200px;">
+                            <label style="color: #cbd5e1; font-size: 0.85em; margin-bottom: 5px; display: block;">Username</label>
+                            <input type="text" id="staffUsername" required placeholder="e.g. admin2" style="width: 100%; padding: 12px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); color: white; border-radius: 8px; outline: none;">
+                        </div>
+                        <div style="flex: 1; min-width: 200px;">
+                            <label style="color: #cbd5e1; font-size: 0.85em; margin-bottom: 5px; display: block;">Password</label>
+                            <input type="password" id="staffPassword" required placeholder="Create a secure password" style="width: 100%; padding: 12px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); color: white; border-radius: 8px; outline: none;">
+                        </div>
+                    </div>
+                    
+                    <button type="submit" style="width: 100%; padding: 15px; background: #3b82f6; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1.1em; transition: 0.3s;">
+                        Create Staff Account
+                    </button>
+                </form>
+            </div>
+        </div>
+
     </div>
 
     <script>
@@ -351,8 +393,10 @@
             document.getElementById('admin-notices-section').style.display = tab === 'notices' ? 'block' : 'none';
             document.getElementById('admin-attendance-section').style.display = tab === 'attendance' ? 'block' : 'none';
             document.getElementById('admin-timetables-section').style.display = tab === 'timetables' ? 'block' : 'none';
+            // Toggle the new staff section
+            document.getElementById('admin-staff-section').style.display = tab === 'staff' ? 'block' : 'none';
             
-            const tabs = ['students', 'queries', 'notices', 'attendance', 'timetables'];
+            const tabs = ['students', 'queries', 'notices', 'attendance', 'timetables', 'staff'];
             tabs.forEach(t => {
                 const el = document.getElementById('tab-' + t);
                 if (el) {
