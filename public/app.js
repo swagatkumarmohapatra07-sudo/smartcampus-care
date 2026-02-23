@@ -340,13 +340,27 @@ if (user?.role === 'Student') {
                     academicInfo.innerText = `${freshUser.course} in ${freshUser.branch} | ${freshUser.year || '1st Year'} (${freshUser.semester || 'Semester 1'}) | Sec: ${freshUser.section || 'Unassigned'}`;
                 }
 
+// Update profile header
                 const profileAvatarLarge = document.getElementById('profileAvatarLarge');
                 const profileNameDisplay = document.getElementById('profileNameDisplay');
-                const profileYear = document.getElementById('profileYear');
                 
                 if (profileAvatarLarge) profileAvatarLarge.src = avatarUrl;
                 if (profileNameDisplay) profileNameDisplay.innerText = freshUser.full_name;
                 
+                // 💥 NEW: Auto-Fill Profile Form Inputs 💥
+                const profileFullName = document.getElementById('profileFullName');
+                if (profileFullName) profileFullName.value = freshUser.full_name || '';
+
+                const profileRegNumber = document.getElementById('profileRegNumber');
+                if (profileRegNumber) profileRegNumber.value = freshUser.registration_number || '';
+
+                const profileCourse = document.getElementById('profileCourse');
+                if (profileCourse) profileCourse.value = freshUser.course || '';
+
+                const profilePassword = document.getElementById('profilePassword');
+                if (profilePassword) profilePassword.value = freshUser.password || '';
+
+                const profileYear = document.getElementById('profileYear');
                 if (profileYear) {
                     initDynamicDropdowns(freshUser.course || 'B.Tech', 'profileYear', 'profileSemester', 'profileBranch', { 
                         year: freshUser.year, semester: freshUser.semester, branch: freshUser.branch 
