@@ -17,6 +17,85 @@
             z-index: 999999 !important;
             pointer-events: auto !important;
         }
+
+        /* 💥 NEW: 3D INTERACTIVE CARD CSS 💥 */
+        .card-container-3d {
+            perspective: 1000px;
+            width: 100%;
+            max-width: 380px;
+            margin: 0 auto 25px;
+        }
+        .card-body-3d {
+            width: 100%;
+            height: 220px;
+            position: relative;
+            transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transform-style: preserve-3d;
+        }
+        .card-body-3d.flipped {
+            transform: rotateY(180deg);
+        }
+        .card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            border: 1px solid rgba(255,255,255,0.1);
+            overflow: hidden;
+        }
+        /* Glossy overlay for realistic card look */
+        .card-face::before {
+            content: '';
+            position: absolute;
+            top: -50%; left: -50%; width: 200%; height: 200%;
+            background: linear-gradient(to bottom right, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 40%, rgba(255,255,255,0) 100%);
+            transform: rotate(30deg);
+            pointer-events: none;
+        }
+        .card-back {
+            transform: rotateY(180deg);
+            padding: 0;
+            justify-content: flex-start;
+        }
+        .magnetic-strip {
+            width: 100%;
+            height: 45px;
+            background: #020617;
+            margin-top: 25px;
+        }
+        .cvv-display-strip {
+            background: white;
+            height: 40px;
+            margin: 20px 25px;
+            border-radius: 4px;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            padding-right: 15px;
+            color: #0f172a;
+            font-style: italic;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+        /* Card input styling */
+        .cc-input-group {
+            display: flex; gap: 15px; margin-bottom: 15px;
+        }
+        .cc-input-wrapper { flex: 1; }
+        .cc-input-wrapper label {
+            display: block; font-size: 0.8em; color: #94a3b8; margin-bottom: 5px; text-transform: uppercase;
+        }
+        .cc-input-wrapper input {
+            background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); width: 100%; padding: 12px; color: white; border-radius: 8px; font-family: monospace; font-size: 1.1em; transition: 0.3s;
+        }
+        .cc-input-wrapper input:focus { border-color: #6366f1; background: rgba(0,0,0,0.5); }
     </style>
 </head>
 <body style="position: relative; min-height: 100vh; overflow-y: auto;">
@@ -93,16 +172,62 @@
                     <input type="text" placeholder="Enter UPI ID (optional)" style="width: 80%; background: transparent; border: 1px solid rgba(255,255,255,0.1); text-align: center; color: white; padding: 10px;">
                 </div>
 
-                <div id="cardUI" class="virtual-card" style="display: none; margin-bottom: 20px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                        <span style="font-weight: bold; letter-spacing: 2px;">SECURE CARD</span>
-                        <span>💳</span>
+                <div id="cardUI" style="display: none; background: rgba(0,0,0,0.2); padding: 30px 20px; border-radius: 12px; margin-bottom: 20px; border: 1px solid rgba(255,255,255,0.05);">
+                    
+                    <div class="card-container-3d">
+                        <div class="card-body-3d" id="interactiveCard">
+                            <div class="card-face">
+                                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                                    <svg width="40" height="30" viewBox="0 0 48 35" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <rect width="48" height="35" rx="6" fill="#fbbf24"/>
+                                        <path d="M0 12H48M0 23H48M15 0V35M33 0V35" stroke="#f59e0b" stroke-width="1.5"/>
+                                    </svg>
+                                    <span style="font-weight: 800; font-style: italic; color: rgba(255,255,255,0.6); letter-spacing: 1px;">BANK</span>
+                                </div>
+                                <div>
+                                    <div id="visCardNum" style="font-size: 1.5em; font-family: monospace; letter-spacing: 2px; margin-bottom: 15px; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">#### #### #### ####</div>
+                                    <div style="display: flex; justify-content: space-between; font-family: monospace; font-size: 0.9em; text-transform: uppercase; color: rgba(255,255,255,0.8);">
+                                        <div style="display: flex; flex-direction: column;">
+                                            <span style="font-size: 0.65em; color: #94a3b8;">Cardholder Name</span>
+                                            <span id="visCardName">YOUR NAME</span>
+                                        </div>
+                                        <div style="display: flex; flex-direction: column; text-align: right;">
+                                            <span style="font-size: 0.65em; color: #94a3b8;">Valid Thru</span>
+                                            <span id="visCardExp">MM/YY</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-face card-back">
+                                <div class="magnetic-strip"></div>
+                                <div style="padding: 0 25px;">
+                                    <span style="font-size: 0.7em; color: #94a3b8; text-transform: uppercase;">CVV Code</span>
+                                </div>
+                                <div class="cvv-display-strip" id="visCardCvv">***</div>
+                                <p style="font-size: 0.55em; color: rgba(255,255,255,0.4); text-align: center; margin-top: 10px;">This card is securely encrypted for SmartCampus transactions.</p>
+                            </div>
+                        </div>
                     </div>
-                    <input type="text" placeholder="0000 0000 0000 0000" style="width: 100%; margin-bottom: 15px; background: rgba(255,255,255,0.1); color: white; border: none; padding: 12px;">
-                    <div style="display: flex; gap: 10px;">
-                        <input type="text" placeholder="MM/YY" style="flex: 1; background: rgba(255,255,255,0.1); border: none; padding: 10px; color: white;">
-                        <input type="password" placeholder="CVV" style="flex: 1; background: rgba(255,255,255,0.1); border: none; padding: 10px; color: white;">
+
+                    <div class="cc-input-wrapper" style="margin-bottom: 15px;">
+                        <label>Card Number</label>
+                        <input type="text" id="inCardNum" placeholder="0000 0000 0000 0000" maxlength="19">
                     </div>
+                    <div class="cc-input-wrapper" style="margin-bottom: 15px;">
+                        <label>Cardholder Name</label>
+                        <input type="text" id="inCardName" placeholder="e.g. John Doe" maxlength="25">
+                    </div>
+                    <div class="cc-input-group">
+                        <div class="cc-input-wrapper">
+                            <label>Expiry Date</label>
+                            <input type="text" id="inCardExp" placeholder="MM/YY" maxlength="5">
+                        </div>
+                        <div class="cc-input-wrapper">
+                            <label>CVV</label>
+                            <input type="password" id="inCardCvv" placeholder="***" maxlength="3">
+                        </div>
+                    </div>
+
                 </div>
 
                 <button type="submit" id="payFeeBtn" style="width: 100%; padding: 16px; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; border: none; border-radius: 12px; font-weight: bold; font-size: 1.1em; cursor: pointer; transition: 0.3s;">
@@ -129,6 +254,64 @@
         <div id="paymentHistoryList"></div>
     </div>
     
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const cardInner = document.getElementById('interactiveCard');
+            
+            const inNum = document.getElementById('inCardNum');
+            const inName = document.getElementById('inCardName');
+            const inExp = document.getElementById('inCardExp');
+            const inCvv = document.getElementById('inCardCvv');
+
+            const visNum = document.getElementById('visCardNum');
+            const visName = document.getElementById('visCardName');
+            const visExp = document.getElementById('visCardExp');
+            const visCvv = document.getElementById('visCardCvv');
+
+            // Format & Update Card Number
+            if(inNum) {
+                inNum.addEventListener('input', (e) => {
+                    let val = e.target.value.replace(/\D/g, ''); // strip non-digits
+                    val = val.replace(/(.{4})/g, '$1 ').trim(); // add spaces
+                    e.target.value = val;
+                    visNum.innerText = val || '#### #### #### ####';
+                });
+            }
+
+            // Update Name
+            if(inName) {
+                inName.addEventListener('input', (e) => {
+                    visName.innerText = e.target.value.toUpperCase() || 'YOUR NAME';
+                });
+            }
+
+            // Format & Update Expiry
+            if(inExp) {
+                inExp.addEventListener('input', (e) => {
+                    let val = e.target.value.replace(/\D/g, '');
+                    if (val.length >= 3) {
+                        val = val.substring(0, 2) + '/' + val.substring(2, 4);
+                    }
+                    e.target.value = val;
+                    visExp.innerText = val || 'MM/YY';
+                });
+            }
+
+            // Flip Card & Update CVV
+            if(inCvv) {
+                inCvv.addEventListener('focus', () => {
+                    cardInner.classList.add('flipped');
+                });
+                inCvv.addEventListener('blur', () => {
+                    cardInner.classList.remove('flipped');
+                });
+                inCvv.addEventListener('input', (e) => {
+                    visCvv.innerText = e.target.value || '***';
+                });
+            }
+        });
+    </script>
+
     <script type="module" src="app.js"></script>
 </body>
 </html>
