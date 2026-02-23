@@ -6,16 +6,17 @@
     <title>Staff Portal - SmartCampus</title>
     <link rel="stylesheet" href="style.css">
 </head>
-<body style="display: flex; justify-content: center; align-items: center; min-height: 100vh; flex-direction: column; padding: 20px;">
+<body style="display: flex; justify-content: center; align-items: center; min-height: 100vh; flex-direction: column; padding: 20px; position: relative;">
 
     <div class="orb orb-1"></div>
     <div class="orb orb-2"></div>
 
-    <div style="width: 100%; max-width: 450px; margin-bottom: 15px; position: relative; z-index: 100;">
-        <a href="index.html" class="back-circle-btn" style="text-decoration: none; font-size: 1.5em;">
-            &larr;
-        </a>
-    </div>
+    <button class="back-circle-btn" onclick="window.location.href='index.html'" title="Go Back" style="position: absolute; top: 25px; left: 25px; z-index: 100000;">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="19" y1="12" x2="5" y2="12"></line>
+            <polyline points="12 19 5 12 12 5"></polyline>
+        </svg>
+    </button>
 
     <div class="card index-glass-card" style="max-width: 450px; width: 100%; margin: 0; position: relative; z-index: 10;">
         
