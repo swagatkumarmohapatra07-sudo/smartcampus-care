@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exam History - SmartCampus</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body style="position: relative; min-height: 100vh; overflow-y: auto;">
+
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+
+    <button class="back-circle-btn" onclick="window.location.href='student-home.html'" title="Back to Dashboard" style="position: absolute; top: 25px; left: 25px; z-index: 100000;">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="19" y1="12" x2="5" y2="12"></line>
+            <polyline points="12 19 5 12 12 5"></polyline>
+        </svg>
+    </button>
+
+    <div class="container slide-in" style="margin-top: 80px; max-width: 900px; position: relative; z-index: 10;">
+        
+        <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 30px;">
+            <div style="font-size: 3em; filter: drop-shadow(0 0 10px rgba(52, 211, 153, 0.5));">📚</div>
+            <div>
+                <h1 style="color: #34d399; margin: 0; font-size: 2.2em;">Academic Transcript</h1>
+                <p style="color: #94a3b8; font-size: 1em; margin: 5px 0 0 0;">View your detailed internal and semester exam scores.</p>
+            </div>
+        </div>
+        
+        <div id="marksHistoryList">
+            <p style="color: #64748b; text-align: center; font-style: italic; background: rgba(0,0,0,0.2); padding: 20px; border-radius: 8px;">Fetching your academic records securely...</p>
+        </div>
+
+    </div>
+    
+    <script type="module" src="app.js"></script>
+</body>
+</html>

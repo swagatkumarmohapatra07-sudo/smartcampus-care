@@ -23,8 +23,8 @@ window.logout = () => {
     window.location.href = 'index.html';
 };
 
-// Route Protection 
-if (!user && (window.location.pathname.includes('admin.html') || window.location.pathname.includes('technician.html') || window.location.pathname.includes('student.html') || window.location.pathname.includes('student-fees.html') || window.location.pathname.includes('student-profile.html') || window.location.pathname.includes('net-banking.html') || window.location.pathname.includes('student-home.html') || window.location.pathname.includes('about-college.html'))) {
+// Route Protection (💥 Added student-marks-history.html)
+if (!user && (window.location.pathname.includes('admin.html') || window.location.pathname.includes('technician.html') || window.location.pathname.includes('student.html') || window.location.pathname.includes('student-fees.html') || window.location.pathname.includes('student-profile.html') || window.location.pathname.includes('net-banking.html') || window.location.pathname.includes('student-home.html') || window.location.pathname.includes('about-college.html') || window.location.pathname.includes('student-marks-history.html'))) {
     window.location.href = 'index.html';
 }
 
@@ -381,6 +381,8 @@ if (user?.role === 'Student') {
     if (document.getElementById('complaintForm')) initQueriesSystem();
     if (document.getElementById('paymentForm')) initFeeSystem();
     if (document.getElementById('profileYear')) initProfileSystem(user.profile_pic || 'https://cdn-icons-png.flaticon.com/512/149/149071.png');
+    // 💥 TRIGGER EXAM HISTORY LIST IF ON MARKS HISTORY PAGE 💥
+    if (document.getElementById('marksHistoryList')) initMarksHistorySystem(user.id);
 
     // LIVE NOTICEBOARD RECEIVER
     const noticeBoard = document.getElementById('studentNoticeBoard');
@@ -420,14 +422,14 @@ if (user?.role === 'Student') {
                         <p style="margin: 0; color: ${i===0 ? '#f8fafc' : '#cbd5e1'}; font-weight: ${i===0 ? 'bold' : 'normal'}; line-height: 1.4;">
                             ${n.message}
                         </p>
-                        ${n.imageUrl ? `<img src="${n.imageUrl}" class="notice-img">` : ''}
+                        ${n.imageUrl ? `<img src="${n.imageUrl}" class="notice-img" style="max-width: 100%; border-radius: 8px; margin-top: 10px; display: block; border: 1px solid rgba(255,255,255,0.1);">` : ''}
                     </div>
                 `).join('');
             }
         });
     }
 
-    // VIEW TIMETABLE LOGIC
+    // 💥 VIEW TIMETABLE LOGIC FOR STUDENT DASHBOARD 💥
     window.viewMyTimetable = async () => {
         const modal = document.getElementById('timetableModal');
         const container = document.getElementById('ttImageContainer');
@@ -472,6 +474,59 @@ if (user?.role === 'Student') {
             container.innerHTML = `<p style="color: #fca5a5;">Failed to load timetable. Check connection.</p>`;
         }
     };
+}
+
+// 💥 NEW: MARKS HISTORY LIST LOGIC 💥
+function initMarksHistorySystem(studentId) {
+    const listDiv = document.getElementById('marksHistoryList');
+    if (!listDiv) return;
+
+    const q = query(collection(db, "marks"), where("student_id", "==", studentId));
+
+    onSnapshot(q, (snapshot) => {
+        let marksData = [];
+        snapshot.forEach(doc => { marksData.push({ id: doc.id, ...doc.data() }); });
+        
+        // Sort newest first for history
+        marksData.sort((a, b) => b.timestamp - a.timestamp);
+
+        if (marksData.length === 0) {
+            listDiv.innerHTML = '<p style="color: #94a3b8; background: rgba(0,0,0,0.3); padding: 20px; border-radius: 8px; text-align: center;">No exam marks recorded yet.</p>';
+            return;
+        }
+
+        listDiv.innerHTML = marksData.map(m => {
+            const percent = ((m.secured_marks / m.total_marks) * 100).toFixed(1);
+            let bColor = '#10b981'; // Green
+            let bgBadge = 'rgba(16, 185, 129, 0.1)';
+            
+            if (percent < 40) {
+                bColor = '#f43f5e'; // Red
+                bgBadge = 'rgba(244, 63, 94, 0.1)';
+            } else if (percent < 60) {
+                bColor = '#f59e0b'; // Yellow
+                bgBadge = 'rgba(245, 158, 11, 0.1)';
+            }
+
+            return `
+                <div class="card" style="border-left: 4px solid ${bColor}; margin-bottom: 15px; background: rgba(15, 23, 42, 0.6); padding: 20px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                        <div>
+                            <h3 style="color: #f8fafc; margin: 0 0 5px 0; font-size: 1.2em;">${m.exam_name}</h3>
+                            <p style="color: #94a3b8; font-size: 0.85em; margin: 0;">🗓️ Recorded: ${new Date(m.date).toLocaleDateString()}</p>
+                        </div>
+                        <div style="text-align: right;">
+                            <span style="font-size: 1.6em; font-weight: bold; color: ${bColor};">${m.secured_marks}</span>
+                            <span style="color: #cbd5e1; font-size: 1em;"> / ${m.total_marks}</span>
+                            <div style="margin-top: 5px;">
+                                <span class="badge" style="background: ${bgBadge}; color: ${bColor}; border: 1px solid ${bColor}; padding: 5px 10px; font-size: 0.9em;">${percent}%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    });
 }
 
 // 💥 STUDENT PERFORMANCE MARKS CHART LOGIC 💥
@@ -657,7 +712,7 @@ function initAttendanceGraphs(studentId) {
                 datasets: [{
                     label: 'Days Present',
                     data: barValues,
-                    backgroundColor: 'rgba(236, 72, 153, 0.8)',
+                    backgroundColor: 'rgba(236, 72, 153, 0.8)', // Neon Pink
                     borderRadius: 6,
                     barPercentage: 0.5
                 }]
@@ -867,54 +922,56 @@ function initFeeSystem() {
         });
     }
 
-    paymentForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const amount = Number(document.getElementById('payAmount').value);
-        const gateway = document.getElementById('payGateway').value;
-        const method = document.getElementById('payMethod').value;
-        
-        const freshUser = JSON.parse(localStorage.getItem('user')) || user;
+    if (paymentForm) {
+        paymentForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const amount = Number(document.getElementById('payAmount').value);
+            const gateway = document.getElementById('payGateway').value;
+            const method = document.getElementById('payMethod').value;
+            
+            const freshUser = JSON.parse(localStorage.getItem('user')) || user;
 
-        if (amount > remainingBalance) {
-            showToast(`Error: You only owe ₹${remainingBalance.toLocaleString()}.`, 'warning');
-            return;
-        }
+            if (amount > remainingBalance) {
+                showToast(`Error: You only owe ₹${remainingBalance.toLocaleString()}.`, 'warning');
+                return;
+            }
 
-        if (method === 'Net Banking') {
-            const pendingTxn = { amount, gateway, method };
-            localStorage.setItem('pendingTxn', JSON.stringify(pendingTxn));
-            window.location.href = 'net-banking.html';
-            return; 
-        }
+            if (method === 'Net Banking') {
+                const pendingTxn = { amount, gateway, method };
+                localStorage.setItem('pendingTxn', JSON.stringify(pendingTxn));
+                window.location.href = 'net-banking.html';
+                return; 
+            }
 
-        const btn = document.getElementById('payFeeBtn');
-        btn.innerText = `Processing via ${gateway}...`;
-        btn.disabled = true;
+            const btn = document.getElementById('payFeeBtn');
+            btn.innerText = `Processing via ${gateway}...`;
+            btn.disabled = true;
 
-        setTimeout(async () => {
-            try {
-                const txnId = 'TXN-' + Math.floor(10000000 + Math.random() * 90000000);
-                await addDoc(collection(db, "payments"), {
-                    student_id: freshUser.id,
-                    full_name: freshUser.full_name,
-                    registration_number: freshUser.registration_number,
-                    course: freshUser.course,
-                    branch: freshUser.branch,
-                    section: freshUser.section || "Unassigned",
-                    year: freshUser.year || "N/A",           
-                    semester: freshUser.semester || "N/A",   
-                    amount: amount,
-                    gateway: gateway,
-                    method: method,
-                    transaction_id: txnId,
-                    date: Date.now()
-                });
-                showToast(`Successfully paid ₹${amount.toLocaleString()}!`, 'success');
-                paymentForm.reset();
-            } catch (error) { showToast("Payment failed.", "error"); } 
-            finally { btn.innerText = "Process Secure Payment"; btn.disabled = false; }
-        }, 2000);
-    });
+            setTimeout(async () => {
+                try {
+                    const txnId = 'TXN-' + Math.floor(10000000 + Math.random() * 90000000);
+                    await addDoc(collection(db, "payments"), {
+                        student_id: freshUser.id,
+                        full_name: freshUser.full_name,
+                        registration_number: freshUser.registration_number,
+                        course: freshUser.course,
+                        branch: freshUser.branch,
+                        section: freshUser.section || "Unassigned",
+                        year: freshUser.year || "N/A",           
+                        semester: freshUser.semester || "N/A",   
+                        amount: amount,
+                        gateway: gateway,
+                        method: method,
+                        transaction_id: txnId,
+                        date: Date.now()
+                    });
+                    showToast(`Successfully paid ₹${amount.toLocaleString()}!`, 'success');
+                    paymentForm.reset();
+                } catch (error) { showToast("Payment failed.", "error"); } 
+                finally { btn.innerText = "Process Secure Payment"; btn.disabled = false; }
+            }, 2000);
+        });
+    }
 
     const historySemesterFilter = document.getElementById('historySemesterFilter');
     if (historySemesterFilter) historySemesterFilter.addEventListener('change', renderPaymentHistory);
@@ -925,25 +982,27 @@ function initFeeSystem() {
         let filteredPayments = window.userPaymentHistory;
         if (filterVal !== "All") filteredPayments = window.userPaymentHistory.filter(p => p.semester === filterVal);
 
-        if (filteredPayments.length === 0) {
-            historyList.innerHTML = '<p style="color: #94a3b8; background: rgba(0,0,0,0.3); padding: 20px; border-radius: 8px; text-align: center;">No transactions found for this selection.</p>';
-        } else {
-            historyList.innerHTML = filteredPayments.map((p) => `
-                <div class="card" style="border-left: 4px solid #10b981; margin-bottom: 15px; background: rgba(15, 23, 42, 0.6);">
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <span style="color: #10b981; font-weight: 800; font-size: 1.2em;">₹${p.amount.toLocaleString()}</span>
-                        <span class="badge" style="background: rgba(16, 185, 129, 0.1); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3);">Success</span>
+        if (historyList) {
+            if (filteredPayments.length === 0) {
+                historyList.innerHTML = '<p style="color: #94a3b8; background: rgba(0,0,0,0.3); padding: 20px; border-radius: 8px; text-align: center;">No transactions found for this selection.</p>';
+            } else {
+                historyList.innerHTML = filteredPayments.map((p) => `
+                    <div class="card" style="border-left: 4px solid #10b981; margin-bottom: 15px; background: rgba(15, 23, 42, 0.6);">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span style="color: #10b981; font-weight: 800; font-size: 1.2em;">₹${p.amount.toLocaleString()}</span>
+                            <span class="badge" style="background: rgba(16, 185, 129, 0.1); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3);">Success</span>
+                        </div>
+                        <p style="margin-top: 8px; color: #94a3b8; font-size: 0.9em; display: flex; justify-content: space-between; flex-wrap: wrap;">
+                            <span><small>TXN ID: ${p.transaction_id}</small></span>
+                            <span style="color: #cbd5e1;"><small>🗓️ Paid during: <strong>${p.semester || 'N/A'}</strong></small></span>
+                        </p>
+                        <div style="display: flex; gap: 10px; margin-top: 15px;">
+                            <button onclick="window.viewReceipt('${p.id}')" style="flex: 1; background: transparent; color: #6366f1; border: 1px solid #6366f1; padding: 10px; border-radius: 8px; cursor: pointer;">👁️ View</button>
+                            <button onclick="window.downloadReceipt('${p.id}')" style="flex: 1; background: transparent; color: #10b981; border: 1px solid #10b981; padding: 10px; border-radius: 8px; cursor: pointer;">↓ Download</button>
+                        </div>
                     </div>
-                    <p style="margin-top: 8px; color: #94a3b8; font-size: 0.9em; display: flex; justify-content: space-between; flex-wrap: wrap;">
-                        <span><small>TXN ID: ${p.transaction_id}</small></span>
-                        <span style="color: #cbd5e1;"><small>🗓️ Paid during: <strong>${p.semester || 'N/A'}</strong></small></span>
-                    </p>
-                    <div style="display: flex; gap: 10px; margin-top: 15px;">
-                        <button onclick="window.viewReceipt('${p.id}')" style="flex: 1; background: transparent; color: #6366f1; border: 1px solid #6366f1; padding: 10px; border-radius: 8px; cursor: pointer;">👁️ View</button>
-                        <button onclick="window.downloadReceipt('${p.id}')" style="flex: 1; background: transparent; color: #10b981; border: 1px solid #10b981; padding: 10px; border-radius: 8px; cursor: pointer;">↓ Download</button>
-                    </div>
-                </div>
-            `).join('');
+                `).join('');
+            }
         }
     }
 
@@ -958,18 +1017,22 @@ function initFeeSystem() {
         });
         remainingBalance = totalFeeAmount - totalPaid;
         window.userPaymentHistory = payments.sort((a, b) => b.date - a.date); 
-        document.getElementById('totalOwedDisplay').innerText = `₹${totalFeeAmount.toLocaleString()}`;
-        document.getElementById('totalPaidDisplay').innerText = `₹${totalPaid.toLocaleString()}`;
-        document.getElementById('remainingBalanceDisplay').innerText = `₹${remainingBalance.toLocaleString()}`;
+        
+        if (document.getElementById('totalOwedDisplay')) document.getElementById('totalOwedDisplay').innerText = `₹${totalFeeAmount.toLocaleString()}`;
+        if (document.getElementById('totalPaidDisplay')) document.getElementById('totalPaidDisplay').innerText = `₹${totalPaid.toLocaleString()}`;
+        if (document.getElementById('remainingBalanceDisplay')) document.getElementById('remainingBalanceDisplay').innerText = `₹${remainingBalance.toLocaleString()}`;
+        
         const payAmountInput = document.getElementById('payAmount');
         const payFeeBtn = document.getElementById('payFeeBtn');
-        if (remainingBalance <= 0) {
-            payAmountInput.disabled = true;
-            payFeeBtn.disabled = true;
-            payFeeBtn.innerText = "Dues Cleared";
-        } else {
-            payAmountInput.max = remainingBalance;
-            payAmountInput.placeholder = `Max: ₹${remainingBalance}`;
+        if (payAmountInput && payFeeBtn) {
+            if (remainingBalance <= 0) {
+                payAmountInput.disabled = true;
+                payFeeBtn.disabled = true;
+                payFeeBtn.innerText = "Dues Cleared";
+            } else {
+                payAmountInput.max = remainingBalance;
+                payAmountInput.placeholder = `Max: ₹${remainingBalance}`;
+            }
         }
         renderPaymentHistory();
     });
@@ -1268,6 +1331,7 @@ if (user?.role === 'Admin') {
             btn.disabled = true;
 
             try {
+                // 💥 CLOUDINARY UPLOAD LOGIC 💥
                 if (file) {
                     btn.innerText = "Uploading Attachment...";
                     const CLOUD_NAME = "dmy74celx"; 
@@ -1877,6 +1941,7 @@ function loadAdminData() {
                 let resolvedCount = 0;
                 querySnapshot.forEach((doc) => {
                     const data = doc.data();
+                    
                     if (data.admin_deleted !== true) {
                         complaints.push({ id: doc.id, ...data });
                         if (data.status === 'Resolved') resolvedCount++;
