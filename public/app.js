@@ -340,7 +340,7 @@ if (user?.role === 'Student') {
                     academicInfo.innerText = `${freshUser.course} in ${freshUser.branch} | ${freshUser.year || '1st Year'} (${freshUser.semester || 'Semester 1'}) | Sec: ${freshUser.section || 'Unassigned'}`;
                 }
 
-// Update profile header
+                // Update profile header
                 const profileAvatarLarge = document.getElementById('profileAvatarLarge');
                 const profileNameDisplay = document.getElementById('profileNameDisplay');
                 
@@ -588,6 +588,8 @@ function initAttendanceGraphs(studentId) {
 
 function initProfileSystem(avatarUrl) {
     const profileImageInput = document.getElementById('profileImageInput');
+    
+    // --- PROFILE PHOTO UPLOAD LOGIC ---
     if(profileImageInput) {
         profileImageInput.addEventListener('change', async (e) => {
             const file = e.target.files[0];
@@ -607,6 +609,42 @@ function initProfileSystem(avatarUrl) {
                     showToast('Profile picture updated!', 'success');
                 }
             } catch(err) { showToast('Failed to upload image.', 'error'); }
+        });
+    }
+
+    // --- 💥 UPDATED: ONLY SAVE PASSWORD LOGIC 💥 ---
+    const saveProfileBtn = document.getElementById('saveProfileBtn');
+    if (saveProfileBtn) {
+        saveProfileBtn.addEventListener('click', async () => {
+            const newPass = document.getElementById('profilePassword').value.trim();
+
+            if (!newPass) {
+                showToast('Password cannot be empty.', 'warning');
+                return;
+            }
+
+            saveProfileBtn.innerText = 'Saving...';
+            saveProfileBtn.disabled = true;
+
+            try {
+                const userRef = doc(db, "users", user.id);
+                // Push ONLY the new password to Firebase
+                await updateDoc(userRef, {
+                    password: newPass
+                });
+                
+                // Update local storage so the browser remembers the change immediately
+                const activeUser = JSON.parse(localStorage.getItem('user'));
+                activeUser.password = newPass;
+                localStorage.setItem('user', JSON.stringify(activeUser));
+                
+                showToast('Password updated successfully!', 'success');
+            } catch (error) {
+                showToast('Failed to update password.', 'error');
+            } finally {
+                saveProfileBtn.innerText = 'Update Password';
+                saveProfileBtn.disabled = false;
+            }
         });
     }
 }
