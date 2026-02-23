@@ -58,6 +58,7 @@
             text-align: center;
         }
 
+        /* Hover Animation */
         .bento-card:hover {
             transform: translateY(-10px) scale(1.02);
             background: rgba(255, 255, 255, 0.08);
@@ -65,6 +66,7 @@
             box-shadow: 0 20px 40px rgba(0,0,0,0.4), inset 0 0 20px rgba(255,255,255,0.05);
         }
 
+        /* Glowing Orbs behind the Glass */
         .bento-card::before {
             content: '';
             position: absolute;
@@ -106,7 +108,7 @@
             background: rgba(15, 23, 42, 0.8);
         }
 
-        /* 💥 NEW: Marks Input Styles 💥 */
+        /* Marks Input Styles */
         .mark-input {
             background: rgba(0,0,0,0.5);
             border: 1px solid rgba(255,255,255,0.2);
@@ -122,6 +124,17 @@
         }
         .mark-input:focus {
             border-color: #10b981;
+        }
+
+        /* FIX: Date Picker Calendar Icon Color for Dark Mode */
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            filter: invert(1);
+            opacity: 0.8;
+            cursor: pointer;
+            transition: opacity 0.3s;
+        }
+        input[type="date"]::-webkit-calendar-picker-indicator:hover {
+            opacity: 1;
         }
     </style>
 </head>
@@ -442,11 +455,23 @@
                     <div style="display: flex; gap: 15px; margin-bottom: 15px; flex-wrap: wrap;">
                         <div style="flex: 1; min-width: 200px;">
                             <label style="color: #cbd5e1; font-size: 0.85em; margin-bottom: 5px; display: block;">Staff Role</label>
-                            <select id="staffRole" required style="width: 100%; padding: 12px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); color: white; border-radius: 8px; outline: none; cursor: pointer;">
+                            <select id="staffRole" required style="width: 100%; padding: 12px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); color: white; border-radius: 8px; outline: none; cursor: pointer;" onchange="document.getElementById('techTypeContainer').style.display = this.value === 'Technician' ? 'block' : 'none';">
                                 <option value="Admin">Administrator</option>
                                 <option value="Technician">Technician</option>
                             </select>
                         </div>
+                        
+                        <div id="techTypeContainer" style="flex: 1; min-width: 200px; display: none;">
+                            <label style="color: #cbd5e1; font-size: 0.85em; margin-bottom: 5px; display: block;">Specialization</label>
+                            <select id="staffTechType" style="width: 100%; padding: 12px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); color: white; border-radius: 8px; outline: none; cursor: pointer;">
+                                <option value="Electrician">Electrician</option>
+                                <option value="Plumber">Plumber</option>
+                                <option value="Carpenter">Carpenter</option>
+                                <option value="IT Support">IT Support</option>
+                                <option value="Others">Others</option>
+                            </select>
+                        </div>
+
                         <div style="flex: 1; min-width: 200px;">
                             <label style="color: #cbd5e1; font-size: 0.85em; margin-bottom: 5px; display: block;">Full Name</label>
                             <input type="text" id="staffFullName" required placeholder="e.g. John Doe" style="width: 100%; padding: 12px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); color: white; border-radius: 8px; outline: none;">

@@ -23,7 +23,7 @@ window.logout = () => {
     window.location.href = 'index.html';
 };
 
-// Route Protection (💥 Added student-marks-history.html)
+// Route Protection (Includes student-marks-history.html)
 if (!user && (window.location.pathname.includes('admin.html') || window.location.pathname.includes('technician.html') || window.location.pathname.includes('student.html') || window.location.pathname.includes('student-fees.html') || window.location.pathname.includes('student-profile.html') || window.location.pathname.includes('net-banking.html') || window.location.pathname.includes('student-home.html') || window.location.pathname.includes('about-college.html') || window.location.pathname.includes('student-marks-history.html'))) {
     window.location.href = 'index.html';
 }
@@ -53,7 +53,6 @@ function safelyPopulateDropdown(selectId, optionsArray, currentValue) {
     if (!selectEl) return;
     
     selectEl.options.length = 0; 
-    
     optionsArray.forEach(opt => {
         selectEl.add(new Option(opt.label, opt.value));
     });
@@ -200,6 +199,7 @@ if (registerForm) {
         e.preventDefault();
         const regNumberInput = document.getElementById('regNumber').value;
         const submitBtn = registerForm.querySelector('button');
+        
         submitBtn.disabled = true;
         submitBtn.innerText = "Checking Details...";
         try {
@@ -212,11 +212,17 @@ if (registerForm) {
                 return; 
             }
             await addDoc(collection(db, "users"), {
-                role: "Student", full_name: document.getElementById('fullName').value,
-                course: document.getElementById('course').value, branch: document.getElementById('branch').value,
-                year: document.getElementById('year').value, semester: document.getElementById('semester').value, 
-                section: "Unassigned", registration_number: regNumberInput,
-                password: document.getElementById('password').value, profile_pic: "", fee_status: "Unpaid" 
+                role: "Student", 
+                full_name: document.getElementById('fullName').value,
+                course: document.getElementById('course').value, 
+                branch: document.getElementById('branch').value,
+                year: document.getElementById('year').value, 
+                semester: document.getElementById('semester').value, 
+                section: "Unassigned", 
+                registration_number: regNumberInput,
+                password: document.getElementById('password').value, 
+                profile_pic: "", 
+                fee_status: "Unpaid" 
             });
             showToast('Registration Successful! Redirecting...', 'success');
             setTimeout(() => window.location.href = 'student-login.html', 1500);
@@ -236,6 +242,7 @@ if (studentLoginForm) {
         const pass = document.getElementById('password').value;
         const q = query(collection(db, "users"), where("registration_number", "==", regNum), where("password", "==", pass), where("role", "==", "Student"));
         const querySnapshot = await getDocs(q);
+        
         if (!querySnapshot.empty) {
             const userData = querySnapshot.docs[0].data();
             userData.id = querySnapshot.docs[0].id; 
@@ -256,10 +263,12 @@ if (adminLoginForm) {
         const username = document.getElementById('username').value.trim(); 
         const pass = document.getElementById('password').value.trim();
         const submitBtn = adminLoginForm.querySelector('button');
+        
         submitBtn.innerText = "Authenticating..."; submitBtn.disabled = true;
         try {
             const q = query(collection(db, "users"), where("username", "==", username), where("password", "==", pass));
             const querySnapshot = await getDocs(q);
+            
             if (!querySnapshot.empty) {
                 const userData = querySnapshot.docs[0].data();
                 userData.id = querySnapshot.docs[0].id;
@@ -291,15 +300,13 @@ if (adminLoginForm) {
 async function ensureAdminExists() {
     try {
         const q = query(collection(db, "users"), where("username", "==", "admin1"));
-        const querySnapshot = await getDocs(q);
-        if (querySnapshot.empty) {
+        if ((await getDocs(q)).empty) {
             await addDoc(collection(db, "users"), { role: "Admin", username: "admin1", password: "admin123", full_name: "System Admin" });
         }
         
         const qTech = query(collection(db, "users"), where("username", "==", "tech1"));
-        const querySnapshotTech = await getDocs(qTech);
-        if (querySnapshotTech.empty) {
-            await addDoc(collection(db, "users"), { role: "Technician", username: "tech1", password: "tech123", full_name: "Campus Tech Support" });
+        if ((await getDocs(qTech)).empty) {
+            await addDoc(collection(db, "users"), { role: "Technician", username: "tech1", password: "tech123", full_name: "Campus Tech Support", tech_type: "IT Support" });
         }
     } catch (e) { }
 }
@@ -342,7 +349,6 @@ if (user?.role === 'Student') {
 
                 const profileAvatarLarge = document.getElementById('profileAvatarLarge');
                 const profileNameDisplay = document.getElementById('profileNameDisplay');
-                
                 if (profileAvatarLarge) profileAvatarLarge.src = avatarUrl;
                 if (profileNameDisplay) profileNameDisplay.innerText = freshUser.full_name;
                 
@@ -369,20 +375,15 @@ if (user?.role === 'Student') {
 
         // 💥 TRIGGER THE STUDENT ATTENDANCE & MARKS GRAPHS 💥
         setTimeout(() => {
-            if(document.getElementById('attendanceDoughnut')) {
-                initAttendanceGraphs(user.id);
-            }
-            if(document.getElementById('marksLineChart')) {
-                initMarksGraphs(user.id);
-            }
-        }, 500); // Small delay ensures HTML canvas is ready
+            if(document.getElementById('attendanceDoughnut')) initAttendanceGraphs(user.id);
+            if(document.getElementById('marksLineChart')) initMarksGraphs(user.id);
+        }, 500); 
     }
 
     if (document.getElementById('complaintForm')) initQueriesSystem();
     if (document.getElementById('paymentForm')) initFeeSystem();
     if (document.getElementById('profileYear')) initProfileSystem(user.profile_pic || 'https://cdn-icons-png.flaticon.com/512/149/149071.png');
-    // 💥 TRIGGER EXAM HISTORY LIST IF ON MARKS HISTORY PAGE 💥
-    if (document.getElementById('marksHistoryList')) initMarksHistorySystem(user.id);
+    if (document.getElementById('marksHistoryList')) initMarksHistorySystem(user.id); 
 
     // LIVE NOTICEBOARD RECEIVER
     const noticeBoard = document.getElementById('studentNoticeBoard');
@@ -441,7 +442,6 @@ if (user?.role === 'Student') {
         const activeUser = JSON.parse(localStorage.getItem('user'));
         if (!activeUser) return;
 
-        // Build exact match identifier
         const matchString = `${activeUser.course}_${activeUser.year}_${activeUser.semester}_${activeUser.branch}_${activeUser.section || 'Unassigned'}`;
         const commonMatchString = `${activeUser.course}_${activeUser.year}_${activeUser.semester}_Common 1st Year_${activeUser.section || 'Unassigned'}`;
         
@@ -462,7 +462,6 @@ if (user?.role === 'Student') {
                 querySnapshot.forEach(doc => tts.push(doc.data()));
                 tts.sort((a,b) => b.timestamp - a.timestamp);
                 
-                // Image is wrapped in a clickable target tag
                 container.innerHTML = `
                     <a href="${tts[0].imageUrl}" target="_blank" title="Click to view full size image in new tab">
                         <img src="${tts[0].imageUrl}" alt="Class Timetable" />
@@ -870,6 +869,7 @@ function initQueriesSystem() {
                         </div>
 
                         <p style="padding-right: 220px; color: #f8fafc; margin: 0 0 15px 0; font-size: 1.05em;"><strong>Query:</strong> ${c.description}</p>
+                        ${c.assigned_to ? `<p style="margin-top: 5px; color: #a855f7; font-size: 0.85em;"><strong>👷 Technician:</strong> ${c.assigned_to}</p>` : ''}
                         <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 12px;">
                             <small style="color: #94a3b8;">Status: <span class="badge ${c.status.replace(' ', '-')}">${c.status}</span></small>
                             <small style="color: #64748b;">${new Date(c.created_at).toLocaleDateString()}</small>
@@ -890,6 +890,7 @@ function initQueriesSystem() {
                         </div>
 
                         <p style="padding-right: 220px; color: #f8fafc; margin: 0 0 15px 0;"><strong>Query:</strong> ${c.description}</p>
+                        ${c.assigned_to ? `<p style="margin-top: 5px; color: #a855f7; font-size: 0.85em;"><strong>👷 Technician:</strong> ${c.assigned_to}</p>` : ''}
                         <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 12px;">
                             <small style="color: #94a3b8;">Status: <span class="badge ${c.status.replace(' ', '-')}">${c.status}</span></small>
                             <small style="color: #64748b;">${new Date(c.created_at).toLocaleDateString()}</small>
@@ -1256,6 +1257,18 @@ if (user?.role === 'Admin') {
             }
         }
     };
+
+    // 💥 NEW: FORWARD QUERY TO SPECIFIC TECHNICIAN 💥
+    window.forwardQuery = async (queryId) => {
+        const techType = document.getElementById(`assign_tech_${queryId}`).value;
+        try {
+            const complaintRef = doc(db, "complaints", queryId);
+            await updateDoc(complaintRef, { status: 'In Progress', assigned_to: techType });
+            showToast(`Query securely forwarded to ${techType}s`, "success");
+        } catch (error) {
+            showToast("Failed to forward query.", "error");
+        }
+    };
     
     window.promoteStudent = async (studentId) => {
         const selectedSemString = document.getElementById(`promoteSem_${studentId}`).value;
@@ -1331,7 +1344,7 @@ if (user?.role === 'Admin') {
             btn.disabled = true;
 
             try {
-                // 💥 CLOUDINARY UPLOAD LOGIC 💥
+                // CLOUDINARY UPLOAD LOGIC
                 if (file) {
                     btn.innerText = "Uploading Attachment...";
                     const CLOUD_NAME = "dmy74celx"; 
@@ -1380,7 +1393,7 @@ if (user?.role === 'Admin') {
         });
     }
 
-    // 💥 SMART ATTENDANCE LOGIC 💥
+    // SMART ATTENDANCE LOGIC
     function initAdminAttendanceDropdowns() {
         const aCourse = document.getElementById('attCourse');
         const aYear = document.getElementById('attYear');
@@ -1562,7 +1575,7 @@ if (user?.role === 'Admin') {
         }
     };
 
-    // 💥 ADMIN TIMETABLE UPLOAD LOGIC 💥
+    // ADMIN TIMETABLE UPLOAD LOGIC
     const ttForm = document.getElementById('timetableForm');
     if (ttForm) {
         function initAdminTimetableDropdowns() {
@@ -1662,7 +1675,7 @@ if (user?.role === 'Admin') {
         });
     }
 
-    // 💥 EXAM MARKS ADMIN LOGIC 💥
+    // EXAM MARKS ADMIN LOGIC
     function initAdminMarksDropdowns() {
         const mCourse = document.getElementById('markCourse');
         const mYear = document.getElementById('markYear');
@@ -1817,12 +1830,15 @@ if (user?.role === 'Admin') {
         }
     };
 
-
+    // 💥 MODIFIED: STAFF REGISTRATION WITH TECH TYPE 💥
     const addStaffForm = document.getElementById('addStaffForm');
     if (addStaffForm) {
         addStaffForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const role = document.getElementById('staffRole').value;
+            // Get the specialization if it's a technician
+            const techType = document.getElementById('staffTechType') ? document.getElementById('staffTechType').value : 'Others';
+            
             const fullName = document.getElementById('staffFullName').value.trim();
             const username = document.getElementById('staffUsername').value.trim();
             const password = document.getElementById('staffPassword').value.trim();
@@ -1842,12 +1858,19 @@ if (user?.role === 'Admin') {
                     return;
                 }
 
-                await addDoc(collection(db, "users"), {
+                let newUserData = {
                     role: role,
                     full_name: fullName,
                     username: username,
                     password: password
-                });
+                };
+
+                // Add the tech_type ONLY if they are a Technician
+                if (role === 'Technician') {
+                    newUserData.tech_type = techType;
+                }
+
+                await addDoc(collection(db, "users"), newUserData);
 
                 showToast(`${role} account created successfully!`, 'success');
                 addStaffForm.reset();
@@ -1864,6 +1887,7 @@ if (user?.role === 'Admin') {
     loadAdminData();
 }
 
+// 💥 UPDATED: ADMIN QUERIES RENDERING WITH DROPDOWN 💥
 window.renderAdminQueries = function() {
     try {
         const listDiv = document.getElementById('adminComplaintsList');
@@ -1907,20 +1931,42 @@ window.renderAdminQueries = function() {
                 bColor = '#3b82f6'; bgBadge = 'rgba(59, 130, 246, 0.2)'; textBadge = '#60a5fa';
             }
 
+            let actionButtons = '';
+            
+            // 💥 NEW: DYNAMIC ASSIGNMENT BUTTONS 💥
+            if (status === 'Pending') {
+                actionButtons = `
+                    <div style="display: flex; gap: 10px; align-items: center; background: rgba(0,0,0,0.3); padding: 5px 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);">
+                        <select id="assign_tech_${c.id}" style="padding: 6px; background: rgba(30,41,59,0.8); color: white; border: 1px solid rgba(255,255,255,0.1); border-radius: 5px; font-size: 0.85em; outline: none; cursor: pointer;">
+                            <option value="Electrician">Electrician</option>
+                            <option value="Plumber">Plumber</option>
+                            <option value="Carpenter">Carpenter</option>
+                            <option value="IT Support">IT Support</option>
+                            <option value="Others">Others</option>
+                        </select>
+                        <button onclick="window.forwardQuery('${c.id}')" style="padding: 6px 12px; background: #3b82f6; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 0.85em; font-weight:bold; transition: 0.3s;" onmouseover="this.style.background='#2563eb'" onmouseout="this.style.background='#3b82f6'">
+                            Forward &rarr;
+                        </button>
+                    </div>
+                `;
+            } else if (status === 'In Progress') {
+                actionButtons = `<button onclick="window.updateStatus('${c.id}', 'Resolved')" style="padding: 8px 15px; border-radius: 8px; background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); cursor: pointer; transition: 0.3s; font-weight: bold;">Mark 'Resolved'</button>`;
+            } else if (status === 'Resolved') {
+                actionButtons = `<button onclick="window.archiveAdminQuery('${c.id}')" style="padding: 8px 15px; border-radius: 8px; background: rgba(225, 29, 72, 0.2); color: #fda4af; border: 1px solid rgba(225, 29, 72, 0.4); cursor: pointer; transition: 0.3s; font-weight: bold;">🗑️ Remove</button>`;
+            }
+
             return `
                 <div class="card" style="margin-bottom: 15px; border-left: 4px solid ${bColor};">
                     <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
                         <span style="color: #6366f1; font-weight: 600;">Reg: ${regNumber}</span>
                         <span class="badge" style="background: ${bgBadge}; color: ${textBadge}; border: 1px solid currentColor;">${status}</span>
                     </div>
-                    <p style="margin-top: 10px; color: #cbd5e1; font-size: 0.95em;"><strong>Info:</strong> ${details}</p>
+                    <p style="margin-top: 10px; margin-bottom: 2px; color: #cbd5e1; font-size: 0.95em;"><strong>Info:</strong> ${details}</p>
+                    ${c.assigned_to ? `<p style="margin-top: 0px; margin-bottom: 10px; color: #a855f7; font-size: 0.85em;"><strong>👷 Assigned To:</strong> ${c.assigned_to}</p>` : ''}
                     <p style="background: rgba(0,0,0,0.3); padding: 12px; border-radius: 8px; color: #f8fafc; margin-bottom: 15px; font-size: 0.95em; border: 1px solid rgba(255,255,255,0.05);"><strong>Issue:</strong> ${desc}</p>
                     
                     <div style="display: flex; gap: 10px; justify-content: flex-end;">
-                        ${status === 'Pending' ? `<button onclick="window.updateStatus('${c.id}', 'In Progress')" style="padding: 8px 15px; border-radius: 8px; background: rgba(59, 130, 246, 0.2); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.4); cursor: pointer; transition: 0.3s; font-weight: bold;">Mark 'In Progress'</button>` : ''}
-                        ${status === 'In Progress' ? `<button onclick="window.updateStatus('${c.id}', 'Resolved')" style="padding: 8px 15px; border-radius: 8px; background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); cursor: pointer; transition: 0.3s; font-weight: bold;">Mark 'Resolved'</button>` : ''}
-                        
-                        ${status === 'Resolved' ? `<button onclick="window.archiveAdminQuery('${c.id}')" style="padding: 8px 15px; border-radius: 8px; background: rgba(225, 29, 72, 0.2); color: #fda4af; border: 1px solid rgba(225, 29, 72, 0.4); cursor: pointer; transition: 0.3s; font-weight: bold;">🗑️ Remove</button>` : ''}
+                        ${actionButtons}
                     </div>
                 </div>
             `;
@@ -1984,10 +2030,14 @@ function loadAdminData() {
     }
 }
 
-// 💥 8. TECHNICIAN DASHBOARD LOGIC 💥
+// 💥 8. TECHNICIAN DASHBOARD LOGIC (UPDATED WITH SPECIFIC ROUTING) 💥
 if (user?.role === 'Technician' && window.location.pathname.includes('technician.html')) {
-    const techNameDisplay = document.getElementById('tech-name-display');
-    if (techNameDisplay) techNameDisplay.innerText = `Welcome, ${user.full_name || 'Tech'}`;
+    
+    // 💥 UPDATED: Show technician's specific role in header
+    const techNameDisplay = document.getElementById('tech-name-display'); 
+    if (techNameDisplay) {
+        techNameDisplay.innerText = `Welcome, ${user.full_name || 'Tech'} (${user.tech_type || 'General'})`;
+    }
 
     const ticketContainer = document.getElementById('ticket-container');
     const logoutBtn = document.getElementById('logout-btn');
@@ -2073,7 +2123,11 @@ if (user?.role === 'Technician' && window.location.pathname.includes('technician
             let tickets = [];
             querySnapshot.forEach(doc => {
                 const data = doc.data();
-                if (data.admin_deleted !== true && data.status !== 'Pending') {
+                
+                // 💥 UPDATED: Technicians ONLY see tickets assigned to their spec, OR if unassigned they default to 'Others'
+                const matchesTech = data.assigned_to === user.tech_type || (!data.assigned_to && user.tech_type === 'Others') || (!data.assigned_to && !user.tech_type);
+                
+                if (data.admin_deleted !== true && data.status !== 'Pending' && matchesTech) {
                     tickets.push({ id: doc.id, ...data });
                 }
             });
