@@ -28,15 +28,18 @@
                 <a href="about-us.html" class="nav-link-btn">About Us</a>
                 
                 <div class="glass-dropdown">
-                    <button class="glass-dropbtn" id="staffBtn">
-                        Staff Portals 
-                        <span style="font-size: 0.8em; margin-left: 5px;">▼</span>
-                    </button>
-                    <div class="glass-dropdown-content" id="staffDropdown">
-                        <a href="admin-login.html">🛡️ Admin Login</a>
-                        <a href="faculty-login.html">👨‍🏫 Faculty Login</a>
-                        <a href="technician-login.html">🔧 Technician Login</a>
-                    </div>
+                   
+                    <div class="glass-dropdown">
+    <button class="glass-dropbtn" id="staffBtn">
+        Staff Portals 
+        <span style="font-size: 0.8em; margin-left: 5px;">▼</span>
+    </button>
+    <div class="glass-dropdown-content" id="staffDropdown">
+        <a href="admin-login.html">🛡️ Admin Login</a>
+        <a href="faculty-login.html">👨‍🏫 Faculty Login</a>
+        <a href="technician-login.html">🔧 Technician Login</a>
+    </div>
+</div>
                 </div>
                 
             </div>
@@ -79,21 +82,21 @@
         });
     </script>
     <script>
-        const staffBtn = document.getElementById('staffBtn');
-        const staffDropdown = document.getElementById('staffDropdown');
+    const staffBtn = document.getElementById('staffBtn');
+    const staffDropdown = document.getElementById('staffDropdown');
 
-        // Toggle dropdown when clicking the button
-        staffBtn.addEventListener('click', (e) => {
-            e.stopPropagation(); // Prevents the click from reaching the window
-            staffDropdown.classList.toggle('show');
-        });
+    // Toggle dropdown when clicking the button
+    staffBtn.addEventListener('click', (e) => {
+        e.stopPropagation(); // Prevents the click from reaching the window
+        staffDropdown.classList.toggle('show');
+    });
 
-        // Close dropdown if user clicks anywhere else on the page
-        window.addEventListener('click', () => {
-            if (staffDropdown.classList.contains('show')) {
-                staffDropdown.classList.remove('show');
-            }
-        });
-    </script>
+    // Close dropdown if user clicks anywhere else on the page
+    window.addEventListener('click', () => {
+        if (staffDropdown.classList.contains('show')) {
+            staffDropdown.classList.remove('show');
+        }
+    });
+</script>
 </body>
 </html>
