@@ -58,6 +58,7 @@
             text-align: center;
         }
 
+        /* Hover Animation */
         .bento-card:hover {
             transform: translateY(-10px) scale(1.02);
             background: rgba(255, 255, 255, 0.08);
@@ -65,6 +66,7 @@
             box-shadow: 0 20px 40px rgba(0,0,0,0.4), inset 0 0 20px rgba(255,255,255,0.05);
         }
 
+        /* Glowing Orbs behind the Glass */
         .bento-card::before {
             content: '';
             position: absolute;
@@ -106,7 +108,34 @@
             background: rgba(15, 23, 42, 0.8);
         }
 
+<<<<<<< HEAD
         /* 💥 FIX: Date Picker Calendar Icon Color for Dark Mode 💥 */
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            filter: invert(1);
+            opacity: 0.8;
+            cursor: pointer;
+            transition: opacity 0.3s;
+=======
+        /* Marks Input Styles */
+        .mark-input {
+            background: rgba(0,0,0,0.5);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: #10b981;
+            padding: 8px;
+            border-radius: 6px;
+            width: 80px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.1em;
+            outline: none;
+            transition: border-color 0.3s;
+>>>>>>> e142f9c6a75bd8be855c4dd66f29be97d5982337
+        }
+        input[type="date"]::-webkit-calendar-picker-indicator:hover {
+            opacity: 1;
+        }
+
+        /* Date Picker Calendar Icon Color for Dark Mode */
         input[type="date"]::-webkit-calendar-picker-indicator {
             filter: invert(1);
             opacity: 0.8;
@@ -145,6 +174,9 @@
             </button>
             <button onclick="switchAdminTab('marks')" id="tab-marks" style="padding: 12px 25px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(30,41,59,0.6); color: #cbd5e1; cursor: pointer; font-weight: bold; transition: 0.3s;">
                 Exam Marks
+            </button>
+            <button onclick="switchAdminTab('lostfound')" id="tab-lostfound" style="padding: 12px 25px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(30,41,59,0.6); color: #cbd5e1; cursor: pointer; font-weight: bold; transition: 0.3s;">
+                Moderate L&F
             </button>
             <button onclick="switchAdminTab('timetables')" id="tab-timetables" style="padding: 12px 25px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(30,41,59,0.6); color: #cbd5e1; cursor: pointer; font-weight: bold; transition: 0.3s;">
                 Timetables
@@ -237,7 +269,7 @@
         <div id="admin-attendance-section" style="display: none;">
             <div class="card" style="background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(16, 185, 129, 0.3);">
                 <h3 style="color: #34d399; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
-                    <span>📋</span> Class attendance
+                    <span>📋</span> Class Attendance
                 </h3>
                 
                 <div style="background: rgba(0,0,0,0.2); padding: 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); margin-bottom: 20px;">
@@ -365,6 +397,18 @@
             </div>
         </div>
 
+        <div id="admin-lostfound-section" style="display: none;">
+            <div class="card" style="background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(20, 184, 166, 0.3);">
+                <h3 style="color: #14b8a6; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+                    <span>🎒</span> Moderate Lost & Found
+                </h3>
+                
+                <div id="adminLostFoundList">
+                    <p style="color: #64748b; text-align: center; font-style: italic; background: rgba(0,0,0,0.2); padding: 20px; border-radius: 8px;">Fetching campus feed...</p>
+                </div>
+            </div>
+        </div>
+
         <div id="admin-timetables-section" style="display: none;">
             <div class="card" style="background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(168, 85, 247, 0.3);">
                 <h3 style="color: #c084fc; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
@@ -435,11 +479,23 @@
                     <div style="display: flex; gap: 15px; margin-bottom: 15px; flex-wrap: wrap;">
                         <div style="flex: 1; min-width: 200px;">
                             <label style="color: #cbd5e1; font-size: 0.85em; margin-bottom: 5px; display: block;">Staff Role</label>
-                            <select id="staffRole" required style="width: 100%; padding: 12px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); color: white; border-radius: 8px; outline: none; cursor: pointer;">
+                            <select id="staffRole" required style="width: 100%; padding: 12px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); color: white; border-radius: 8px; outline: none; cursor: pointer;" onchange="document.getElementById('techTypeContainer').style.display = this.value === 'Technician' ? 'block' : 'none';">
                                 <option value="Admin">Administrator</option>
                                 <option value="Technician">Technician</option>
                             </select>
                         </div>
+                        
+                        <div id="techTypeContainer" style="flex: 1; min-width: 200px; display: none;">
+                            <label style="color: #cbd5e1; font-size: 0.85em; margin-bottom: 5px; display: block;">Specialization</label>
+                            <select id="staffTechType" style="width: 100%; padding: 12px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); color: white; border-radius: 8px; outline: none; cursor: pointer;">
+                                <option value="Electrician">Electrician</option>
+                                <option value="Plumber">Plumber</option>
+                                <option value="Carpenter">Carpenter</option>
+                                <option value="IT Support">IT Support</option>
+                                <option value="Others">Others</option>
+                            </select>
+                        </div>
+
                         <div style="flex: 1; min-width: 200px;">
                             <label style="color: #cbd5e1; font-size: 0.85em; margin-bottom: 5px; display: block;">Full Name</label>
                             <input type="text" id="staffFullName" required placeholder="e.g. John Doe" style="width: 100%; padding: 12px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); color: white; border-radius: 8px; outline: none;">
@@ -476,7 +532,10 @@
             document.getElementById('admin-timetables-section').style.display = tab === 'timetables' ? 'block' : 'none';
             document.getElementById('admin-staff-section').style.display = tab === 'staff' ? 'block' : 'none';
             
-            const tabs = ['students', 'queries', 'notices', 'attendance', 'marks', 'timetables', 'staff'];
+            // 💥 NEW: Toggle Lost & Found section 💥
+            document.getElementById('admin-lostfound-section').style.display = tab === 'lostfound' ? 'block' : 'none';
+            
+            const tabs = ['students', 'queries', 'notices', 'attendance', 'marks', 'timetables', 'staff', 'lostfound'];
             tabs.forEach(t => {
                 const el = document.getElementById('tab-' + t);
                 if (el) {
