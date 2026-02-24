@@ -675,62 +675,66 @@ body.index-body {
         margin-top: 15px;
     }
 }
-/* 💥 UPGRADED MOBILE DROPDOWN (WITH GLASS & ANIMATION) 💥 */
+/* 💥 EXACT DESKTOP EFFECT FOR MOBILE 💥 */
 @media (max-width: 768px) {
-    .glass-dropbtn {
-        width: 90%;
-        margin: 0 auto;
-        justify-content: center;
-        padding: 15px;
-        font-size: 1.1em;
-        background: rgba(255, 255, 255, 0.08); /* Slight glass on button */
-        border: 1px solid rgba(255, 255, 255, 0.2);
-    }
-
     .glass-dropdown {
+        position: relative; /* Essential for floating the menu right below the button */
         width: 100%;
-        display: block;
+        display: flex;
+        justify-content: center;
         margin-top: 15px;
     }
 
-    .glass-dropdown-content {
-        position: static !important; 
-        width: 90%;
-        margin: 10px auto 0 auto;
-        
-        /* 💎 Premium Glassmorphism Restored */
-        background: rgba(15, 23, 42, 0.6) !important; 
-        backdrop-filter: blur(20px) !important;
-        -webkit-backdrop-filter: blur(20px) !important;
-        border: 1px solid rgba(255, 255, 255, 0.15) !important;
-        border-radius: 12px !important;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.5), inset 0 0 15px rgba(255,255,255,0.02) !important;
-        
-        /* Prepare for animation */
-        transform-origin: top center;
+    .glass-dropbtn {
+        width: 85%;
+        justify-content: center; /* Center the text in the button */
+        padding: 15px;
+        font-size: 1.1em;
     }
 
-    /* 🎬 Apply custom mobile animation */
+    /* Keep it floating (absolute) just like the desktop version! */
+    .glass-dropdown-content {
+        position: absolute !important;
+        top: 100% !important; /* Pops up right below the button */
+        left: 50% !important;
+        width: 85% !important;
+        z-index: 9999 !important;
+        
+        /* Premium Glassmorphism */
+        background: rgba(15, 23, 42, 0.95) !important;
+        backdrop-filter: blur(16px) !important;
+        -webkit-backdrop-filter: blur(16px) !important;
+        border: 1px solid rgba(255, 255, 255, 0.2) !important;
+        border-radius: 12px !important;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6) !important;
+        
+        /* Start position hidden and slightly lower */
+        opacity: 0;
+        transform: translateX(-50%) translateY(15px) !important;
+        display: none;
+    }
+
+    /* Trigger the exact same fade & slide effect */
     .glass-dropdown-content.show {
         display: block !important;
-        animation: mobileSlideDown 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards !important;
+        animation: mobileFloatingGlass 0.3s ease-out forwards !important;
     }
 
     .glass-dropdown-content a {
-        justify-content: center;
+        justify-content: center; /* Center the links nicely */
         padding: 15px;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        font-size: 1.1em;
     }
 }
 
-/* 🎬 Smooth Mobile Slide Animation */
-@keyframes mobileSlideDown {
-    from {
-        opacity: 0;
-        transform: scaleY(0.5) translateY(-20px);
+/* 🎬 Custom animation to maintain centering while sliding */
+@keyframes mobileFloatingGlass {
+    from { 
+        opacity: 0; 
+        transform: translateX(-50%) translateY(15px); 
     }
-    to {
-        opacity: 1;
-        transform: scaleY(1) translateY(0);
+    to { 
+        opacity: 1; 
+        transform: translateX(-50%) translateY(5px); /* Leaves a small 5px gap below the button */
     }
 }
