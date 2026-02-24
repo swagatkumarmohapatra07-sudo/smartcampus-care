@@ -407,3 +407,132 @@ body.index-body {
     .hero-text h1 { font-size: 2.8rem !important; }
     .index-logo { font-size: 1.3em !important; }
 }
+/* 💥 GLASSMORPHISM DROPDOWN MENU 💥 */
+.glass-dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.glass-dropbtn {
+    background: rgba(255, 255, 255, 0.1);
+    color: #f8fafc;
+    padding: 12px 20px;
+    font-size: 1em;
+    font-weight: bold;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    cursor: pointer;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+}
+
+.glass-dropdown:hover .glass-dropbtn {
+    background: rgba(99, 102, 241, 0.2);
+    border-color: rgba(99, 102, 241, 0.5);
+    box-shadow: 0 0 15px rgba(99, 102, 241, 0.3);
+}
+
+.glass-dropdown-content {
+    display: none;
+    position: absolute;
+    top: 110%;
+    left: 0;
+    min-width: 220px;
+    background: rgba(15, 23, 42, 0.85); /* Deep dark glass */
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+    z-index: 9999;
+    overflow: hidden;
+    animation: fadeInDown 0.3s ease forwards;
+    opacity: 0;
+    transform: translateY(-10px);
+}
+
+.glass-dropdown-content a {
+    color: #cbd5e1;
+    padding: 14px 20px;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    font-weight: 500;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    transition: all 0.2s ease;
+}
+
+.glass-dropdown-content a:last-child {
+    border-bottom: none;
+}
+
+.glass-dropdown-content a:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+    padding-left: 25px; /* Smooth slide-right effect on hover */
+}
+
+/* Show the dropdown menu on hover */
+.glass-dropdown:hover .glass-dropdown-content {
+    display: block;
+}
+
+/* Subtle entrance animation */
+@keyframes fadeInDown {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+/* 💥 RESPONSIVE LOGIN CONTAINERS (MOBILE FIX) 💥 */
+
+/* Ensure the container doesn't touch the absolute edges on small screens */
+.login-container {
+    width: 90% !important; 
+    box-sizing: border-box;
+}
+
+/* When the screen is smaller than 600px (Phones & Small Tablets) */
+@media (max-width: 600px) {
+    .login-container {
+        margin-top: 70px !important; /* Bring it up higher on small screens */
+        padding: 30px 20px !important; /* Reduce the thick padding inside the box */
+    }
+
+    .login-container h2 {
+        font-size: 1.5em !important; /* Shrink the title slightly */
+    }
+
+    /* Target the big Emoji icon at the top */
+    .login-container > div:first-child {
+        font-size: 2.5em !important; 
+    }
+
+    .input-group input {
+        padding: 12px !important; /* Make input boxes slightly thinner for mobile */
+        font-size: 0.95em !important;
+    }
+
+    .submit-btn {
+        padding: 12px !important;
+        font-size: 1em !important;
+    }
+    
+    /* Move the back button so it doesn't overlap the UI on tiny screens */
+    .back-circle-btn {
+        top: 15px !important;
+        left: 15px !important;
+        width: 35px !important;
+        height: 35px !important;
+    }
+}
+
+/* For extremely small phones (like iPhone SE - 375px) */
+@media (max-width: 380px) {
+    .login-container {
+        padding: 20px 15px !important;
+    }
+}
