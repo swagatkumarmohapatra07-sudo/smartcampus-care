@@ -408,6 +408,7 @@ body.index-body {
     .index-logo { font-size: 1.3em !important; }
 }
 /* 💥 GLASSMORPHISM DROPDOWN MENU 💥 */
+/* 💥 CLICK-BASED GLASSMORPHISM DROPDOWN 💥 */
 .glass-dropdown {
     position: relative;
     display: inline-block;
@@ -423,35 +424,31 @@ body.index-body {
     border-radius: 8px;
     cursor: pointer;
     backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
     transition: all 0.3s ease;
     display: flex;
     align-items: center;
-}
-
-.glass-dropdown:hover .glass-dropbtn {
-    background: rgba(99, 102, 241, 0.2);
-    border-color: rgba(99, 102, 241, 0.5);
-    box-shadow: 0 0 15px rgba(99, 102, 241, 0.3);
+    outline: none;
 }
 
 .glass-dropdown-content {
-    display: none;
+    display: none; /* Changed back to display:none to prevent clicking links when hidden */
     position: absolute;
-    top: 110%;
+    top: 55px;
     left: 0;
     min-width: 220px;
-    background: rgba(15, 23, 42, 0.85); /* Deep dark glass */
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
+    background: rgba(15, 23, 42, 0.98); /* Slightly more opaque for better readability */
+    backdrop-filter: blur(20px);
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 12px;
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6);
     z-index: 9999;
     overflow: hidden;
-    animation: fadeInDown 0.3s ease forwards;
-    opacity: 0;
-    transform: translateY(-10px);
+}
+
+/* 💡 THE TRIGGER CLASS 💡 */
+.glass-dropdown-content.show {
+    display: block;
+    animation: dropdownFadeIn 0.2s ease-out;
 }
 
 .glass-dropdown-content a {
@@ -460,32 +457,19 @@ body.index-body {
     text-decoration: none;
     display: flex;
     align-items: center;
-    font-weight: 500;
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
     transition: all 0.2s ease;
 }
 
-.glass-dropdown-content a:last-child {
-    border-bottom: none;
-}
-
 .glass-dropdown-content a:hover {
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(99, 102, 241, 0.2);
     color: #ffffff;
-    padding-left: 25px; /* Smooth slide-right effect on hover */
+    padding-left: 28px;
 }
 
-/* Show the dropdown menu on hover */
-.glass-dropdown:hover .glass-dropdown-content {
-    display: block;
-}
-
-/* Subtle entrance animation */
-@keyframes fadeInDown {
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+@keyframes dropdownFadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 /* 💥 RESPONSIVE LOGIN CONTAINERS (MOBILE FIX) 💥 */
 
