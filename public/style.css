@@ -675,66 +675,89 @@ body.index-body {
         margin-top: 15px;
     }
 }
-/* 💥 THE ULTIMATE MOBILE FLOATING GLASS OVERRIDE 💥 */
-@media screen and (max-width: 768px) {
-    /* 1. Fix the container */
+/* 🌟 PREMIUM MOBILE STAFF PORTAL UI 🌟 */
+@media (max-width: 768px) {
+    /* 1. Style the Trigger Button to look like a premium card */
     .glass-dropdown {
-        position: relative !important;
-        width: 100% !important;
-        display: flex !important;
-        justify-content: center !important;
-        margin: 15px 0 !important;
+        width: 90%;
+        margin: 15px auto;
+        position: relative;
     }
 
-    /* 2. Fix the button */
     #staffBtn {
-        width: 250px !important;
-        padding: 15px !important;
-        background: rgba(255, 255, 255, 0.1) !important;
-        border-radius: 8px !important;
-        display: flex !important;
-        justify-content: center !important;
-        z-index: 1000 !important;
+        width: 100%;
+        padding: 16px 20px;
+        background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 12px;
+        color: #fff;
+        font-size: 1.15rem;
+        font-weight: bold;
+        display: flex;
+        justify-content: space-between; /* Spaces text and arrow perfectly */
+        align-items: center;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+        transition: all 0.3s ease;
     }
 
-    /* 3. The Floating Glass Menu (Hidden by default) */
+    /* 2. The Expanding Glowing Glass Card */
     #staffDropdown {
-        position: absolute !important;
-        top: 60px !important; /* Forces it to sit right below the button */
-        left: 50% !important;
-        width: 250px !important;
+        position: static !important;
+        width: 100% !important;
+        margin-top: 10px !important;
         
-        /* Premium Glass Effects */
-        background: rgba(15, 23, 42, 0.95) !important;
-        backdrop-filter: blur(20px) !important;
-        -webkit-backdrop-filter: blur(20px) !important;
+        /* 🎨 Beautiful Gradient Glass Background */
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(236, 72, 153, 0.15)) !important;
+        backdrop-filter: blur(25px) !important;
+        -webkit-backdrop-filter: blur(25px) !important;
+        
+        /* Bright glowing borders */
         border: 1px solid rgba(255, 255, 255, 0.3) !important;
         border-radius: 12px !important;
-        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8) !important;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.5), inset 0 0 20px rgba(255,255,255,0.05) !important;
         
-        /* Animation Setup */
-        visibility: hidden !important;
-        opacity: 0 !important;
-        transform: translateX(-50%) translateY(-15px) !important;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-        
+        /* 🎬 Fluid Accordion Animation Setup */
+        max-height: 0;
+        padding: 0;
+        opacity: 0;
+        overflow: hidden;
         display: flex !important;
         flex-direction: column !important;
-        z-index: 99999 !important;
+        visibility: hidden;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+        transform: translateY(-10px);
     }
 
-    /* 4. The Trigger! (When JS adds the 'show' class) */
+    /* 3. The 'Show' State (When Clicked) */
     #staffDropdown.show {
-        visibility: visible !important;
+        max-height: 250px !important; /* Expands smoothly */
+        padding: 10px 0 !important;
         opacity: 1 !important;
-        transform: translateX(-50%) translateY(0) !important;
+        visibility: visible !important;
+        transform: translateY(0) !important;
     }
 
-    /* 5. Center the links */
+    /* 4. Beautifully Spaced Links with Tap Effects */
     #staffDropdown a {
-        justify-content: center !important;
-        padding: 15px !important;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: flex-start !important;
+        padding: 15px 25px !important;
+        color: #f8fafc !important;
         font-size: 1.1rem !important;
+        font-weight: 500 !important;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+        transition: background 0.3s ease, padding-left 0.3s ease !important;
+    }
+
+    #staffDropdown a:last-child {
+        border-bottom: none !important;
+    }
+
+    /* Slide-right effect when you tap a link */
+    #staffDropdown a:active, #staffDropdown a:hover {
+        background: rgba(255, 255, 255, 0.15) !important;
+        padding-left: 35px !important;
+        color: #fff !important;
     }
 }
