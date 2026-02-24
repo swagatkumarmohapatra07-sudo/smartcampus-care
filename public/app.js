@@ -23,10 +23,11 @@ window.logout = () => {
     window.location.href = 'index.html';
 };
 
-// Route Protection
+// Route Protection (💥 Added faculty.html)
 if (!user && (
     window.location.pathname.includes('admin.html') || 
     window.location.pathname.includes('technician.html') || 
+    window.location.pathname.includes('faculty.html') || 
     window.location.pathname.includes('student.html') || 
     window.location.pathname.includes('student-fees.html') || 
     window.location.pathname.includes('student-profile.html') || 
@@ -302,10 +303,14 @@ if (adminLoginForm) {
                 const userData = querySnapshot.docs[0].data();
                 userData.id = querySnapshot.docs[0].id;
                 
-                if (userData.role === "Admin" || userData.role === "Technician") {
+                // 💥 UPDATED LOGIN ROUTING FOR FACULTY 💥
+                if (userData.role === "Admin" || userData.role === "Technician" || userData.role === "Faculty") {
                     localStorage.setItem('user', JSON.stringify(userData));
+                    
                     if (userData.role === "Admin") {
                         window.location.href = 'admin.html';
+                    } else if (userData.role === "Faculty") {
+                        window.location.href = 'faculty.html';
                     } else {
                         window.location.href = 'technician.html';
                     }
@@ -595,7 +600,7 @@ function initLostFoundSystem() {
                     image_url: uploadedImageUrl,
                     student_id: activeUser.id,
                     student_name: activeUser.full_name,
-                    contact_info: contactNum, // 💥 SAVE REAL CONTACT NUMBER 💥
+                    contact_info: contactNum, 
                     status: "Active", 
                     timestamp: Date.now()
                 });
@@ -1312,8 +1317,8 @@ window.viewReceipt = (paymentId) => {
     window.open(blobUrl, "_blank");
 };
 
-// --- 7. ADMIN DASHBOARD LOGIC ---
-if (user?.role === 'Admin') {
+// --- 7. ADMIN / FACULTY DASHBOARD LOGIC ---
+if (user?.role === 'Admin' || user?.role === 'Faculty') {
     
     window.dbState = { course: null, branch: null, year: null, semester: null };
 
@@ -1751,9 +1756,7 @@ if (user?.role === 'Admin') {
             const matchesSem = (sem === "All" || s.semester === sem);
             
             let sBranch = s.branch || "Common 1st Year";
-            if (sBranch.trim().toUpperCase() === "CSE") {
-                sBranch = "Computer Science and Engineering";
-            }
+            if (sBranch.trim().toUpperCase() === "CSE") sBranch = "Computer Science and Engineering";
             const matchesBranch = (branch === "All" || sBranch === branch || (branch === 'Common 1st Year' && s.year === '1st Year'));
             
             const matchesSec = (section === "All" || (s.section || "Unassigned") === section);
@@ -2177,14 +2180,16 @@ if (user?.role === 'Admin') {
         }
     };
 
-    // 💥 MODIFIED: STAFF REGISTRATION WITH TECH TYPE 💥
+    // 💥 MODIFIED: STAFF REGISTRATION WITH TECH TYPE & FACULTY BRANCH 💥
     const addStaffForm = document.getElementById('addStaffForm');
     if (addStaffForm) {
         addStaffForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const role = document.getElementById('staffRole').value;
-            // Get the specialization if it's a technician
+            
+            // Get specializations if applicable
             const techType = document.getElementById('staffTechType') ? document.getElementById('staffTechType').value : 'Others';
+            const facultyBranch = document.getElementById('facultyBranch') ? document.getElementById('facultyBranch').value : 'General';
             
             const fullName = document.getElementById('staffFullName').value.trim();
             const username = document.getElementById('staffUsername').value.trim();
@@ -2212,9 +2217,11 @@ if (user?.role === 'Admin') {
                     password: password
                 };
 
-                // Add the tech_type ONLY if they are a Technician
+                // Add Sub-Roles
                 if (role === 'Technician') {
                     newUserData.tech_type = techType;
+                } else if (role === 'Faculty') {
+                    newUserData.branch = facultyBranch;
                 }
 
                 await addDoc(collection(db, "users"), newUserData);
