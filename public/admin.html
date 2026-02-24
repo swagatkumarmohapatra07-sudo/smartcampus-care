@@ -106,22 +106,15 @@
             background: rgba(15, 23, 42, 0.8);
         }
 
-        /* 💥 NEW: Marks Input Styles 💥 */
-        .mark-input {
-            background: rgba(0,0,0,0.5);
-            border: 1px solid rgba(255,255,255,0.2);
-            color: #10b981;
-            padding: 8px;
-            border-radius: 6px;
-            width: 80px;
-            text-align: center;
-            font-weight: bold;
-            font-size: 1.1em;
-            outline: none;
-            transition: border-color 0.3s;
+        /* 💥 FIX: Date Picker Calendar Icon Color for Dark Mode 💥 */
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            filter: invert(1);
+            opacity: 0.8;
+            cursor: pointer;
+            transition: opacity 0.3s;
         }
-        .mark-input:focus {
-            border-color: #10b981;
+        input[type="date"]::-webkit-calendar-picker-indicator:hover {
+            opacity: 1;
         }
     </style>
 </head>
@@ -148,7 +141,7 @@
                 Noticeboard
             </button>
             <button onclick="switchAdminTab('attendance')" id="tab-attendance" style="padding: 12px 25px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(30,41,59,0.6); color: #cbd5e1; cursor: pointer; font-weight: bold; transition: 0.3s;">
-                attendance
+                Attendance
             </button>
             <button onclick="switchAdminTab('marks')" id="tab-marks" style="padding: 12px 25px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(30,41,59,0.6); color: #cbd5e1; cursor: pointer; font-weight: bold; transition: 0.3s;">
                 Exam Marks
