@@ -30,6 +30,12 @@
             <h3 style="color: #f8fafc; margin-bottom: 15px;">Raise a New Query</h3>
             <form id="complaintForm">
                 <textarea id="description" rows="4" placeholder="Describe your campus or hostel issue here..." required style="width: 100%; padding: 15px; background: rgba(0,0,0,0.3); color: white; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; resize: vertical; margin-bottom: 15px; box-sizing: border-box;"></textarea>
+                
+                <div style="margin-bottom: 15px;">
+                    <label for="queryImage" style="color: #94a3b8; font-size: 0.9em; margin-bottom: 8px; display: block;">Attach a Photo (Optional):</label>
+                    <input type="file" id="queryImage" accept="image/*" style="width: 100%; padding: 12px; background: rgba(0,0,0,0.3); color: #f8fafc; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; box-sizing: border-box; cursor: pointer;">
+                </div>
+                
                 <button type="submit" style="width: 100%; padding: 15px; background: #f59e0b; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.3s;" onmouseover="this.style.background='#d97706'" onmouseout="this.style.background='#f59e0b'">
                     Submit Query
                 </button>

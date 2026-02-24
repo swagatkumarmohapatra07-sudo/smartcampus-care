@@ -1008,6 +1008,7 @@ function initQueriesSystem() {
     complaintForm.addEventListener('submit', async (e) => {
         e.preventDefault(); 
         const descInput = document.getElementById('description'); 
+        const imageInput = document.getElementById('queryImage'); // ADDED: Capture Image Input
         const submitBtn = complaintForm.querySelector('button');
 
         if (!descInput || !descInput.value.trim()) return;
@@ -1016,12 +1017,34 @@ function initQueriesSystem() {
         const originalText = submitBtn.innerText; 
         submitBtn.innerText = "Submitting securely...";
 
+        let uploadedImageUrl = ""; // ADDED: Prepare URL variable
+
         try {
+            // ADDED: Cloudinary Upload logic for queries
+            const file = imageInput && imageInput.files ? imageInput.files[0] : null;
+            if (file) {
+                submitBtn.innerText = "Uploading Photo...";
+                const CLOUD_NAME = "dmy74celx"; 
+                const UPLOAD_PRESET = "rcyp6gvo"; 
+                const formData = new FormData();
+                formData.append('file', file);
+                formData.append('upload_preset', UPLOAD_PRESET);
+
+                const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, { method: 'POST', body: formData });
+                const data = await res.json();
+                if (data.secure_url) {
+                    uploadedImageUrl = data.secure_url;
+                }
+            }
+
+            submitBtn.innerText = "Saving to Database...";
+
             await addDoc(collection(db, "complaints"), { 
                 student_id: safeQueryId, 
                 student_details: `${activeUser.full_name || 'Unknown'} | ${activeUser.course || 'Course'} (${activeUser.branch || 'Branch'}) - Sec: ${activeUser.section || 'Unassigned'}`, 
                 reg_number: activeUser.registration_number || "Unknown", 
                 description: descInput.value.trim(), 
+                image_url: uploadedImageUrl, // ADDED: Save image URL
                 status: "Pending", 
                 created_at: Date.now() 
             });
@@ -1086,7 +1109,9 @@ function initQueriesSystem() {
                         <p style="padding-right: 220px; color: #f8fafc; margin: 0 0 15px 0; font-size: 1.05em;"><strong>Query:</strong> ${c.description}</p>
                         ${c.assigned_to ? `<p style="margin-top: 5px; color: #a855f7; font-size: 0.85em;"><strong>👷 Technician:</strong> ${c.assigned_to}</p>` : ''}
                         
-                        <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 12px;">
+                        ${c.image_url ? `<div style="margin-top: 10px;"><a href="${c.image_url}" target="_blank" style="display: inline-block; background: rgba(59, 130, 246, 0.2); color: #60a5fa; padding: 6px 12px; border-radius: 6px; text-decoration: none; font-size: 0.85em; border: 1px solid rgba(59, 130, 246, 0.4);">📸 View Attached Photo</a></div>` : ''}
+
+                        <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 12px; margin-top: 15px;">
                             <small style="color: #94a3b8;">Status: <span class="badge ${c.status.replace(' ', '-')}">${c.status}</span></small>
                             <small style="color: #64748b;">${new Date(c.created_at).toLocaleDateString()}</small>
                         </div>
@@ -1107,7 +1132,9 @@ function initQueriesSystem() {
                         <p style="padding-right: 220px; color: #f8fafc; margin: 0 0 15px 0;"><strong>Query:</strong> ${c.description}</p>
                         ${c.assigned_to ? `<p style="margin-top: 5px; color: #a855f7; font-size: 0.85em;"><strong>👷 Technician:</strong> ${c.assigned_to}</p>` : ''}
                         
-                        <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 12px;">
+                        ${c.image_url ? `<div style="margin-top: 10px;"><a href="${c.image_url}" target="_blank" style="display: inline-block; background: rgba(59, 130, 246, 0.2); color: #60a5fa; padding: 6px 12px; border-radius: 6px; text-decoration: none; font-size: 0.85em; border: 1px solid rgba(59, 130, 246, 0.4);">📸 View Attached Photo</a></div>` : ''}
+
+                        <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 12px; margin-top: 15px;">
                             <small style="color: #94a3b8;">Status: <span class="badge ${c.status.replace(' ', '-')}">${c.status}</span></small>
                             <small style="color: #64748b;">${new Date(c.created_at).toLocaleDateString()}</small>
                         </div>
@@ -2296,7 +2323,7 @@ if (user?.role === 'Admin' || user?.role === 'Faculty') {
     loadAdminData();
 }
 
-// 💥 UPDATED: ADMIN QUERIES RENDERING WITH DROPDOWN 💥
+// 💥 UPDATED: ADMIN QUERIES RENDERING WITH DROPDOWN & PHOTOS 💥
 window.renderAdminQueries = function() {
     try {
         const listDiv = document.getElementById('adminComplaintsList');
@@ -2378,6 +2405,8 @@ window.renderAdminQueries = function() {
                     ${c.assigned_to ? `<p style="margin-top: 0px; margin-bottom: 10px; color: #a855f7; font-size: 0.85em;"><strong>👷 Assigned To:</strong> ${c.assigned_to}</p>` : ''}
                     <p style="background: rgba(0,0,0,0.3); padding: 12px; border-radius: 8px; color: #f8fafc; margin-bottom: 15px; font-size: 0.95em; border: 1px solid rgba(255,255,255,0.05);"><strong>Issue:</strong> ${desc}</p>
                     
+                    ${c.image_url ? `<div style="margin-bottom: 15px;"><a href="${c.image_url}" target="_blank" style="display: inline-flex; align-items: center; gap: 8px; background: rgba(59, 130, 246, 0.15); color: #60a5fa; padding: 8px 15px; border-radius: 8px; border: 1px solid rgba(59, 130, 246, 0.3); text-decoration: none; font-size: 0.9rem; font-weight: bold; transition: all 0.2s;">📸 View Attached Photo</a></div>` : ''}
+
                     <div style="display: flex; gap: 10px; justify-content: flex-end;">
                         ${actionButtons}
                     </div>
@@ -2464,7 +2493,7 @@ function loadAdminData() {
     }
 }
 
-// 💥 8. TECHNICIAN DASHBOARD LOGIC (UPDATED WITH SPECIFIC ROUTING) 💥
+// 💥 8. TECHNICIAN DASHBOARD LOGIC (UPDATED WITH SPECIFIC ROUTING & PHOTOS) 💥
 if (user?.role === 'Technician' && window.location.pathname.includes('technician.html')) {
     
     // 💥 UPDATED: Show technician's specific role in header
@@ -2536,6 +2565,9 @@ if (user?.role === 'Technician' && window.location.pathname.includes('technician
                     <div class="ticket-body">
                         <h3>${t.student_details?.split('|')[0] || 'Unknown Student'}</h3>
                         <p>${t.description}</p>
+                        
+                        ${t.image_url ? `<div style="margin: 10px 0;"><a href="${t.image_url}" target="_blank" style="display: inline-block; background: rgba(59, 130, 246, 0.2); color: #60a5fa; padding: 6px 12px; border-radius: 6px; text-decoration: none; font-size: 0.85em; border: 1px solid rgba(59, 130, 246, 0.4);">📸 View Attached Photo</a></div>` : ''}
+
                         <div class="ticket-meta">
                             <span>📍 Info: ${t.student_details?.split('|')[1] || 'N/A'}</span>
                             <span>📅 Reported: ${new Date(t.created_at).toLocaleString()}</span>
