@@ -675,3 +675,62 @@ body.index-body {
         margin-top: 15px;
     }
 }
+/* 💥 UPGRADED MOBILE DROPDOWN (WITH GLASS & ANIMATION) 💥 */
+@media (max-width: 768px) {
+    .glass-dropbtn {
+        width: 90%;
+        margin: 0 auto;
+        justify-content: center;
+        padding: 15px;
+        font-size: 1.1em;
+        background: rgba(255, 255, 255, 0.08); /* Slight glass on button */
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .glass-dropdown {
+        width: 100%;
+        display: block;
+        margin-top: 15px;
+    }
+
+    .glass-dropdown-content {
+        position: static !important; 
+        width: 90%;
+        margin: 10px auto 0 auto;
+        
+        /* 💎 Premium Glassmorphism Restored */
+        background: rgba(15, 23, 42, 0.6) !important; 
+        backdrop-filter: blur(20px) !important;
+        -webkit-backdrop-filter: blur(20px) !important;
+        border: 1px solid rgba(255, 255, 255, 0.15) !important;
+        border-radius: 12px !important;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.5), inset 0 0 15px rgba(255,255,255,0.02) !important;
+        
+        /* Prepare for animation */
+        transform-origin: top center;
+    }
+
+    /* 🎬 Apply custom mobile animation */
+    .glass-dropdown-content.show {
+        display: block !important;
+        animation: mobileSlideDown 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards !important;
+    }
+
+    .glass-dropdown-content a {
+        justify-content: center;
+        padding: 15px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+}
+
+/* 🎬 Smooth Mobile Slide Animation */
+@keyframes mobileSlideDown {
+    from {
+        opacity: 0;
+        transform: scaleY(0.5) translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: scaleY(1) translateY(0);
+    }
+}
