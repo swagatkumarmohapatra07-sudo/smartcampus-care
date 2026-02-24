@@ -28,18 +28,15 @@
                 <a href="about-us.html" class="nav-link-btn">About Us</a>
                 
                 <div class="glass-dropdown">
-                   
-                    <div class="glass-dropdown">
-    <button class="glass-dropbtn" id="staffBtn">
-        Staff Portals 
-        <span style="font-size: 0.8em; margin-left: 5px;">▼</span>
-    </button>
-    <div class="glass-dropdown-content" id="staffDropdown">
-        <a href="admin-login.html">🛡️ Admin Login</a>
-        <a href="faculty-login.html">👨‍🏫 Faculty Login</a>
-        <a href="technician-login.html">🔧 Technician Login</a>
-    </div>
-</div>
+                    <button class="glass-dropbtn" id="staffBtn">
+                        Staff Portals 
+                        <span style="font-size: 0.8em; margin-left: 5px;">▼</span>
+                    </button>
+                    <div class="glass-dropdown-content" id="staffDropdown">
+                        <a href="admin-login.html">🛡️ Admin Login</a>
+                        <a href="faculty-login.html">👨‍🏫 Faculty Login</a>
+                        <a href="technician-login.html">🔧 Technician Login</a>
+                    </div>
                 </div>
                 
             </div>
@@ -73,6 +70,7 @@
     </div>
 
     <script>
+        // 1. Hamburger Menu Logic
         const menuBtn = document.getElementById('mobile-menu-btn');
         const navLinks = document.getElementById('nav-links');
 
@@ -80,23 +78,25 @@
             menuBtn.classList.toggle('active');
             navLinks.classList.toggle('active');
         });
+
+        // 2. Premium Staff Dropdown Logic
+        const staffBtn = document.getElementById('staffBtn');
+        const staffDropdown = document.getElementById('staffDropdown');
+
+        // Toggle dropdown and arrow rotation when clicking the button
+        staffBtn.addEventListener('click', (e) => {
+            e.stopPropagation(); // Stops the click from instantly triggering the window click
+            staffDropdown.classList.toggle('show');
+            staffBtn.classList.toggle('arrow-up'); // Spins the arrow!
+        });
+
+        // Close dropdown and reset arrow if user clicks anywhere else on the page
+        window.addEventListener('click', () => {
+            if (staffDropdown.classList.contains('show')) {
+                staffDropdown.classList.remove('show');
+                staffBtn.classList.remove('arrow-up'); // Resets the arrow!
+            }
+        });
     </script>
-    <script>
-    const staffBtn = document.getElementById('staffBtn');
-    const staffDropdown = document.getElementById('staffDropdown');
-
-    // Toggle dropdown when clicking the button
-    staffBtn.addEventListener('click', (e) => {
-        e.stopPropagation(); // Prevents the click from reaching the window
-        staffDropdown.classList.toggle('show');
-    });
-
-    // Close dropdown if user clicks anywhere else on the page
-    window.addEventListener('click', () => {
-        if (staffDropdown.classList.contains('show')) {
-            staffDropdown.classList.remove('show');
-        }
-    });
-</script>
 </body>
 </html>
