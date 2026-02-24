@@ -520,3 +520,124 @@ body.index-body {
         padding: 20px 15px !important;
     }
 }
+/* 💥 SMARTCAMPUS RESPONSIVE MOBILE FIXES 💥 */
+
+/* Ensure the hamburger menu is hidden on Desktop */
+.hamburger {
+    display: none;
+    flex-direction: column;
+    gap: 5px;
+    cursor: pointer;
+    z-index: 1001;
+}
+
+.hamburger span {
+    width: 25px;
+    height: 3px;
+    background-color: #f8fafc;
+    border-radius: 3px;
+    transition: all 0.3s ease;
+}
+
+/* --- TABLET VIEW (Under 900px) --- */
+@media (max-width: 900px) {
+    /* Stack the Hero section instead of side-by-side */
+    .index-hero {
+        flex-direction: column !important;
+        text-align: center;
+        padding: 40px 20px !important;
+        gap: 40px;
+        margin-top: 40px;
+    }
+
+    /* Center the feature pills */
+    .feature-pills {
+        justify-content: center !important;
+    }
+
+    /* Prevent the login card from stretching too wide */
+    .hero-card {
+        width: 100% !important;
+        max-width: 450px;
+        margin: 0 auto;
+    }
+}
+
+/* --- MOBILE VIEW (Under 768px) --- */
+@media (max-width: 768px) {
+    /* Show the hamburger menu icon */
+    .hamburger {
+        display: flex !important;
+    }
+
+    /* Hamburger Animation when clicked */
+    .hamburger.active span:nth-child(1) { transform: translateY(8px) rotate(45deg); }
+    .hamburger.active span:nth-child(2) { opacity: 0; }
+    .hamburger.active span:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
+
+    /* Convert Navigation Links into a Slide-Out Mobile Menu */
+    .index-nav-links {
+        position: absolute;
+        top: 70px; /* Just below the navbar */
+        left: -100%; /* Hidden off-screen to the left */
+        flex-direction: column;
+        background: rgba(15, 23, 42, 0.98);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        width: 100%;
+        text-align: center;
+        transition: 0.4s ease-in-out;
+        padding: 20px 0;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+        z-index: 1000;
+        box-shadow: 0 15px 30px rgba(0,0,0,0.5);
+    }
+
+    /* Slide the menu in when active */
+    .index-nav-links.active {
+        left: 0; 
+    }
+
+    .nav-link-btn {
+        margin: 15px 0;
+        display: block;
+    }
+
+    /* Center the Staff Dropdown in the Mobile Menu */
+    .glass-dropdown {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-top: 10px;
+    }
+
+    .glass-dropdown-content {
+        position: relative;
+        top: 0;
+        width: 90%;
+        margin-top: 10px;
+        box-shadow: none;
+        background: rgba(0, 0, 0, 0.2);
+    }
+}
+
+/* --- SMALL MOBILE PHONES (Under 480px) --- */
+@media (max-width: 480px) {
+    .hero-text h1 {
+        font-size: 2.2rem !important; /* Shrink giant text so it fits */
+    }
+    
+    .hero-text p {
+        font-size: 0.95rem !important;
+    }
+    
+    .feature-pills span {
+        font-size: 0.8rem !important;
+        padding: 5px 10px !important;
+    }
+
+    .index-nav {
+        padding: 15px 20px !important; /* Save space on small screens */
+    }
+}
