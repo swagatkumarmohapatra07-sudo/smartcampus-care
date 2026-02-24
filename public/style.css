@@ -675,66 +675,66 @@ body.index-body {
         margin-top: 15px;
     }
 }
-/* 💥 EXACT DESKTOP EFFECT FOR MOBILE 💥 */
-@media (max-width: 768px) {
+/* 💥 THE ULTIMATE MOBILE FLOATING GLASS OVERRIDE 💥 */
+@media screen and (max-width: 768px) {
+    /* 1. Fix the container */
     .glass-dropdown {
-        position: relative; /* Essential for floating the menu right below the button */
-        width: 100%;
-        display: flex;
-        justify-content: center;
-        margin-top: 15px;
+        position: relative !important;
+        width: 100% !important;
+        display: flex !important;
+        justify-content: center !important;
+        margin: 15px 0 !important;
     }
 
-    .glass-dropbtn {
-        width: 85%;
-        justify-content: center; /* Center the text in the button */
-        padding: 15px;
-        font-size: 1.1em;
+    /* 2. Fix the button */
+    #staffBtn {
+        width: 250px !important;
+        padding: 15px !important;
+        background: rgba(255, 255, 255, 0.1) !important;
+        border-radius: 8px !important;
+        display: flex !important;
+        justify-content: center !important;
+        z-index: 1000 !important;
     }
 
-    /* Keep it floating (absolute) just like the desktop version! */
-    .glass-dropdown-content {
+    /* 3. The Floating Glass Menu (Hidden by default) */
+    #staffDropdown {
         position: absolute !important;
-        top: 100% !important; /* Pops up right below the button */
+        top: 60px !important; /* Forces it to sit right below the button */
         left: 50% !important;
-        width: 85% !important;
-        z-index: 9999 !important;
+        width: 250px !important;
         
-        /* Premium Glassmorphism */
+        /* Premium Glass Effects */
         background: rgba(15, 23, 42, 0.95) !important;
-        backdrop-filter: blur(16px) !important;
-        -webkit-backdrop-filter: blur(16px) !important;
-        border: 1px solid rgba(255, 255, 255, 0.2) !important;
+        backdrop-filter: blur(20px) !important;
+        -webkit-backdrop-filter: blur(20px) !important;
+        border: 1px solid rgba(255, 255, 255, 0.3) !important;
         border-radius: 12px !important;
-        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6) !important;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8) !important;
         
-        /* Start position hidden and slightly lower */
-        opacity: 0;
-        transform: translateX(-50%) translateY(15px) !important;
-        display: none;
+        /* Animation Setup */
+        visibility: hidden !important;
+        opacity: 0 !important;
+        transform: translateX(-50%) translateY(-15px) !important;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        
+        display: flex !important;
+        flex-direction: column !important;
+        z-index: 99999 !important;
     }
 
-    /* Trigger the exact same fade & slide effect */
-    .glass-dropdown-content.show {
-        display: block !important;
-        animation: mobileFloatingGlass 0.3s ease-out forwards !important;
+    /* 4. The Trigger! (When JS adds the 'show' class) */
+    #staffDropdown.show {
+        visibility: visible !important;
+        opacity: 1 !important;
+        transform: translateX(-50%) translateY(0) !important;
     }
 
-    .glass-dropdown-content a {
-        justify-content: center; /* Center the links nicely */
-        padding: 15px;
-        font-size: 1.1em;
-    }
-}
-
-/* 🎬 Custom animation to maintain centering while sliding */
-@keyframes mobileFloatingGlass {
-    from { 
-        opacity: 0; 
-        transform: translateX(-50%) translateY(15px); 
-    }
-    to { 
-        opacity: 1; 
-        transform: translateX(-50%) translateY(5px); /* Leaves a small 5px gap below the button */
+    /* 5. Center the links */
+    #staffDropdown a {
+        justify-content: center !important;
+        padding: 15px !important;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+        font-size: 1.1rem !important;
     }
 }
