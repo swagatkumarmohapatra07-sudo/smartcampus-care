@@ -28,18 +28,15 @@
                 <a href="about-us.html" class="nav-link-btn">About Us</a>
                 
                 <div class="glass-dropdown">
-                   
-                    <div class="glass-dropdown">
-    <button class="glass-dropbtn" id="staffBtn">
-        Staff Portals 
-        <span style="font-size: 0.8em; margin-left: 5px;">▼</span>
-    </button>
-    <div class="glass-dropdown-content" id="staffDropdown">
-        <a href="admin-login.html">🛡️ Admin Login</a>
-        <a href="faculty-login.html">👨‍🏫 Faculty Login</a>
-        <a href="technician-login.html">🔧 Technician Login</a>
-    </div>
-</div>
+                    <button class="glass-dropbtn" id="staffBtn">
+                        Staff Portals 
+                        <span style="font-size: 0.8em; margin-left: 5px;">▼</span>
+                    </button>
+                    <div class="glass-dropdown-content" id="staffDropdown">
+                        <a href="admin-login.html">🛡️ Admin Login</a>
+                        <a href="faculty-login.html">👨‍🏫 Faculty Login</a>
+                        <a href="technician-login.html">🔧 Technician Login</a>
+                    </div>
                 </div>
                 
             </div>
@@ -82,38 +79,21 @@
         });
     </script>
     <script>
-    const staffBtn = document.getElementById('staffBtn');
-    const staffDropdown = document.getElementById('staffDropdown');
+        const staffBtn = document.getElementById('staffBtn');
+        const staffDropdown = document.getElementById('staffDropdown');
 
-    // Toggle dropdown when clicking the button
-    staffBtn.addEventListener('click', (e) => {
-        e.stopPropagation(); // Prevents the click from reaching the window
-        staffDropdown.classList.toggle('show');
-    });
+        // Toggle dropdown when clicking the button
+        staffBtn.addEventListener('click', (e) => {
+            e.stopPropagation(); // Prevents the click from reaching the window
+            staffDropdown.classList.toggle('show');
+        });
 
-    // Close dropdown if user clicks anywhere else on the page
-    window.addEventListener('click', () => {
-        if (staffDropdown.classList.contains('show')) {
-            staffDropdown.classList.remove('show');
-        }
-    });
-</script>
+        // Close dropdown if user clicks anywhere else on the page
+        window.addEventListener('click', () => {
+            if (staffDropdown.classList.contains('show')) {
+                staffDropdown.classList.remove('show');
+            }
+        });
+    </script>
 </body>
 </html>
-<div class="glass-dropdown">
-    <button class="glass-dropbtn">
-        Staff Portals 
-        <span style="font-size: 0.8em; margin-left: 5px;">▼</span>
-    </button>
-    <div class="glass-dropdown-content">
-        <a href="staff-login.html">
-            <span style="font-size: 1.2em; margin-right: 8px;">🛡️</span> Admin Login
-        </a>
-        <a href="staff-login.html">
-            <span style="font-size: 1.2em; margin-right: 8px;">👨‍🏫</span> Faculty Login
-        </a>
-        <a href="staff-login.html">
-            <span style="font-size: 1.2em; margin-right: 8px;">🔧</span> Technician Login
-        </a>
-    </div>
-</div>
