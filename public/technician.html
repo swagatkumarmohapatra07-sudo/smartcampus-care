@@ -41,11 +41,14 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 20px 40px;
+            padding: 15px 40px;
             background: rgba(15, 23, 42, 0.8);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
             border-bottom: 1px solid var(--glass-border);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
         }
 
         .tech-logo {
@@ -58,19 +61,27 @@
             gap: 10px;
         }
 
+        /* COMPACT TOP-RIGHT LOGOUT BUTTON */
         .logout-btn {
+            width: auto;
+            min-width: 100px;
             padding: 8px 20px;
-            background: rgba(225, 29, 72, 0.15);
-            border: 1px solid rgba(225, 29, 72, 0.3);
+            background: rgba(225, 29, 72, 0.2);
+            border: 1px solid rgba(225, 29, 72, 0.4);
             color: #fda4af;
-            border-radius: 20px;
-            text-decoration: none;
-            transition: all 0.3s ease;
+            border-radius: 8px;
             cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
         
         .logout-btn:hover {
-            background: rgba(225, 29, 72, 0.3);
+            background: rgba(225, 29, 72, 0.4);
+            transform: translateY(-2px);
         }
 
         /* Dashboard Layout */
@@ -84,11 +95,6 @@
 
         .dashboard-header {
             margin-bottom: 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            flex-wrap: wrap;
-            gap: 20px;
         }
 
         .dashboard-header h2 {
@@ -99,13 +105,13 @@
             -webkit-text-fill-color: transparent;
         }
 
-        /* --- New Controls Area (Search & Sort) --- */
+        /* Controls Area */
         .controls-group {
             display: flex;
             gap: 15px;
             flex-wrap: wrap;
             width: 100%;
-            margin-top: 15px;
+            margin-top: 20px;
         }
 
         .tech-input {
@@ -119,14 +125,8 @@
             transition: border-color 0.3s;
         }
 
-        .tech-input:focus {
-            border-color: #6366f1;
-        }
-
-        .search-bar {
-            flex: 1;
-            min-width: 250px;
-        }
+        .tech-input:focus { border-color: #6366f1; }
+        .search-bar { flex: 1; min-width: 250px; }
 
         /* Ticket Grid */
         .ticket-grid {
@@ -135,7 +135,6 @@
             gap: 25px;
         }
 
-        /* Glassmorphism Ticket Card */
         .ticket-card {
             background: var(--glass-bg);
             backdrop-filter: blur(16px);
@@ -146,13 +145,12 @@
             display: flex;
             flex-direction: column;
             gap: 15px;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            transition: all 0.3s ease;
         }
 
         .ticket-card:hover {
             transform: translateY(-5px);
             box-shadow: 0 10px 25px rgba(0,0,0,0.3);
-            border-color: rgba(255,255,255,0.2);
         }
 
         .ticket-header {
@@ -163,13 +161,6 @@
             padding-bottom: 10px;
         }
 
-        .ticket-id {
-            font-size: 0.9rem;
-            color: var(--text-muted);
-            font-family: monospace;
-        }
-
-        /* Status Badges */
         .status-badge {
             padding: 5px 12px;
             border-radius: 12px;
@@ -177,21 +168,8 @@
             font-weight: 600;
             text-transform: uppercase;
         }
-        .status-pending { background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
         .status-progress { background: rgba(59, 130, 246, 0.2); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3); }
         .status-resolved { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
-
-        .ticket-body h3 {
-            margin: 0 0 10px 0;
-            font-size: 1.2rem;
-        }
-
-        .ticket-body p {
-            margin: 0;
-            color: var(--text-muted);
-            font-size: 0.95rem;
-            line-height: 1.5;
-        }
 
         .ticket-meta {
             margin-top: 10px;
@@ -202,36 +180,35 @@
             gap: 5px;
         }
 
-        /* Action Buttons */
+        /* 💥 RESTORED: RESOLVE BUTTON CSS 💥 */
         .ticket-actions {
             margin-top: auto;
             display: flex;
             gap: 10px;
             padding-top: 15px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
         }
 
         .action-btn {
             flex: 1;
-            padding: 10px;
+            padding: 12px;
             border: none;
             border-radius: 8px;
             cursor: pointer;
             font-weight: 600;
+            font-size: 1rem;
             transition: all 0.2s;
-            background: rgba(255,255,255,0.1);
-            color: white;
         }
 
-        .action-btn:hover {
-            background: rgba(255,255,255,0.2);
-        }
-        
         .btn-resolve {
             background: rgba(16, 185, 129, 0.2);
             color: #34d399;
+            border: 1px solid rgba(16, 185, 129, 0.4);
         }
-        .btn-resolve:hover {
-            background: rgba(16, 185, 129, 0.4);
+
+        .btn-resolve:hover { 
+            background: rgba(16, 185, 129, 0.4); 
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.2);
         }
 
     </style>
@@ -248,37 +225,45 @@
         </a>
         <div style="display: flex; gap: 20px; align-items: center;">
             <span style="color: var(--text-muted); font-size: 0.9rem;" id="tech-name-display">Welcome, Tech</span>
-            <button id="logout-btn" class="logout-btn">Log Out</button>
+            <button class="logout-btn" onclick="window.logout()">
+                <span>Logout</span> 
+            </button>
         </div>
     </nav>
 
     <main class="dashboard-container">
         <div class="dashboard-header">
-            <div style="width: 100%;">
-                <h2>Assigned Maintenance Tasks</h2>
-                <p style="color: var(--text-muted); margin-top: 5px;">Manage and update your active campus queries.</p>
+            <h2>Assigned Maintenance Tasks</h2>
+            <p style="color: var(--text-muted); margin-top: 5px;">Manage and update your active campus queries.</p>
+            
+            <div class="controls-group">
+                <input type="text" id="techSearch" class="tech-input search-bar" placeholder="🔍 Search by reg no, description, location...">
                 
-                <div class="controls-group">
-                    <input type="text" id="techSearch" class="tech-input search-bar" placeholder="🔍 Search by reg no, description, location...">
-                    
-                    <select id="techSort" class="tech-input">
-                        <option value="newest">Sort: Newest First</option>
-                        <option value="oldest">Sort: Oldest First</option>
-                    </select>
+                <select id="techSort" class="tech-input">
+                    <option value="newest">Sort: Newest First</option>
+                    <option value="oldest">Sort: Oldest First</option>
+                </select>
 
-                    <select id="techFilter" class="tech-input">
-                        <option value="all">Status: All Tasks</option>
-                        <option value="Pending">Status: Pending</option>
-                        <option value="In Progress">Status: In Progress</option>
-                        <option value="Resolved">Status: Resolved</option>
-                    </select>
-                </div>
+                <select id="techFilter" class="tech-input">
+                    <option value="all">Status: All Tasks</option>
+                    <option value="In Progress">Status: In Progress</option>
+                    <option value="Resolved">Status: Resolved</option>
+                </select>
             </div>
         </div>
 
         <div class="ticket-grid" id="ticket-container"></div>
     </main>
 
+    <script>
+    // Set Name Data
+    document.addEventListener('DOMContentLoaded', () => {
+        const user = JSON.parse(localStorage.getItem('user'));
+        if(user && user.full_name) {
+            document.getElementById('tech-name-display').innerText = `Welcome, ${user.full_name}`;
+        }
+    });
+    </script>
     <script type="module" src="app.js"></script>
 </body>
 </html>

@@ -14,7 +14,12 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
-
+// --- GLOBAL LOGOUT LOGIC ---
+window.logout = () => {
+    console.log("Logging out..."); // Debugging line
+    localStorage.removeItem('user');
+    window.location.href = 'index.html';
+};
 // --- 2. GLOBAL UTILITIES & TOAST NOTIFICATIONS ---
 const user = JSON.parse(localStorage.getItem('user'));
 
